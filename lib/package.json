@@ -1,0 +1,54 @@
+{
+  "name": "jsonresume-viewer",
+  "author": "Richard Adleta <radleta@gmail.com> (https://www.richardadleta.com)",
+  "description": "A simple JSON Resume viewer built with React and Tailwind CSS.",
+  "license": "MIT",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "files": [
+    "dist/"
+  ],
+  "main": "./dist/jsonresume-viewer.umd.js",
+  "module": "./dist/jsonresume-viewer.js",
+  "exports": {
+    ".": {
+      "import": "./dist/jsonresume-viewer.js",
+      "require": "./dist/jsonresume-viewer.umd.js"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "recharts": "^2.15.3",
+    "zod": "^3.24.3"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@tailwindcss/vite": "^4.1.4",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react-swc": "^3.8.0",
+    "eslint": "^9.22.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwindcss": "^4.1.4",
+    "typescript": "~5.7.2",
+    "typescript-eslint": "^8.26.1",
+    "vite": "^6.3.1",
+    "vite-plugin-dts": "^4.5.3"
+  }
+}
