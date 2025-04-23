@@ -10,10 +10,15 @@ export const CertificateUI: React.FC<CertificateUIProps> = ({
   certificate,
 }) => {
   return (
-    <div className="certificate-item">
-      <h3 className="certificate-name">
+    <div className="mb-4 pb-3 border-b border-gray-200 last:border-0">
+      <h3 className="text-lg font-semibold text-gray-800">
         {certificate.url ? (
-          <a href={certificate.url} target="_blank" rel="noopener noreferrer">
+          <a
+            href={certificate.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline hover:text-blue-800"
+          >
             {certificate.name}
           </a>
         ) : (
@@ -21,15 +26,15 @@ export const CertificateUI: React.FC<CertificateUIProps> = ({
         )}
       </h3>
 
-      <div className="certificate-details">
+      <div className="mt-1 text-sm text-gray-600">
         {certificate.issuer && (
-          <span className="certificate-issuer">
-            Issued by {certificate.issuer}
-          </span>
+          <span className="mr-1">Issued by {certificate.issuer}</span>
         )}
-        {certificate.date && certificate.issuer && <span> • </span>}
+        {certificate.date && certificate.issuer && (
+          <span className="mx-1 text-gray-400">•</span>
+        )}
         {certificate.date && (
-          <span className="certificate-date">
+          <span className="text-gray-500">
             <DateUI date={certificate.date} />
           </span>
         )}
@@ -48,8 +53,10 @@ export const CertificateListUI: React.FC<CertificateListUIProps> = ({
   if (!certificateList || certificateList.length === 0) return null;
 
   return (
-    <section className="resume-certificates">
-      <h2>Certificates</h2>
+    <section className="mb-6">
+      <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-300">
+        Certificates
+      </h2>
       {certificateList.map((certificate, index) => (
         <CertificateUI key={index} certificate={certificate} />
       ))}

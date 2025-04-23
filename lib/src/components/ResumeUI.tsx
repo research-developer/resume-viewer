@@ -19,7 +19,7 @@ interface ResumeUIProps {
 
 export const ResumeUI: React.FC<ResumeUIProps> = ({ resume }) => {
   return (
-    <div className="resume-container">
+    <div className="bg-white p-6 rounded-lg shadow-sm">
       <BasicsUI basics={resume.basics} />
 
       {resume.work && <WorkListUI workList={resume.work} />}

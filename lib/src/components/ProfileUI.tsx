@@ -7,19 +7,21 @@ interface ProfileUIProps {
 
 export const ProfileUI: React.FC<ProfileUIProps> = ({ profile }) => {
   return (
-    <div className="resume-profile">
-      <span className="profile-network">{profile.network}: </span>
+    <div className="inline-flex items-center bg-gray-100 rounded-full px-3 py-1 text-sm">
+      <span className="font-medium text-gray-700 mr-1">
+        {profile.network}:{" "}
+      </span>
       {profile.url ? (
         <a
           href={profile.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="profile-link"
+          className="text-blue-600 hover:underline"
         >
           {profile.username}
         </a>
       ) : (
-        <span className="profile-username">{profile.username}</span>
+        <span className="text-gray-800">{profile.username}</span>
       )}
     </div>
   );

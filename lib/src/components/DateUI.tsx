@@ -37,7 +37,7 @@ export const DateUI: React.FC<DateProps> = ({
     month: "short",
   },
   locale = "en-US",
-  className = "date-display",
+  className = "text-gray-600",
   fallback = "",
 }) => {
   if (!date) {
@@ -51,7 +51,7 @@ export const DateUI: React.FC<DateProps> = ({
     // Check if date is valid
     if (isNaN(dateObj.getTime())) {
       return (
-        <span className={`${className} invalid-date`}>{date.toString()}</span>
+        <span className={`${className} text-red-500`}>{date.toString()}</span>
       );
     }
 
@@ -59,7 +59,7 @@ export const DateUI: React.FC<DateProps> = ({
     return <span className={className}>{formattedDate}</span>;
   } catch (error) {
     // Fallback for any parsing errors
-    return <span className={`${className} date-error`}>{String(date)}</span>;
+    return <span className={`${className} text-red-500`}>{String(date)}</span>;
   }
 };
 

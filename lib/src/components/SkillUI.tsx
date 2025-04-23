@@ -7,18 +7,22 @@ interface SkillUIProps {
 
 export const SkillUI: React.FC<SkillUIProps> = ({ skill }) => {
   return (
-    <div className="skill-item">
-      <div className="skill-name-level">
-        <span className="skill-name">{skill.name}</span>
-        {skill.level && <span className="skill-level"> ({skill.level})</span>}
+    <div className="mb-3 p-3 bg-gray-50 rounded-md">
+      <div className="mb-1">
+        <span className="font-medium text-gray-800">{skill.name}</span>
+        {skill.level && (
+          <span className="ml-2 text-sm text-gray-500">({skill.level})</span>
+        )}
       </div>
 
       {skill.keywords && skill.keywords.length > 0 && (
-        <div className="skill-keywords">
+        <div className="flex flex-wrap gap-1 mt-2">
           {skill.keywords.map((keyword, index) => (
-            <span key={index} className="skill-keyword">
+            <span
+              key={index}
+              className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-md"
+            >
               {keyword}
-              {index < skill.keywords!.length - 1 ? ", " : ""}
             </span>
           ))}
         </div>
@@ -35,9 +39,11 @@ export const SkillListUI: React.FC<SkillListUIProps> = ({ skillList }) => {
   if (!skillList || skillList.length === 0) return null;
 
   return (
-    <section className="resume-skills">
-      <h2>Skills</h2>
-      <div className="skills-container">
+    <section className="mb-6">
+      <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-300">
+        Skills
+      </h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {skillList.map((skill, index) => (
           <SkillUI key={index} skill={skill} />
         ))}

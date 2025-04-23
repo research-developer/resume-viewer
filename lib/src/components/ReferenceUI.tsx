@@ -7,10 +7,12 @@ interface ReferenceUIProps {
 
 export const ReferenceUI: React.FC<ReferenceUIProps> = ({ reference }) => {
   return (
-    <div className="reference-item">
-      <h3 className="reference-name">{reference.name}</h3>
+    <div className="mb-4 pb-4 border-b border-gray-200 last:border-0">
+      <h3 className="text-lg font-semibold text-gray-800">{reference.name}</h3>
       {reference.reference && (
-        <p className="reference-text">"{reference.reference}"</p>
+        <p className="mt-2 italic text-gray-700 pl-4 border-l-2 border-gray-300">
+          "{reference.reference}"
+        </p>
       )}
     </div>
   );
@@ -26,8 +28,10 @@ export const ReferenceListUI: React.FC<ReferenceListUIProps> = ({
   if (!referenceList || referenceList.length === 0) return null;
 
   return (
-    <section className="resume-references">
-      <h2>References</h2>
+    <section className="mb-6">
+      <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-300">
+        References
+      </h2>
       {referenceList.map((reference, index) => (
         <ReferenceUI key={index} reference={reference} />
       ))}

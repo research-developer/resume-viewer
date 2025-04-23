@@ -8,11 +8,16 @@ interface EducationUIProps {
 
 export const EducationItem: React.FC<EducationUIProps> = ({ education }) => {
   return (
-    <div className="education-item">
-      <div className="education-header">
-        <h3 className="education-institution">
+    <div className="mb-5 pb-4 border-b border-gray-200 last:border-0">
+      <div className="mb-2">
+        <h3 className="text-lg font-semibold text-gray-800">
           {education.url ? (
-            <a href={education.url} target="_blank" rel="noopener noreferrer">
+            <a
+              href={education.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline hover:text-blue-800"
+            >
               {education.institution}
             </a>
           ) : (
@@ -20,14 +25,14 @@ export const EducationItem: React.FC<EducationUIProps> = ({ education }) => {
           )}
         </h3>
         {education.area && education.studyType && (
-          <div className="education-area">
+          <div className="text-base text-gray-700 font-medium">
             {education.studyType} in {education.area}
           </div>
         )}
       </div>
 
       {(education.startDate || education.endDate) && (
-        <div className="education-date">
+        <div className="mb-2">
           <DateRangeUI
             startDate={education.startDate}
             endDate={education.endDate}
@@ -39,13 +44,13 @@ export const EducationItem: React.FC<EducationUIProps> = ({ education }) => {
       )}
 
       {education.score && (
-        <div className="education-score">GPA: {education.score}</div>
+        <div className="text-sm text-gray-600 mb-2">GPA: {education.score}</div>
       )}
 
       {education.courses && education.courses.length > 0 && (
-        <div className="education-courses">
-          <h4>Courses</h4>
-          <ul>
+        <div className="mt-3">
+          <h4 className="text-sm font-semibold text-gray-700 mb-1">Courses</h4>
+          <ul className="list-disc pl-5 text-sm text-gray-600 space-y-1">
             {education.courses.map((course, index) => (
               <li key={index}>{course}</li>
             ))}
@@ -66,8 +71,10 @@ export const EducationListUI: React.FC<EducationListUIProps> = ({
   if (!educationList || educationList.length === 0) return null;
 
   return (
-    <section className="resume-education">
-      <h2>Education</h2>
+    <section className="mb-6">
+      <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-300">
+        Education
+      </h2>
       {educationList.map((education, index) => (
         <EducationItem key={index} education={education} />
       ))}
