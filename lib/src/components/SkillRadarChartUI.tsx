@@ -9,10 +9,10 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { SkillStats } from "../ResumeSkillStatsModel";
+import { SkillStatsSummaryTreeNode } from "../ResumeSkillStatsModel";
 
 interface SkillRadarChartUIProps {
-  skills: SkillStats[];
+  skills: SkillStatsSummaryTreeNode[];
 }
 
 export const SkillRadarChartUI: React.FC<SkillRadarChartUIProps> = ({
@@ -28,9 +28,9 @@ export const SkillRadarChartUI: React.FC<SkillRadarChartUIProps> = ({
 
   // Transform the skills data for the radar chart
   const formattedData = skills.map((skill) => ({
-    subject: skill.name,
-    value: skill.totalMonths / 12, // Convert months to years
-    fullMark: Math.ceil(Math.max(...skills.map((s) => s.totalMonths / 12))),
+    subject: skill.skill.name,
+    value: skill.summary.months / 12, // Convert months to years
+    fullMark: Math.ceil(Math.max(...skills.map((s) => s.summary.months / 12))),
   }));
 
   return (

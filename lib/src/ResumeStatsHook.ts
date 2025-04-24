@@ -1,9 +1,6 @@
 import { useMemo } from "react";
 import { Resume } from "./ResumeModel";
-import {
-  calculateResumeSkillStats,
-  ResumeSkillStats,
-} from "./ResumeSkillStatsModel";
+import { getResumeSkillStats, ResumeSkillStats } from "./ResumeSkillStatsModel";
 
 // Define the structure of the ResumeStats object
 export interface ResumeStats {
@@ -12,7 +9,7 @@ export interface ResumeStats {
 
 export function useResumeStats(resume: Resume | null) {
   return useMemo(
-    () => ({ skills: calculateResumeSkillStats(resume) }),
+    () => ({ skills: resume && getResumeSkillStats(resume) }),
     [resume]
   );
 }
