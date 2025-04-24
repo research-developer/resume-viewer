@@ -12,6 +12,7 @@ import { LanguageListUI } from "./LanguageUI";
 import { InterestListUI } from "./InterestUI";
 import { ReferenceListUI } from "./ReferenceUI";
 import { ProjectListUI } from "./ProjectUI";
+import { TimelineUI } from "./TimelineUI";
 
 interface ResumeUIProps {
   resume: Resume;
@@ -21,7 +22,7 @@ export const ResumeUI: React.FC<ResumeUIProps> = ({ resume }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
       <BasicsUI basics={resume.basics} />
-
+      {resume.work && <TimelineUI workExperience={resume.work} />}
       {resume.work && <WorkListUI workList={resume.work} />}
       {resume.volunteer && <VolunteerListUI volunteerList={resume.volunteer} />}
       {resume.education && <EducationListUI educationList={resume.education} />}

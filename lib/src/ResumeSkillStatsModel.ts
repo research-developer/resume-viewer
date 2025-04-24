@@ -1,4 +1,5 @@
 import { Resume, ResumeSkill } from "./ResumeModel";
+import { differenceInMonths } from "./Time";
 
 // Types for the stats we'll collect
 export interface SkillOccurrence {
@@ -18,6 +19,7 @@ export interface SkillStats {
   totalMonths: number; // Total experience in months
   keywords: string[]; // Keywords associated with this skill
   isKeyword: boolean; // Whether this skill is also a keyword for another skill
+  isCategory: boolean; // Whether this skill is a category (has keywords and isn't just a keyword itself)
   parentSkills: string[]; // Skills that have this as a keyword
 }
 
@@ -33,20 +35,6 @@ export interface ResumeSkillStats {
   byKeyword: Map<string, string[]>; // Map keywords to their parent skills
   hierarchies: KeywordHierarchy[]; // Hierarchical structure of skills
   totalWorkMonths: number;
-}
-
-function differenceInMonths(
-  dateLeft: Date | undefined,
-  dateRight: Date | undefined
-): number {
-  if (!dateLeft || !dateRight) return 0;
-  const start = new Date(dateLeft);
-  const end = new Date(dateRight);
-  return (
-    (end.getFullYear() - start.getFullYear()) * 12 +
-    end.getMonth() -
-    start.getMonth()
-  );
 }
 
 // Helper function to merge overlapping time periods and calculate total months without duplication
@@ -120,6 +108,12 @@ export function calculateResumeSkillStats(
 
       // Track keywords
       if (skill.keywords && skill.keywords.length > 0) {
+        // Mark this skill as a category since it has keywords
+        const existingSkill = skillsMap.get(skill.name);
+        if (existingSkill) {
+          existingSkill.isCategory = true;
+        }
+
         skill.keywords.forEach((keyword) => {
           // Add this keyword to the mapping
           if (!keywordToSkillsMap.has(keyword)) {
@@ -136,6 +130,7 @@ export function calculateResumeSkillStats(
               totalMonths: 0,
               keywords: [],
               isKeyword: true,
+              isCategory: false, // Keywords themselves are not categories by default
               parentSkills: [skill.name],
             });
           } else {
@@ -148,9 +143,9 @@ export function calculateResumeSkillStats(
         });
 
         // Update the skill with its keywords
-        const existingSkill = skillsMap.get(skill.name);
-        if (existingSkill) {
-          existingSkill.keywords = skill.keywords;
+        const existingSkill1 = skillsMap.get(skill.name);
+        if (existingSkill1) {
+          existingSkill1.keywords = skill.keywords;
         }
       }
     });
@@ -170,18 +165,25 @@ export function calculateResumeSkillStats(
       // Calculate job duration for individual skills
       const startDate = job.startDate;
       const endDate = job.endDate || new Date();
-      const durationMonths = differenceInMonths(startDate, endDate);
 
       // Skills explicitly defined in the job
       if (job.skills && job.skills.length > 0) {
         job.skills.forEach((skill) => {
+          // Use skill-specific dates if available, otherwise default to job dates
+          const skillStartDate = skill.startDate || startDate;
+          const skillEndDate = skill.endDate || endDate;
+          const skillDurationMonths = differenceInMonths(
+            skillStartDate,
+            skillEndDate
+          );
+
           const occurrence = {
             source: "work" as const,
             context: job.name,
             id: `${job.name}-${skill.name}`,
-            startDate,
-            endDate,
-            durationMonths,
+            startDate: skillStartDate,
+            endDate: skillEndDate,
+            durationMonths: skillDurationMonths,
           };
 
           addSkillToMap(skillsMap, skill, occurrence);
@@ -196,7 +198,7 @@ export function calculateResumeSkillStats(
                   id: `${occurrence.id}-keyword-${keyword}`,
                 });
                 keywordSkill.count++;
-                keywordSkill.totalMonths += durationMonths;
+                keywordSkill.totalMonths += skillDurationMonths;
               }
             });
           }
@@ -305,6 +307,7 @@ function addSkillToMap(
     // Ensure keywords are updated if present
     if (skill.keywords && skill.keywords.length > 0) {
       existingSkill.keywords = skill.keywords;
+      existingSkill.isCategory = true; // Mark as category if it has keywords
     }
     map.set(skill.name, existingSkill);
   } else {
@@ -316,6 +319,7 @@ function addSkillToMap(
       totalMonths: occurrence.source === "work" ? durationMonths : 0,
       keywords: skill.keywords || [],
       isKeyword: false,
+      isCategory: skill.keywords && skill.keywords.length > 0, // Mark as category if it has keywords
       parentSkills: [],
     });
   }

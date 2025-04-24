@@ -30,6 +30,8 @@ export const SkillSchema = z.object({
   name: z.string(),
   level: z.string().optional(),
   keywords: z.array(z.string()).optional(),
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().optional(),
 });
 
 export const LanguageSchema = z.object({
