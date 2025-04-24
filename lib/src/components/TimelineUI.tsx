@@ -216,15 +216,18 @@ interface TimelineData {
 function buildTimeline(workExperience: ResumeWork[]): TimelineData {
   if (!workExperience || workExperience.length === 0) return { events: [] };
 
+  // clone the work experience array to avoid mutating the original data
+  const workItems = [...workExperience];
+
   // order the work experience by start date
-  workExperience.sort((a, b) => {
+  workItems.sort((a, b) => {
     const startA = new Date(a.startDate).getTime();
     const startB = new Date(b.startDate).getTime();
     return startA - startB;
   });
 
   // create a timeline event for each work experience however we want to combine them when its a role change at the same company (name)
-  const events: TimelineEvent[] = workExperience.reduce(
+  const events: TimelineEvent[] = workItems.reduce(
     (acc: TimelineEvent[], work) => {
       const startDate = new Date(work.startDate).getTime();
       const endDate = work.endDate
