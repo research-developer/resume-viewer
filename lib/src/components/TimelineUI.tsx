@@ -54,22 +54,41 @@ export const TimelineUI: React.FC<TimelineUIProps> = ({ workExperience }) => {
   };
 
   useEffect(() => {
+    // Debounce function to prevent excessive redraws
+    let resizeTimer: ReturnType<typeof setTimeout>;
     const handleResize = () => {
-      if (ref.current) {
-        drawTimeline(timelineEvents, ref.current);
-      }
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (ref.current) {
+          // Stop any running animations before redrawing
+          d3.select(ref.current).selectAll("*").interrupt();
+          drawTimeline(timelineEvents, ref.current);
+        }
+      }, 250); // 250ms debounce timeout
     };
 
+    // Initialize timeline
     if (ref.current) {
       drawTimeline(timelineEvents, ref.current);
     }
 
-    // Add resize listener
-    window.addEventListener("resize", handleResize);
+    // Use ResizeObserver instead of window resize event
+    const resizeObserver = new ResizeObserver(handleResize);
+
+    // Observe the container element
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
 
     // Clean up
     return () => {
-      window.removeEventListener("resize", handleResize);
+      clearTimeout(resizeTimer);
+      resizeObserver.disconnect();
+
+      // Ensure all animations are stopped when component unmounts
+      if (ref.current) {
+        d3.select(ref.current).selectAll("*").interrupt();
+      }
     };
   }, [timelineEvents]);
 
@@ -287,8 +306,9 @@ function drawTimeline(timeline: TimelineData, element: SVGSVGElement | null) {
     .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
   // Calculate positions for labels with improved staggering
+  const arcHeight = 30; // Height of the arc bow from the timeline
   const dotRadius = 6;
-  const baseLineLength = 40;
+  const baseLineLength = arcHeight + dotRadius * 2 + 15; // Adjusted to include dot radius
   const minLabelDistance = 150; // Increased minimum distance between labels
   const labelHeight = 14;
   const labelPadding = 15; // Increased padding for better spacing
@@ -388,9 +408,6 @@ function drawTimeline(timeline: TimelineData, element: SVGSVGElement | null) {
       d3.select(this)
         .attr("stroke-dasharray", null)
         .attr("stroke-dashoffset", null);
-
-      // Call the animateJobArcs function to clean up arcs
-      animateJobArcs();
     });
 
   // Create a group for events but don't animate them yet - they'll be triggered by the baseline
@@ -426,8 +443,6 @@ function drawTimeline(timeline: TimelineData, element: SVGSVGElement | null) {
     .attr("z-index", 1); // Ensure it's on top of the arc
 
   // Draw curved arcs between start and end dates for each job with animated path drawing
-  const arcHeight = 30; // Height of the arc bow from the timeline
-
   const jobArcs = mainGroup
     .selectAll(".job-duration")
     .data(timeline.events)
@@ -667,7 +682,8 @@ function drawTimeline(timeline: TimelineData, element: SVGSVGElement | null) {
 
   // Apply hover and click handlers to end events
   endEvents
-    .on("mouseenter", (event, d: TimelineEvent) => {
+    .on("mouseenter", (event, d: any) => {
+      // Change from TimelineEvent to any to match D3's binding
       if (!pinnedEventName) {
         highlightEvent(d.name, true);
       }
@@ -722,12 +738,13 @@ function drawTimeline(timeline: TimelineData, element: SVGSVGElement | null) {
     .style("opacity", 0);
 
   // Add small tick marks for years
+  const yearMarkerYOffset = arcHeight + 5; // Offset for year markers
   yearMarkersGroup
     .append("line")
     .attr("x1", 0)
     .attr("y1", (d) => d.position * 1) // Start slightly away from center
     .attr("x2", 0)
-    .attr("y2", (d) => d.position * 30) // Extend up or down based on position
+    .attr("y2", (d) => d.position * yearMarkerYOffset) // Extend up or down based on position
     .attr("stroke", "#adb5bd")
     .attr("stroke-width", 1)
     .attr("stroke-opacity", 0.8) // Slightly transparent
@@ -737,7 +754,7 @@ function drawTimeline(timeline: TimelineData, element: SVGSVGElement | null) {
   yearMarkersGroup
     .append("text")
     .attr("x", 0)
-    .attr("y", (d) => d.position * 30) // Position above or below based on alternating pattern
+    .attr("y", (d) => d.position * yearMarkerYOffset) // Position above or below based on alternating pattern
     .attr("text-anchor", "middle")
     .style("font-weight", "500")
     .style("opacity", 0.4)
@@ -878,7 +895,7 @@ function drawTimeline(timeline: TimelineData, element: SVGSVGElement | null) {
             const textOpacity = Math.min(1, easedFade);
 
             // Get or create the text element
-            let textLabel = element.select("text.event-label");
+            let textLabel: any = element.select("text.event-label");
             let labelText = d.event.name;
 
             // Truncate long names with ellipsis
@@ -927,7 +944,6 @@ function drawTimeline(timeline: TimelineData, element: SVGSVGElement | null) {
         const startX = xScale(new Date(d.startDate));
         const endX = xScale(new Date(d.endDate));
         const pathLength = (this as SVGPathElement).getTotalLength();
-        const isOngoing = d.endDate >= Date.now() - 86400000;
 
         if (baselineDrawingProgress <= startX) {
           // Baseline hasn't reached this job's start yet
@@ -991,19 +1007,6 @@ function drawTimeline(timeline: TimelineData, element: SVGSVGElement | null) {
       }
     };
   });
-
-  // Function to animate job arcs
-  function animateJobArcs() {
-    // This is no longer needed as arcs animate with the baseline
-    // We're keeping the function in case there's any cleanup needed
-    jobArcs.each(function (d: TimelineEvent, i: number) {
-      // If there's any post-animation cleanup needed, it can go here
-      const currentArc = d3.select(this);
-
-      // After all animations are complete, remove dash arrays
-      currentArc.attr("stroke-dasharray", null).attr("stroke-dashoffset", null);
-    });
-  }
 
   // Add hover effects to circles - these remain unchanged
   eventsGroup
