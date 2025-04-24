@@ -5,11 +5,9 @@ import {
   getSkills,
   aggregateSummaries,
   SkillSource,
-  SkillStatsSummary,
+  processSkills,
 } from "./ResumeSkillStatsModel";
 import { Resume, ResumeSkill } from "./ResumeModel";
-import { FluentSet } from "./FluentSet";
-import { FluentMap } from "./FluentMap";
 import { FluentIterable } from "./FluentIterable";
 
 describe("ResumeSkillStatsModel", () => {
@@ -185,26 +183,50 @@ describe("ResumeSkillStatsModel", () => {
 
   describe("aggregateSummaries", () => {
     it("should combine multiple summaries correctly", () => {
-      // Create mock summaries
-      const summary1: SkillStatsSummary = {
-        stats: [],
-        count: 3,
-        months: 18,
+      // Build some kills to use to test the summaries
+      const skill1: ResumeSkill = {
+        id: "skill-1",
+        name: "JavaScript",
+        keywords: ["ES6", "TypeScript"],
+        // start and end dates are used to calculate months and dedup overlapping skills
+        startDate: new Date("2020-01-01"),
+        endDate: new Date("2021-01-01"),
+      };
+      const skill2: ResumeSkill = {
+        id: "skill-2",
+        name: "CSS",
+        keywords: ["Flexbox", "Grid"],
+        // start and end dates are used to calculate months and dedup overlapping skills
+        startDate: new Date("2020-01-01"),
+        endDate: new Date("2021-01-01"),
+      };
+      const skill3: ResumeSkill = {
+        id: "skill-3",
+        name: "React",
+        keywords: ["JavaScript", "Frontend"],
+        // start and end dates are used to calculate months and dedup overlapping skills
+        startDate: new Date("2020-06-01"),
+        endDate: new Date("2021-01-01"),
       };
 
-      const summary2: SkillStatsSummary = {
-        stats: [],
-        count: 2,
-        months: 18,
-      };
+      // create skill tree
+      const tree = buildSkillTree([skill1, skill2, skill3]);
+      const summaryTree = processSkills(tree, [skill1, skill2], {
+        source: SkillSource.WORK,
+        id: "work-1",
+      });
+
+      // Create mock summaries
+      const summary1 = summaryTree.all.get("JavaScript")?.summary!;
+      const summary2 = summaryTree.all.get("CSS")?.summary!;
 
       const combined = aggregateSummaries(
         FluentIterable.from([summary1, summary2])
       );
 
       // Check the combined summary properties
-      expect(combined.count).toBe(5); // 3 + 2
-      expect(combined.months).toBe(36); // 18 + 18
+      expect(combined.count).toBe(2); // 2 skills combined
+      expect(combined.months).toBe(12); // 12 months total
     });
   });
 

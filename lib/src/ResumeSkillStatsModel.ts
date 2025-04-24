@@ -133,7 +133,7 @@ export function getResumeSkillStats(resume: Resume): ResumeSkillStats {
 }
 
 // Core function to process skills from any source
-function processSkills(
+export function processSkills(
   tree: SkillTree,
   skills: ResumeSkill[],
   source: SkillSourceIdentifier,
@@ -189,10 +189,10 @@ function processSkillOccurances(
       const skillStats: SkillStats = {
         skill: skillNode,
         occurrences: occurrences,
-        count: occurrences.length,
-        months: occurrences.reduce((total, occurrence) => {
-          return total + (occurrence.months || 0); // Sum the months for each occurrence
-        }, 0),
+        count: occurrences.length, // Count the number of occurrences
+        months: calculateNonOverlappingDuration(
+          FluentIterable.from(occurrences)
+        ),
       };
       acc.set(skillName, skillStats);
       return acc;
@@ -214,7 +214,9 @@ function processSkillOccurances(
     };
     summary.stats.push(skillStats); // Add the skill stats to the all array
     summary.count += skillStats.count; // Increment the count
-    summary.months += skillStats.months; // Increment the months
+    summary.months = calculateNonOverlappingDuration(
+      FluentIterable.from(summary.stats.flatMap((s) => s.occurrences))
+    );
     acc.set(skillNode.name, summary); // Update the summary in the map
     return acc;
   }, new FluentMap<string, SkillStatsSummary>());
@@ -244,15 +246,9 @@ function appendSkillStatsSummary(
 ) {
   summary.stats.push(stats); // Add the skill stats to the summary
   summary.count += stats.count; // Increment the count
-  summary.months += stats.months; // Increment the months
-}
-
-// Append the skill stats to the stats
-function appendSkillStats(to: SkillStats, from: SkillStats): void {
-  to.skill = from.skill; // Set the skill
-  to.occurrences.push(...from.occurrences); // Add the occurrences to the stats
-  to.count += from.count; // Increment the count
-  to.months += from.months; // Increment the months
+  summary.months = calculateNonOverlappingDuration(
+    FluentIterable.from(summary.stats.flatMap((s) => s.occurrences))
+  ); // Calculate the total months from the occurrences
 }
 
 // Combine the summaries into a single summary
@@ -267,7 +263,9 @@ export function aggregateSummaries(
   summaries.forEach((summary) => {
     combinedSummary.stats.push(...summary.stats); // Add all stats to the combined summary
     combinedSummary.count += summary.count; // Increment the count
-    combinedSummary.months += summary.months; // Increment the months
+    combinedSummary.months = calculateNonOverlappingDuration(
+      FluentIterable.from(combinedSummary.stats.flatMap((s) => s.occurrences))
+    ); // Calculate the total months from the occurrences
   });
   return combinedSummary;
 }
@@ -488,4 +486,55 @@ export function aggregateSummaryTrees(
 
   // Process the occurrences to build the summary tree
   return processSkillOccurances(tree, occurancesBySkill);
+}
+
+// Helper function to merge overlapping time periods and calculate total months without duplication
+function calculateNonOverlappingDuration(
+  occurrences: FluentIterable<SkillOccurrence>
+): number {
+  // Filter occurences to only include those with valid start and end dates
+  const dateRanges = occurrences
+    .map((occ) => {
+      if (!occ.startDate || !occ.endDate) return null; // Skip if no start or end date
+      // Ensure start and end dates are valid Date objects
+      const startDate = occ.startDate; // Default to epoch if no start date
+      const endDate = occ.endDate; // Default to now if no end date
+      return { startDate, endDate };
+    })
+    .truthy() // Filter out null values
+    .toArray() as { startDate: Date; endDate: Date }[]; // Cast to the expected type
+
+  // Check if there are no date ranges to process
+  if (dateRanges.length === 0) return 0;
+
+  // Sort the date ranges by start date
+  dateRanges.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+
+  // Merge overlapping periods
+  const mergedRanges = [];
+  let currentRange = { ...dateRanges[0] };
+
+  for (let i = 1; i < dateRanges.length; i++) {
+    const range = dateRanges[i];
+
+    // If current range overlaps with the next range
+    if (range.startDate <= currentRange.endDate) {
+      // Extend the current range if needed
+      currentRange.endDate = new Date(
+        Math.max(currentRange.endDate.getTime(), range.endDate.getTime())
+      );
+    } else {
+      // No overlap, add the current range to our result and start a new one
+      mergedRanges.push({ ...currentRange });
+      currentRange = { ...range };
+    }
+  }
+
+  // Add the last range
+  mergedRanges.push(currentRange);
+
+  // Calculate total duration in months from the merged ranges
+  return mergedRanges.reduce((total, range) => {
+    return total + differenceInMonths(range.startDate, range.endDate);
+  }, 0);
 }
