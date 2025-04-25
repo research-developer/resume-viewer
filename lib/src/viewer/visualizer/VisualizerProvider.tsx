@@ -1,4 +1,4 @@
-import React, { useReducer, useMemo, useEffect, useCallback } from "react";
+import React, { useReducer, useMemo, useEffect } from "react";
 import { Resume } from "../../ResumeModel";
 import {
   visualizerReducer,
@@ -7,7 +7,8 @@ import {
   VisualizerStatus,
   VisualizerTransition,
 } from "./VisualizerHook";
-import { buildVisualizerData } from "./VisualizerModel";
+import { buildVisualizerData, VisualizerData } from "./VisualizerModel";
+import { useVisualizerData } from "./VisualizerDataHook";
 
 export const VisualizerProvider: React.FC<{
   resume: Resume;
@@ -15,6 +16,7 @@ export const VisualizerProvider: React.FC<{
 }> = ({ resume: initialResume, children }) => {
   const svgRef = React.useRef<SVGSVGElement | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const { data: initialData } = useVisualizerData(initialResume);
   const initializeState = useMemo(
     () => ({ svgRef, containerRef }),
     [svgRef, containerRef]
@@ -25,28 +27,17 @@ export const VisualizerProvider: React.FC<{
     createInitialState
   );
   const { data } = state;
-  const { resume } = data || {};
-  const resumeRef = React.useRef<Resume | null>(resume);
+  const dataRef = React.useRef<VisualizerData | null>(initialData);
   const statusRef = React.useRef<VisualizerStatus | null>(state.status);
 
-  // Set the resume in the state
+  // Set the data in the state
   useEffect(() => {
-    // We only want to dispatch if the resume has changed
-    if (resumeRef.current === initialResume) return;
-    resumeRef.current = initialResume;
+    // We only want to dispatch if the data has changed
+    if (dataRef.current === initialData) return;
+    dataRef.current = initialData;
 
-    // Use setTimeout to ensure the state is updated after the render cycle
-    if (resume !== initialResume) {
-      setTimeout(() => {
-        const data = buildVisualizerData(initialResume);
-        console.log("Setting data in state", initialResume, data);
-        dispatch({
-          type: "SET_DATA",
-          data,
-        });
-      }, 0);
-    }
-  }, [initialResume, data, resumeRef, dispatch]);
+    dispatch({ type: "SET_DATA", data: initialData });
+  }, [initialData, data, dataRef, dispatch]);
 
   // When the status changes, dispatch the next action
   useEffect(() => {
