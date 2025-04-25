@@ -614,18 +614,20 @@ function drawTimeline(timeline: TimelineData, element: SVGSVGElement | null) {
       });
 
       // Animate the lines based on baseline progress
+      const lineDelay = 0.0; // Delay before line starts growing
+      const lineGrowthRate = 20; // How fast the line grows
       eventLines.attr("y2", function (d: any) {
         const lineLength =
           baseLineLength + d.level * (labelHeight + labelPadding);
         if (baselineDrawingProgress >= d.x) {
           // Calculate how much time has passed since the baseline crossed this point
           const timeSincePassing = (baselineDrawingProgress - d.x) / innerWidth;
-          // Allow a short delay before starting line animation
-          if (timeSincePassing > 0.02) {
-            // Calculate line growth progress (0 to 1)
-            const growthProgress = Math.min(1, (timeSincePassing - 0.02) * 10);
-            return d.direction * lineLength * growthProgress;
-          }
+          // Calculate line growth progress (0 to 1)
+          const growthProgress = Math.max(
+            0,
+            Math.min(1, (timeSincePassing - lineDelay) * lineGrowthRate)
+          );
+          return d.direction * lineLength * growthProgress;
         }
         return 0; // Default to no line until reached
       });
@@ -640,8 +642,6 @@ function drawTimeline(timeline: TimelineData, element: SVGSVGElement | null) {
           const timeSincePassing = (baselineDrawingProgress - d.x) / innerWidth;
 
           // Calculate line extension progress (0 to 1)
-          const lineDelay = 0.02; // Delay before line starts growing
-          const lineGrowthRate = 10; // How fast the line grows
           const lineProgress = Math.min(
             1,
             (timeSincePassing - lineDelay) * lineGrowthRate
