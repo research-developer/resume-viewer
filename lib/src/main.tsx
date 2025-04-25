@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { JsonResumeViewer } from "./JsonResumeViewerUI";
+import { JsonResumeViewer } from "./viewer/ViewerUI";
 
 const root = document.getElementById("root") as HTMLElement;
 if (!root) {

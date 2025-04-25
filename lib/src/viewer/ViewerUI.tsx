@@ -1,8 +1,8 @@
 import { FC } from "react";
-import { useResume } from "./ResumeHook";
-import { ResumeUI } from "./components/ResumeUI";
-import { useResumeStats } from "./ResumeStatsHook";
-import { ResumeStatsUI } from "./components/ResumeStatsUI";
+import { useResume } from "../ResumeHook";
+import { ResumeUI } from "./ResumeUI";
+import { useResumeStats } from "../ResumeStatsHook";
+import { ResumeStatsUI } from "./ResumeStatsUI";
 
 type JsonResumeViewerProps = {
   jsonResumeUrl: string;
