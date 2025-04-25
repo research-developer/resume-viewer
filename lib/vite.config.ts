@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import dts from "vite-plugin-dts";
 import tailwindcss from "@tailwindcss/vite";
+import checker from "vite-plugin-checker";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -30,6 +31,9 @@ export default defineConfig({
       tsconfigPath: "./tsconfig.app.json",
       rollupTypes: true,
       insertTypesEntry: true,
+    }),
+    checker({
+      typescript: true,
     }),
   ],
 });
