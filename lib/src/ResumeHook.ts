@@ -3,11 +3,17 @@ import { Resume, ResumeSchema } from "./ResumeModel";
 
 export function useResume(url: string) {
   const [data, setData] = useState<Resume | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
+  const [loadingUrl, setLoadingUrl] = useState<string | null>(null);
 
   const fetchResume = async () => {
-    if (!url) {
+    if (loading) {
+      console.warn("Already loading resume, skipping fetch.");
+      return;
+    }
+
+    if (!loadingUrl) {
       setLoading(false);
       setError(new Error("No URL provided"));
       return;
@@ -17,7 +23,7 @@ export function useResume(url: string) {
     setError(null);
 
     try {
-      const response = await fetch(url);
+      const response = await fetch(loadingUrl);
 
       if (!response.ok) {
         // Do some friendly error handling for common HTTP errors
@@ -45,8 +51,16 @@ export function useResume(url: string) {
   };
 
   useEffect(() => {
-    fetchResume();
-  }, [url]);
+    if (url && url !== loadingUrl) {
+      setLoadingUrl(url);
+    }
+  }, [url, loadingUrl]);
+
+  useEffect(() => {
+    if (loadingUrl) {
+      fetchResume();
+    }
+  }, [loadingUrl]);
 
   return {
     data,
