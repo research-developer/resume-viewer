@@ -1,269 +1,34 @@
 import * as d3 from "d3";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect } from "react";
+import { useVisualizerContext, VisualizerStatus } from "./VisualizerHook";
+import { TimelineData, TimelineEvent } from "./TimelineModel";
 
-import { ResumeWork } from "../ResumeModel";
+export const TimelineUI: React.FC = () => {
+  const { state } = useVisualizerContext();
+  const { svgRef: ref, data, status } = state;
+  const { timeline: timelineEvents } = data || {};
 
-interface TimelineUIProps {
-  workExperience: ResumeWork[];
-}
-
-export const TimelineUI: React.FC<TimelineUIProps> = ({ workExperience }) => {
-  const ref = useRef<SVGSVGElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
-  const timelineEvents = useMemo(
-    () => buildTimeline(workExperience),
-    [workExperience]
-  );
-
-  // Handler for fullscreen change events
+  // Trigger replay animation when isAnimating changes
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-    };
-  }, []);
-
-  // Toggle fullscreen
-  const toggleFullscreen = () => {
-    if (!isFullscreen) {
-      if (containerRef.current?.requestFullscreen) {
-        containerRef.current.requestFullscreen().catch((err) => {
-          console.error(
-            `Error attempting to enable fullscreen: ${err.message}`
-          );
-        });
-      }
-    } else if (document.exitFullscreen) {
-      document.exitFullscreen();
-    }
-  };
-
-  // Replay timeline animation
-  const replayTimeline = () => {
-    if (ref.current) {
-      // Clear and redraw the timeline
-      d3.select(ref.current).selectAll("*").remove();
-      drawTimeline(timelineEvents, ref.current);
-    }
-  };
-
-  useEffect(() => {
-    // Debounce function to prevent excessive redraws
-    let resizeTimer: ReturnType<typeof setTimeout>;
-    const handleResize = () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        if (ref.current) {
-          // Stop any running animations before redrawing
-          d3.select(ref.current).selectAll("*").interrupt();
+    if (status === VisualizerStatus.Started) {
+      if (ref.current) {
+        // Clear and redraw the timeline
+        d3.select(ref.current).selectAll("*").remove();
+        if (timelineEvents) {
           drawTimeline(timelineEvents, ref.current);
         }
-      }, 250); // 250ms debounce timeout
-    };
-
-    // Initialize timeline
-    if (ref.current) {
-      drawTimeline(timelineEvents, ref.current);
-    }
-
-    // Use ResizeObserver instead of window resize event
-    const resizeObserver = new ResizeObserver(handleResize);
-
-    // Observe the container element
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
-    // Clean up
-    return () => {
-      clearTimeout(resizeTimer);
-      resizeObserver.disconnect();
-
-      // Ensure all animations are stopped when component unmounts
+      }
+    } else if (status === VisualizerStatus.Stopped) {
+      // Stop any running animations and clear the timeline
       if (ref.current) {
         d3.select(ref.current).selectAll("*").interrupt();
+        d3.select(ref.current).selectAll("*").remove();
       }
-    };
-  }, [timelineEvents]);
+    }
+  }, [status, timelineEvents, ref]);
 
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        width: "100%",
-        height: "100%",
-        position: "relative",
-        backgroundColor: "#ffffff",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        ...(isFullscreen && {
-          width: "100vw",
-          height: "100vh",
-          overflow: "hidden",
-        }),
-      }}
-    >
-      <svg
-        className="container"
-        ref={ref}
-        style={{
-          width: isFullscreen ? "100vw" : "100%",
-          height: isFullscreen ? "100vh" : "100%",
-          maxWidth: "100%",
-          maxHeight: "100%",
-        }}
-        preserveAspectRatio="xMidYMid meet"
-      ></svg>
-      <div
-        style={{
-          position: "absolute",
-          top: "10px",
-          right: "10px",
-          display: "flex",
-          gap: "10px",
-          zIndex: 10,
-        }}
-      >
-        <button
-          onClick={replayTimeline}
-          style={{
-            border: "none",
-            background: "rgba(255, 255, 255, 0.7)",
-            borderRadius: "4px",
-            width: "32px",
-            height: "32px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
-            transition: "background 0.2s",
-          }}
-          title="Replay Timeline"
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"
-              fill="#333"
-            />
-          </svg>
-        </button>
-        <button
-          onClick={toggleFullscreen}
-          style={{
-            border: "none",
-            background: "rgba(255, 255, 255, 0.7)",
-            borderRadius: "4px",
-            width: "32px",
-            height: "32px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
-            transition: "background 0.2s",
-          }}
-          title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            {isFullscreen ? (
-              <path
-                d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"
-                fill="#333"
-              />
-            ) : (
-              <path
-                d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"
-                fill="#333"
-              />
-            )}
-          </svg>
-        </button>
-      </div>
-    </div>
-  );
+  return null;
 };
-
-interface TimelineEvent {
-  name: string;
-  startDate: number;
-  endDate: number;
-}
-
-interface TimelineData {
-  events: TimelineEvent[];
-}
-
-function buildTimeline(workExperience: ResumeWork[]): TimelineData {
-  if (!workExperience || workExperience.length === 0) return { events: [] };
-
-  // clone the work experience array to avoid mutating the original data
-  const workItems = [...workExperience];
-
-  // order the work experience by start date
-  workItems.sort((a, b) => {
-    const startA = new Date(a.startDate).getTime();
-    const startB = new Date(b.startDate).getTime();
-    return startA - startB;
-  });
-
-  // create a timeline event for each work experience however we want to combine them when its a role change at the same company (name)
-  const events: TimelineEvent[] = workItems.reduce(
-    (acc: TimelineEvent[], work) => {
-      const startDate = new Date(work.startDate).getTime();
-      const endDate = work.endDate
-        ? new Date(work.endDate).getTime()
-        : Date.now();
-
-      // Look backward for any events matching the same company name and see if the time overlaps
-      const sameWorkNameEvent = acc.find((event) => {
-        if (event.name === work.name) {
-          // Check if the start date of the current work experience is before the end date of the existing event
-          return startDate < event.endDate;
-        }
-        return false;
-      });
-      if (sameWorkNameEvent) {
-        // If they overlap, update the end date of the existing event to the later end date
-        sameWorkNameEvent.endDate = Math.max(
-          sameWorkNameEvent.endDate,
-          endDate
-        );
-      } else {
-        // Create a new event for this work experience
-        acc.push({
-          name: work.name,
-          startDate: startDate,
-          endDate: endDate,
-        });
-      }
-
-      return acc;
-    },
-    []
-  );
-
-  return { events };
-}
 
 function drawTimeline(timeline: TimelineData, element: SVGSVGElement | null) {
   if (!element) return;
