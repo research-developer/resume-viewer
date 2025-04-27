@@ -7,6 +7,7 @@ import {
   VisualizerView,
 } from "./VisualizerHook";
 import { TimelineData, TimelineEvent } from "./TimelineModel";
+import { destoryVisualization } from "./VisualizationUtil";
 
 export const TimelineUI: React.FC = () => {
   const { state } = useVisualizerContext();
@@ -23,23 +24,12 @@ export const TimelineUI: React.FC = () => {
     ) {
       drawTimeline(ref.current, timeline, timelineViewOrigin);
     } else if (status === VisualizerStatus.Stopping) {
-      destoryTimeline(ref.current);
+      destoryVisualization(ref.current, ".timeline");
     }
   }, [status, currentView, timeline, timelineViewOrigin]);
 
   return null;
 };
-
-function destoryTimeline(element: SVGSVGElement) {
-  // Clear any existing elements first
-  const timeline = d3.select(element).selectAll(".timeline");
-  if (timeline.empty()) return; // No timeline to destroy
-  // Interrupt any ongoing animations and remove all elements
-  timeline.interrupt().selectAll("*").interrupt().remove();
-  // Remove the timeline group itself
-  timeline.remove();
-  console.log("TimelineUI: Timeline destroyed.");
-}
 
 function drawTimeline(
   element: SVGSVGElement,
@@ -51,7 +41,7 @@ function drawTimeline(
   if (!events || events.length === 0) return;
 
   // Always clear the previous timeline before drawing a new one
-  destoryTimeline(element);
+  destoryVisualization(element, ".timeline");
 
   const svg = d3.select(element);
 

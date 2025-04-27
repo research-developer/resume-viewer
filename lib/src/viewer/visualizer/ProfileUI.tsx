@@ -7,6 +7,7 @@ import {
   VisualizerView,
 } from "./VisualizerHook";
 import { VisualizerData } from "./VisualizerModel";
+import { destoryVisualization } from "./VisualizationUtil";
 
 export const ProfileUI: React.FC = () => {
   const { state, dispatch } = useVisualizerContext();
@@ -15,14 +16,17 @@ export const ProfileUI: React.FC = () => {
 
   useEffect(() => {
     // Only render when visualization is starting or started
-    if (status === VisualizerStatus.Started) {
+    if (
+      status === VisualizerStatus.Starting &&
+      currentView === VisualizerView.Home
+    ) {
       if (svgRef.current && data) {
-        createProfileVisualization(dispatch, data, svgRef.current);
+        drawProfileVisualization(svgRef.current, dispatch, data);
       }
-    } else {
+    } else if (status === VisualizerStatus.Stopping) {
       // If the status is not started, we can clear the SVG
       if (svgRef.current) {
-        d3.select(svgRef.current).selectAll("*").remove();
+        destoryVisualization(svgRef.current, ".profile-visualization");
       }
     }
   }, [data, svgRef, status, currentView, dispatch]);
@@ -30,21 +34,21 @@ export const ProfileUI: React.FC = () => {
   return null; // Component doesn't render any HTML directly, uses D3 with the SVG ref
 };
 
-async function createProfileVisualization(
+async function drawProfileVisualization(
+  svg: SVGSVGElement,
   dispatch: ReturnType<typeof useVisualizerContext>["dispatch"],
-  data: VisualizerData,
-  svg: SVGSVGElement
+  data: VisualizerData
 ): Promise<void> {
   const { resume, gravatarUrl } = data;
   const { basics } = resume;
   const name = basics?.name || "Unknown";
 
   // Clear existing content
-  d3.select(svg).selectAll("*").remove();
+  destoryVisualization(svg, ".profile-visualization");
 
   // Get dimensions
-  const width = svg.clientWidth || 800;
-  const height = svg.clientHeight || 600;
+  const width = 1024;
+  const height = 768;
   const centerX = width / 2;
   const centerY = height / 2;
 
