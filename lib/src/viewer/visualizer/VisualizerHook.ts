@@ -2,7 +2,16 @@ import React, { act, createContext, useContext } from "react";
 import { Resume } from "../../ResumeModel";
 import { buildVisualizerData, VisualizerData } from "./VisualizerModel";
 
-export type VisualizerView = "career" | "skills" | "education";
+export enum VisualizerView {
+  Home = "home",
+  Timeline = "timeline",
+  Skills = "skills",
+  Work = "work",
+  Education = "education",
+  Projects = "projects",
+  Certificates = "certificates",
+  Languages = "languages",
+}
 
 export enum VisualizerStatus {
   Starting = "starting",
@@ -16,8 +25,15 @@ export enum VisualizerTransition {
   Restart = "restart",
 }
 
+export interface VisualizerAnimationStartPosition {
+  x: number; // X coordinate of the start position
+  y: number; // Y coordinate of the start position
+  angle: number; // Direction of the animation in degrees
+}
+
 export interface VisualizerState {
   currentView: VisualizerView;
+  timelineViewOrigin: VisualizerAnimationStartPosition | null;
   status: VisualizerStatus;
   transition: VisualizerTransition;
   selectedEvent: string | null;
@@ -28,7 +44,11 @@ export interface VisualizerState {
 }
 
 type VisualizerAction =
-  | { type: "SET_VIEW"; view: VisualizerView }
+  | {
+      type: "SET_VIEW";
+      view: VisualizerView;
+      origin: VisualizerAnimationStartPosition | null;
+    }
   | { type: "RESTART" }
   | { type: "SELECT_EVENT"; eventId: string | null }
   | { type: "TOGGLE_FULLSCREEN" }
@@ -39,6 +59,16 @@ type VisualizerAction =
   | { type: "STOP" }
   | { type: "STOPPED" };
 
+const defaultState: Omit<VisualizerState, "svgRef" | "containerRef"> = {
+  currentView: VisualizerView.Timeline,
+  timelineViewOrigin: null,
+  status: VisualizerStatus.Stopped,
+  transition: VisualizerTransition.None,
+  selectedEvent: null,
+  isFullscreen: null,
+  data: null,
+};
+
 export const createInitialState = ({
   svgRef,
   containerRef,
@@ -46,14 +76,9 @@ export const createInitialState = ({
   svgRef: React.RefObject<SVGSVGElement | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
 }): VisualizerState => ({
-  currentView: "career",
-  status: VisualizerStatus.Stopped,
-  transition: VisualizerTransition.None,
-  selectedEvent: null,
-  isFullscreen: null,
+  ...defaultState,
   svgRef,
   containerRef,
-  data: null,
 });
 
 export const VisualizerContext = createContext<
@@ -69,10 +94,13 @@ const visualizerReducerDebug = (
   state: VisualizerState,
   action: VisualizerAction
 ): VisualizerState => {
-  console.group(`visualizerReducer: ${action.type}`, { state, action });
+  console.groupCollapsed(`visualizerReducer: ${action.type}`, {
+    state,
+    action,
+  });
   try {
     const result = visualizerReducerProd(state, action);
-    console.log("New state:", result);
+    console.log(`New State:`, result);
     return result;
   } finally {
     console.groupEnd();
@@ -86,7 +114,21 @@ const visualizerReducerProd = (
 ): VisualizerState => {
   switch (action.type) {
     case "SET_VIEW":
-      return { ...state, currentView: action.view };
+      if (state.currentView === action.view) {
+        console.warn("View is the same, no need to update visualizer view.");
+        return state;
+      }
+      if (action.view === VisualizerView.Timeline) {
+        return {
+          ...state,
+          currentView: action.view,
+          timelineViewOrigin: action.origin,
+        };
+      }
+      return {
+        ...state,
+        currentView: action.view,
+      };
     case "SELECT_EVENT":
       return { ...state, selectedEvent: action.eventId };
     case "TOGGLE_FULLSCREEN":
@@ -115,8 +157,10 @@ const visualizerReducerProd = (
       return visualizerReducer(
         {
           ...state,
-          currentView: "career",
           transition: VisualizerTransition.Restart,
+          // Reset to default state for key properties
+          currentView: defaultState.currentView,
+          timelineViewOrigin: defaultState.timelineViewOrigin,
         },
         nextRestartAction
       );
@@ -162,3 +206,5 @@ export const useVisualizerContext = () => {
   }
   return context;
 };
+
+export type VisualizerContextType = ReturnType<typeof useVisualizerContext>;

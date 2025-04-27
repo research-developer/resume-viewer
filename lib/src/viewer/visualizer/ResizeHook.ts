@@ -1,24 +1,41 @@
-import { useEffect, RefObject, useState, useCallback } from "react";
-import { useVisualizerContext } from "./VisualizerHook";
+import { useEffect, RefObject, useState } from "react";
+
+export interface Dimensions {
+  width: number;
+  height: number;
+}
 
 export function useResize(containerRef: RefObject<HTMLDivElement | null>) {
-  const { dispatch } = useVisualizerContext();
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [dimensions, setDimensions] = useState<Dimensions | null>(null);
 
-  const setDimensionsWhenDirty = useCallback(
-    (newDimensions: { width: number; height: number }) => {
+  // This effect runs only once when the component mounts to get the initial dimensions
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    setDimensions(rect);
+    console.log(`useResize: Initial dimensions: ${rect.width}x${rect.height}`);
+  }, []);
+
+  //
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    // Function to set dimensions only when they are dirty
+    // This prevents unnecessary re-renders and state updates
+    const setDimensionsWhenDirty = (newDimensions: Dimensions) => {
       if (
+        !dimensions ||
         dimensions.width !== newDimensions.width ||
         dimensions.height !== newDimensions.height
       ) {
+        console.log(
+          `useResize: Dimensions changed: ${dimensions?.width}x${dimensions?.height} -> ${newDimensions.width}x${newDimensions.height}`
+        );
+        // Update the state only if the dimensions have changed
         setDimensions(newDimensions);
       }
-    },
-    [dimensions]
-  );
-
-  useEffect(() => {
-    if (!containerRef.current) return;
+    };
 
     // Create a debounced function to handle resize
     let resizeTimer: ReturnType<typeof setTimeout>;
@@ -28,36 +45,22 @@ export function useResize(containerRef: RefObject<HTMLDivElement | null>) {
       resizeTimer = setTimeout(() => {
         if (!entries[0]) return;
 
-        const { width, height } = entries[0].contentRect;
-
-        // Only update if dimensions actually changed
-        if (dimensions.width !== width || dimensions.height !== height) {
-          setDimensionsWhenDirty({ width, height });
-
-          // Dispatch the restart action to the reducer
-          dispatch({ type: "RESTART" });
-        }
-      }, 250); // 250ms debounce timeout
+        setDimensionsWhenDirty(entries[0].contentRect);
+      }, 250);
     };
 
     // Create and setup the ResizeObserver
     const resizeObserver = new ResizeObserver(handleResize);
     resizeObserver.observe(containerRef.current);
 
-    // Initial size calculation
-    if (containerRef.current) {
-      setDimensionsWhenDirty({
-        width: containerRef.current.clientWidth,
-        height: containerRef.current.clientHeight,
-      });
-    }
-
     // Cleanup
     return () => {
       clearTimeout(resizeTimer);
       resizeObserver.disconnect();
     };
-  }, [containerRef, dispatch, dimensions, setDimensionsWhenDirty]);
+  }, [dimensions]);
 
   return dimensions;
 }
+
+export type ResizeHookType = ReturnType<typeof useResize>;

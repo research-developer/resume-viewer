@@ -1,15 +1,15 @@
-import React from "react";
+import { FC } from "react";
 import { Resume } from "../../ResumeModel";
 import { VisualizerProvider } from "./VisualizerProvider";
 import { VisualizerControlsUI } from "./VisualizerControlsUI";
-import { TimelineUI } from "./TimelineUI";
 import { VisualizerContainerUI } from "./VisualizerContainerUI";
+import { TimelineUI } from "./TimelineUI";
 
 interface VisualizerUIProps {
   resume: Resume;
 }
 
-export const VisualizerUI: React.FC<VisualizerUIProps> = ({ resume }) => {
+export const VisualizerUI: FC<VisualizerUIProps> = ({ resume }) => {
   return (
     <VisualizerProvider resume={resume}>
       <VisualizerContainerUI>

@@ -7,7 +7,7 @@ import {
   VisualizerStatus,
   VisualizerTransition,
 } from "./VisualizerHook";
-import { buildVisualizerData, VisualizerData } from "./VisualizerModel";
+import { VisualizerData } from "./VisualizerModel";
 import { useVisualizerData } from "./VisualizerDataHook";
 
 export const VisualizerProvider: React.FC<{
