@@ -3,123 +3,75 @@ import React, { useEffect } from "react";
 import {
   useVisualizerContext,
   VisualizerAnimationStartPosition,
-  VisualizerStatus,
-  VisualizerView,
+  VisualizerD3State,
+  VisualizerDispatchAction,
 } from "./VisualizerHook";
 import { TimelineData, TimelineEvent } from "./TimelineModel";
-import { destoryVisualization } from "./VisualizationUtil";
+import { burstAt, destoryVisualization } from "./VisualizationUtil";
 
 export const TimelineUI: React.FC = () => {
   const { state } = useVisualizerContext();
-  const { svgRef: ref, data, status, currentView, timelineViewOrigin } = state;
-  const { timeline } = data || {};
+  const { d3State } = state;
 
   // Trigger replay animation when isAnimating changes
   useEffect(() => {
-    if (!ref.current) return; // Ensure the SVG reference is available
-    console.log("TimelineUI effect triggered:", status, currentView);
-    if (
-      status === VisualizerStatus.Starting &&
-      currentView === VisualizerView.Timeline
-    ) {
-      drawTimeline(ref.current, timeline, timelineViewOrigin);
-    } else if (status === VisualizerStatus.Stopping) {
-      destoryVisualization(ref.current, ".timeline");
-    }
-  }, [status, currentView, timeline, timelineViewOrigin]);
+    d3State.dispatch.on("DRAW_TIMELINE", function () {
+      if (!d3State.svgRef.current) return; // Ensure the SVG reference is available
+      if (this.type === "DRAW_TIMELINE") {
+        drawTimeline(d3State, this.data, this.origin);
+        // do burst animation
+        //burstAt(d3State.svgRef.current, this.origin.x, this.origin.y);
+      }
+    });
+
+    return () => {
+      // Clean up the event listener when the component unmounts
+      d3State.dispatch.on("DRAW_TIMELINE", null);
+    };
+  }, [d3State]);
 
   return null;
 };
 
 function drawTimeline(
-  element: SVGSVGElement,
-  timeline: TimelineData | undefined,
-  timelineViewOrigin: VisualizerAnimationStartPosition | null
+  d3State: VisualizerD3State,
+  data: TimelineData,
+  origin: VisualizerAnimationStartPosition
 ) {
-  if (!timeline) return; // No timeline data to draw
-  const { events } = timeline;
-  if (!events || events.length === 0) return;
+  const { svgRef, rootRef, dispatch, zoom, width, height, minZoom, maxZoom } =
+    d3State;
+  if (!svgRef.current || !rootRef.current) return; // Ensure the SVG reference is available
+  if (!data?.events) return; // Ensure timeline data is available
+
+  const { events, now } = data;
 
   // Always clear the previous timeline before drawing a new one
-  destoryVisualization(element, ".timeline");
+  destoryVisualization(svgRef.current, ".timeline");
 
-  const svg = d3.select(element);
+  const svg = d3.select(svgRef.current);
+  const root = d3.select(rootRef.current);
 
   // Get the SVG dimensions from the element
   const svgRect = svg.node()?.getBBox();
   if (!svgRect) return; // No dimensions available
 
   // Use a fixed size and let the SVG scale it
-  const width = 1024;
-  const height = 768; // Adjust height based on aspect ratio
   const xMid = width / 2;
   const yMid = height / 2;
-  const origin = timelineViewOrigin || {
-    x: 0,
-    y: 0,
-    angle: 0,
-  };
 
   // Calculate the scale factor based on the SVG dimensions to fit the view
   const scaleFactor = Math.min(svgRect.width / width, svgRect.height / height);
 
-  console.log("timeline: Initial state:", {
-    width,
-    height,
-    xMid,
-    yMid,
-    origin,
-    scaleFactor,
-  });
-
   // Find min and max dates for the domain
-  const today = new Date();
   const minDate = new Date(
-    d3.min(events, (d: TimelineEvent) => d.startDate) || today.getTime()
+    d3.min(events, (d: TimelineEvent) => d.startDate) || now.getTime()
   );
   const maxDate = new Date(
-    d3.max(events, (d: TimelineEvent) => d.endDate) || today.getTime()
+    d3.max(events, (d: TimelineEvent) => d.endDate) || now.getTime()
   );
 
-  // Add padding to domain (3 months on each side)
-  const domainPadding = 15 * 24 * 60 * 60 * 1000; // 90 days in milliseconds
-  const paddedMinDate = new Date(minDate.getTime() - domainPadding);
-  const paddedMaxDate = new Date(maxDate.getTime() + domainPadding);
-
-  // Use scaleTime for the horizontal timeline
-  const xTimelineScale = d3
-    .scaleTime()
-    .domain([paddedMinDate, paddedMaxDate])
-    .range([0, width])
-    .nice();
-  const xToday = xTimelineScale(today); // X position of today on the timeline
-  const xMinDate = xTimelineScale(paddedMinDate); // X position of min date on the timeline
-  const xMaxDate = xTimelineScale(paddedMaxDate); // X position of max date on the timeline
-
   // Create a group for the visualization with proper margins
-  const g = svg
-    .append("g")
-    .classed("timeline", true)
-    .attr(
-      "transform",
-      `translate(${origin.x}, ${origin.y}) rotate(${origin.angle}) scale(${scaleFactor})`
-    );
-
-  // Set up zoom if you want
-  const maxZoom = 40; // Maximum zoom level
-  const zoom = d3
-    .zoom()
-    .scaleExtent([1, maxZoom])
-    .translateExtent([
-      [-width, -height],
-      [width * 2, height * 2],
-    ])
-    .on("zoom", (event) => {
-      g.attr("transform", event.transform);
-    });
-
-  // Apply zoom to the SVG element
-  svg.call(zoom as any);
+  const container = root.append("g").classed("timeline", true);
 
   // Calculate positions for labels with improved staggering
   const arcHeight = 30; // Height of the arc bow from the timeline
@@ -129,10 +81,33 @@ function drawTimeline(
   const labelHeight = 14;
   const labelPadding = 15; // Increased padding for better spacing
   const maxLabelLength = 25; // Maximum characters for label before truncating
-  const yBaseline = yMid; // Y position of the baseline (timeline)
+  const baselineStartX = origin.x; // Start of the baseline
+  const baselineEndX = baselineStartX + width; // End of the baseline
+  const baselineY = origin.y; // Y position of the baseline (timeline)
+
+  // Add padding to domain (3 months on each side)
+  const domainPadding = 90 * 24 * 60 * 60 * 1000; // 90 days in milliseconds
+  const paddedMinDate = new Date(minDate.getTime() - domainPadding);
+  const paddedMaxDate = new Date(maxDate.getTime() + domainPadding);
+
+  // Use scaleTime for the horizontal timeline
+  const xTimelineScale = d3
+    .scaleTime()
+    .domain([paddedMinDate, paddedMaxDate])
+    .range([baselineStartX, baselineEndX])
+    .nice();
+  const todayX = xTimelineScale(now); // X position of today on the timeline
+  const minDateX = xTimelineScale(paddedMinDate); // X position of min date on the timeline
+  const maxDateX = xTimelineScale(paddedMaxDate); // X position of max date on the timeline
+
+  // Need to translate the x,y by hand due to weird zoom behavior
+  const xWidthScale = d3
+    .scaleLinear()
+    .domain([0, width])
+    .range([baselineStartX, baselineEndX]);
 
   // Assign levels to events based on their proximity
-  const eventPositions = timeline.events
+  const eventPositions = events
     .map((event) => {
       return {
         x: xTimelineScale(new Date(event.startDate)),
@@ -193,7 +168,7 @@ function drawTimeline(
     .attr("fill", "steelblue");
 
   // Create a main group that will be transformed during zoom - needs to be created early
-  const mainGroup = g
+  const mainGroup = container
     .append("g")
     .classed("main-group", true)
     // Start with opacity 0 for entrance animation
@@ -210,11 +185,57 @@ function drawTimeline(
   const entranceDuration = 100; // Duration of entrance animation
   mainGroup.transition().duration(entranceDuration).style("opacity", 1);
 
+  // Calculate the current viewport based on the baseline drawing progress
+  function calculateViewport(baselineDrawingProgress: number) {
+    // Calculate a moving viewport width - enough to see context
+    const viewportWidth =
+      width * Math.min(0.25, Math.max(0.05, baseLineLength)); // Show 25% of timeline width
+
+    // Get the relevant Y boundaries from events near the current position
+    let minY = baselineY - arcHeight - 20; // Default: timeline with some margin
+    let maxY = baselineY + 40; // Default: timeline with some margin
+
+    // Find any visible events within the current viewport
+    eventPositions.forEach((pos) => {
+      // If event is in view, adjust Y boundaries
+      const direction = pos.direction;
+      const lineLength =
+        baseLineLength + pos.level * (labelHeight + labelPadding);
+      const eventY = baselineY + direction * lineLength;
+
+      minY = Math.min(minY, eventY - 15);
+      maxY = Math.max(maxY, eventY + 15);
+    });
+
+    // Calculate viewport height and center point
+    const viewportHeight = maxY - minY;
+    const viewportCenterX = baselineDrawingProgress;
+    const viewportCenterY = minY + viewportHeight / 2;
+
+    // Calculate appropriate zoom level based on viewport size
+    const viewportZoom = Math.min(
+      width / viewportWidth,
+      height / viewportHeight
+    ); // 80% to add some margin
+
+    return {
+      viewportWidth,
+      viewportHeight,
+      viewportCenterX,
+      viewportCenterY,
+      viewportZoom,
+    };
+  }
+
+  const startViewport = calculateViewport(0);
+
   // draw a dot at the origin point
+  const originDotX = baselineStartX;
+  const originDotY = baselineY;
   const originDot = topLayer
     .append("circle")
-    .attr("cx", 0)
-    .attr("cy", yBaseline)
+    .attr("cx", originDotX)
+    .attr("cy", originDotY)
     .attr("r", 3)
     .attr("fill", "steelblue")
     .attr("opacity", 0)
@@ -245,9 +266,10 @@ function drawTimeline(
       .call(
         zoom.transform as any,
         d3.zoomIdentity
-          .translate(width / 2, width / 2) // Center the zoom on the origin
+          // Center the zoom on the origin dot
+          .translate(width / 2, height / 2)
           .scale(maxZoom)
-          .translate(-3, -yBaseline - 3)
+          .translate(-originDotX, -originDotY)
       )
       .on("end", () => {
         // Now we need to zoom to the viewport
@@ -255,65 +277,18 @@ function drawTimeline(
       });
   }
 
-  function calculateViewport(baselineDrawingProgress: number) {
-    // Calculate a moving viewport width - enough to see context
-    const viewportWidth =
-      width * Math.min(0.25, Math.max(0.05, baseLineLength)); // Show 25% of timeline width
-
-    // Get the relevant Y boundaries from events near the current position
-    let minY = yBaseline - arcHeight - 20; // Default: timeline with some margin
-    let maxY = yBaseline + 40; // Default: timeline with some margin
-
-    // Find any visible events within the current viewport
-    eventPositions.forEach((pos) => {
-      // If event is in view, adjust Y boundaries
-      const direction = pos.direction;
-      const lineLength =
-        baseLineLength + pos.level * (labelHeight + labelPadding);
-      const eventY = yBaseline + direction * lineLength;
-
-      minY = Math.min(minY, eventY - 15);
-      maxY = Math.max(maxY, eventY + 15);
-    });
-
-    // Calculate viewport height and center point
-    const viewportHeight = maxY - minY;
-    const viewportCenterX = baselineDrawingProgress;
-    const viewportCenterY = minY + viewportHeight / 2;
-
-    // Calculate appropriate zoom level based on viewport size
-    const viewportZoom = Math.min(
-      width / viewportWidth,
-      height / viewportHeight
-    ); // 80% to add some margin
-
-    return {
-      viewportWidth,
-      viewportHeight,
-      viewportCenterX,
-      viewportCenterY,
-      viewportZoom,
-    };
-  }
-
   function zoomToViewport() {
-    // Calculate the current viewport based on the baseline drawing progress
-    const { viewportCenterX, viewportCenterY, viewportZoom } =
-      calculateViewport(0);
-
     // Apply zoom to the SVG element
     svg
       .transition()
-      .attr("cx", 0)
-      .duration(1000) // Duration of the animation
-      .transition()
+      .attr("x", baselineStartX)
       .duration(1000) // Duration of the animation
       .call(
         zoom.transform as any,
         d3.zoomIdentity
           .translate(width / 2, height / 2)
-          .scale(viewportZoom)
-          .translate(-viewportCenterX, -viewportCenterY)
+          .scale(startViewport.viewportZoom)
+          .translate(-baselineStartX, -baselineY)
       )
       .on("end", () => {
         // After the zoom, animate the origin dot to the timeline position
@@ -330,14 +305,14 @@ function drawTimeline(
     const baselineAnimation = lineLayer
       .append("line")
       .classed("timeline-baseline", true)
-      .attr("x1", 0)
-      .attr("y1", yBaseline)
-      .attr("x2", xMaxDate)
-      .attr("y2", yBaseline)
+      .attr("x1", baselineStartX)
+      .attr("y1", baselineY)
+      .attr("x2", baselineEndX)
+      .attr("y2", baselineY)
       .attr("stroke", "#adb5bd")
       .attr("stroke-width", 2)
-      .attr("stroke-dasharray", xMaxDate) // Set dash array to line length
-      .attr("stroke-dashoffset", xMaxDate) // Initially offset by full length (invisible)
+      .attr("stroke-dasharray", width) // Set dash array to line length
+      .attr("stroke-dashoffset", width) // Initially offset by full length (invisible)
       .attr("opacity", 0.5) // Slightly transparent
       .attr("stroke-opacity", 0.8) // Slightly transparent
       .attr("z-index", 1) // Ensure it's below the arcs
@@ -360,7 +335,7 @@ function drawTimeline(
       .enter()
       .append("g")
       .classed("event", true)
-      .attr("transform", (d: any) => `translate(${d.x}, ${yBaseline})`)
+      .attr("transform", (d: any) => `translate(${d.x}, ${baselineY})`)
       .style("opacity", 1);
 
     // Add lines that grow after their respective dots appear
@@ -395,10 +370,10 @@ function drawTimeline(
       .attr("d", (d: TimelineEvent) => {
         const startX = xTimelineScale(new Date(d.startDate));
         const endX = xTimelineScale(new Date(d.endDate));
-        const isOngoing = d.endDate >= Date.now() - 86400000; // Within a day of current date
+        const isOngoing = d.endDate.getTime() >= now.getTime() - 86400000; // Within a day of current date
 
         // Calculate time difference in milliseconds
-        const timeDiff = d.endDate - d.startDate;
+        const timeDiff = d.endDate.getTime() - d.startDate.getTime();
         const isShortTimespan = timeDiff < 180 * 24 * 60 * 60 * 1000; // Less than ~6 months
 
         // Calculate how high the arc should go based on duration
@@ -407,32 +382,32 @@ function drawTimeline(
           ? arcHeight * (timeDiff / (365 * 24 * 60 * 60 * 1000)) * 2
           : arcHeight;
 
-        const controlY = yBaseline - Math.max(15, effectiveArcHeight); // Ensure minimum height of 15px
+        const controlY = baselineY - Math.max(15, effectiveArcHeight); // Ensure minimum height of 15px
 
         if (isOngoing) {
           // For ongoing events, create a path that rises to meet today's line at the middle
           // Adjust the path to meet today's vertical line at its midpoint
-          const todayMidpointY = yBaseline - arcHeight + 5; // Mid-point of today's vertical line
+          const todayMidpointY = baselineY - arcHeight + 5; // Mid-point of today's vertical line
 
-          if (isShortTimespan && startX > xToday - width * 0.2) {
+          if (isShortTimespan && startX > todayX - width * 0.2) {
             // Very recent start - create a gradual rise to today's line
-            return `M ${startX} ${yBaseline}
-                  C ${startX + (xToday - startX) * 0.3} ${yBaseline - 10},
-                    ${xToday - 20} ${todayMidpointY + 10},
-                    ${xToday} ${todayMidpointY}`;
+            return `M ${startX} ${baselineY}
+                  C ${startX + (todayX - startX) * 0.3} ${baselineY - 10},
+                    ${todayX - 20} ${todayMidpointY + 10},
+                    ${todayX} ${todayMidpointY}`;
           } else {
             // Regular ongoing event - arch up and then to today's line
-            return `M ${startX} ${yBaseline}
-                  C ${startX + (xToday - startX) * 0.3} ${controlY},
-                    ${xToday - (xToday - startX) * 0.3} ${controlY},
-                    ${xToday} ${todayMidpointY}`;
+            return `M ${startX} ${baselineY}
+                  C ${startX + (todayX - startX) * 0.3} ${controlY},
+                    ${todayX - (todayX - startX) * 0.3} ${controlY},
+                    ${todayX} ${todayMidpointY}`;
           }
         } else {
           // Regular completed events return to the timeline
-          return `M ${startX} ${yBaseline}
+          return `M ${startX} ${baselineY}
                 C ${startX} ${controlY},
                   ${endX} ${controlY},
-                  ${endX} ${yBaseline}`;
+                  ${endX} ${baselineY}`;
         }
       })
       .attr("fill", "none")
@@ -451,16 +426,14 @@ function drawTimeline(
     // Replace the end-dot circles with diamond shapes
     const endEvents = arcLayer
       .selectAll(".end-dot")
-      .data(events.filter((e) => e.endDate < Date.now()))
+      .data(events.filter((e) => e.endDate.getTime() < now.getTime()))
       .enter()
       .append("path")
       .classed("end-dot", true)
       .attr(
         "transform",
         (d: TimelineEvent) =>
-          `translate(${xTimelineScale(
-            new Date(d.endDate)
-          )}, ${yBaseline}) scale(0.75)`
+          `translate(${xTimelineScale(d.endDate)}, ${baselineY}) scale(0.75)`
       )
       .attr("d", d3.symbol().type(d3.symbolX).size(0)) // Start with size 0
       .attr("fill", "steelblue")
@@ -682,7 +655,7 @@ function drawTimeline(
       .enter()
       .append("g")
       .classed("year-marker", true)
-      .attr("transform", (d) => `translate(${d.x}, ${yBaseline})`)
+      .attr("transform", (d) => `translate(${d.x}, ${baselineY})`)
       .style("opacity", 0);
 
     // Dashed line for year markers
@@ -716,14 +689,14 @@ function drawTimeline(
 
     // Add current year indicator at the end with clearer positioning
     const currentYearIndicatorHeight = yearMarkerYOffset + 12;
-    const y1CurrentYearIndicator = yBaseline - currentYearIndicatorHeight; // Position above the timeline
+    const y1CurrentYearIndicator = baselineY - currentYearIndicatorHeight; // Position above the timeline
     const currentYearIndicator = bottomLayer
       .append("line")
       .classed("current-year-indicator", true)
-      .attr("x1", xToday)
+      .attr("x1", todayX)
       .attr("y1", y1CurrentYearIndicator) // Position above the timeline
-      .attr("x2", xToday)
-      .attr("y2", yBaseline) // Position at the timeline
+      .attr("x2", todayX)
+      .attr("y2", baselineY) // Position at the timeline
       .attr("stroke", "#e74c3c")
       .attr("stroke-width", 1)
       .attr("stroke-dasharray", "5,5") // Dashed line
@@ -735,7 +708,7 @@ function drawTimeline(
     const currentYearLabel = bottomLayer
       .append("text")
       .classed("current-year-label", true)
-      .attr("x", xToday)
+      .attr("x", todayX)
       .attr("y", y1CurrentYearIndicator - 5) // Position above the timeline
       .attr("text-anchor", "middle")
       .attr("dy", "-0.35em") // Adjust vertical alignment
@@ -752,7 +725,7 @@ function drawTimeline(
       .append("text")
       .classed("flying-year", true)
       .attr("x", 0)
-      .attr("y", yBaseline + 6) // Position above the timeline
+      .attr("y", baselineY + 6) // Position above the timeline
       .attr("text-anchor", "middle")
       .attr("fill", "steelblue")
       .style("font-family", "Arial, sans-serif")
@@ -764,7 +737,12 @@ function drawTimeline(
     // Create a function to track baseline animation progress
     baselineAnimation.tween("track-progress", function () {
       return function (t) {
-        baselineDrawingProgress = t * xMaxDate;
+        // Update the baseline drawing progress based on animation progress
+        baselineDrawingProgress = baselineStartX + t * width;
+
+        // Zoom in on the current viewport based on progress
+        const { viewportCenterX, viewportCenterY, viewportZoom } =
+          calculateViewport(baselineDrawingProgress);
 
         // Calculate the current year based on timeline position
         const currentDate = xTimelineScale.invert(baselineDrawingProgress);
@@ -772,11 +750,11 @@ function drawTimeline(
 
         // Update the flying year text
         flyingYearText
-          .attr("x", baselineDrawingProgress + flyingYearTextXOffset) // Position just ahead of the baseline
+          .attr("x", viewportCenterX + flyingYearTextXOffset) // Position just ahead of the baseline
           .text(currentYear);
 
-        // Update the origin dot position to it follow the baseline
-        originDot.transition().duration(0).attr("cx", baselineDrawingProgress);
+        // Update the origin dot position to it follow the baseline and stop at today
+        originDot.attr("cx", Math.min(viewportCenterX, todayX));
 
         // Handle the flying year opacity based on animation progress
         if (t < 0.05) {
@@ -794,7 +772,7 @@ function drawTimeline(
         startEvents.attr("r", function (d: any) {
           // If the baseline has passed this dot's x position, show it
           if (baselineDrawingProgress >= d.x) {
-            const timeSincePassing = (baselineDrawingProgress - d.x) / xMaxDate;
+            const timeSincePassing = (baselineDrawingProgress - d.x) / maxDateX;
             // Calculate a value between 0 and dotRadius based on how long ago the line passed
             const growthProgress = Math.min(1, timeSincePassing * 10);
             return dotRadius * growthProgress;
@@ -810,7 +788,7 @@ function drawTimeline(
             baseLineLength + d.level * (labelHeight + labelPadding);
           if (baselineDrawingProgress >= d.x) {
             // Calculate how much time has passed since the baseline crossed this point
-            const timeSincePassing = (baselineDrawingProgress - d.x) / xMaxDate;
+            const timeSincePassing = (baselineDrawingProgress - d.x) / maxDateX;
             // Calculate line growth progress (0 to 1)
             const growthProgress = Math.max(
               0,
@@ -828,7 +806,7 @@ function drawTimeline(
             baseLineLength + d.level * (labelHeight + labelPadding);
 
           if (baselineDrawingProgress >= d.x) {
-            const timeSincePassing = (baselineDrawingProgress - d.x) / xMaxDate;
+            const timeSincePassing = (baselineDrawingProgress - d.x) / maxDateX;
 
             // Calculate line extension progress (0 to 1)
             const lineProgress = Math.min(
@@ -918,7 +896,7 @@ function drawTimeline(
 
         // Update arrow markers for ongoing events
         jobArcs.each(function (d: TimelineEvent) {
-          const isOngoing = d.endDate >= Date.now() - 86400000;
+          const isOngoing = d.endDate.getTime() >= now.getTime() - 86400000;
           const todayX = xTimelineScale(new Date());
 
           if (isOngoing && baselineDrawingProgress >= todayX) {
@@ -929,7 +907,7 @@ function drawTimeline(
 
         // Update end dots based on baseline position
         endEvents.attr("d", function (d: TimelineEvent) {
-          const isOngoing = d.endDate >= Date.now() - 86400000;
+          const isOngoing = d.endDate.getTime() >= now.getTime() - 86400000;
           if (isOngoing) {
             // Ongoing events should not show end dots
             return d3.symbol().type(d3.symbolX).size(0)();
@@ -938,7 +916,7 @@ function drawTimeline(
           const endX = xTimelineScale(new Date(d.endDate));
           if (baselineDrawingProgress >= endX) {
             const timeSincePassing =
-              (baselineDrawingProgress - endX) / xMaxDate;
+              (baselineDrawingProgress - endX) / maxDateX;
             const growthProgress = Math.min(1, timeSincePassing * 10);
             const size = 50 * growthProgress; // Max size of 50
             return d3.symbol().type(d3.symbolX).size(size)();
@@ -949,14 +927,14 @@ function drawTimeline(
         // Update year markers based on baseline progress
         yearMarkersGroup.style("opacity", function (d: any) {
           if (baselineDrawingProgress >= d.x) {
-            const timeSincePassing = (baselineDrawingProgress - d.x) / xMaxDate;
+            const timeSincePassing = (baselineDrawingProgress - d.x) / maxDateX;
             return Math.min(1, timeSincePassing * 10);
           }
           return 0;
         });
 
         // Update current year indicator at the end
-        if (currentDate >= today) {
+        if (currentDate >= now) {
           // Show when animation is almost complete
           const fadeInProgress = Math.min(1, (t - 0.9) * 10);
           currentYearIndicator.style("opacity", fadeInProgress);
@@ -965,10 +943,6 @@ function drawTimeline(
 
         if (t < 1) {
           if (!pinnedEventName) {
-            // Zoom in on the current viewport based on progress
-            const { viewportCenterX, viewportCenterY, viewportZoom } =
-              calculateViewport(baselineDrawingProgress);
-
             svg
               .transition()
               .duration(50)

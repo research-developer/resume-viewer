@@ -2,16 +2,19 @@ import { ResumeWork } from "../../ResumeModel";
 
 export interface TimelineEvent {
   name: string;
-  startDate: number;
-  endDate: number;
+  startDate: Date;
+  endDate: Date;
 }
 
 export interface TimelineData {
+  now: Date;
   events: TimelineEvent[];
 }
 
 export function buildTimeline(workExperience: ResumeWork[]): TimelineData {
-  if (!workExperience || workExperience.length === 0) return { events: [] };
+  const now = new Date();
+  if (!workExperience || workExperience.length === 0)
+    return { events: [], now };
 
   // clone the work experience array to avoid mutating the original data
   const workItems = [...workExperience];
@@ -35,22 +38,21 @@ export function buildTimeline(workExperience: ResumeWork[]): TimelineData {
       const sameWorkNameEvent = acc.find((event) => {
         if (event.name === work.name) {
           // Check if the start date of the current work experience is before the end date of the existing event
-          return startDate < event.endDate;
+          return startDate < (event.endDate ?? now).getTime();
         }
         return false;
       });
       if (sameWorkNameEvent) {
         // If they overlap, update the end date of the existing event to the later end date
-        sameWorkNameEvent.endDate = Math.max(
-          sameWorkNameEvent.endDate,
-          endDate
+        sameWorkNameEvent.endDate = new Date(
+          Math.max((sameWorkNameEvent.endDate ?? now).getTime(), endDate)
         );
       } else {
         // Create a new event for this work experience
         acc.push({
           name: work.name,
-          startDate: startDate,
-          endDate: endDate,
+          startDate: new Date(startDate),
+          endDate: new Date(endDate) ?? now,
         });
       }
 
@@ -59,5 +61,5 @@ export function buildTimeline(workExperience: ResumeWork[]): TimelineData {
     []
   );
 
-  return { events };
+  return { events, now };
 }

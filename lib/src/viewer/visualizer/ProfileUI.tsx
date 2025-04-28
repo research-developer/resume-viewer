@@ -3,54 +3,56 @@ import * as d3 from "d3";
 import { getInitials } from "./GravatarUtil";
 import {
   useVisualizerContext,
+  VisualizerAnimationStartPosition,
+  VisualizerD3State,
+  VisualizerDispatch,
   VisualizerStatus,
   VisualizerView,
 } from "./VisualizerHook";
 import { VisualizerData } from "./VisualizerModel";
-import { destoryVisualization } from "./VisualizationUtil";
+import { destoryVisualization, getScale } from "./VisualizationUtil";
 
 export const ProfileUI: React.FC = () => {
-  const { state, dispatch } = useVisualizerContext();
-  const { svgRef, status, data, currentView } = state;
-  const centerImageRef = useRef<SVGImageElement>(null);
+  const { state } = useVisualizerContext();
+  const { d3State } = state;
 
+  // Trigger replay animation when isAnimating changes
   useEffect(() => {
-    // Only render when visualization is starting or started
-    if (
-      status === VisualizerStatus.Starting &&
-      currentView === VisualizerView.Home
-    ) {
-      if (svgRef.current && data) {
-        drawProfileVisualization(svgRef.current, dispatch, data);
+    d3State.dispatch.on("DRAW_PROFILE", function () {
+      if (!d3State.svgRef.current) return; // Ensure the SVG reference is available
+      if (this.type === "DRAW_PROFILE") {
+        drawProfileVisualization(d3State, this.data, this.origin);
       }
-    } else if (status === VisualizerStatus.Stopping) {
-      // If the status is not started, we can clear the SVG
-      if (svgRef.current) {
-        destoryVisualization(svgRef.current, ".profile-visualization");
-      }
-    }
-  }, [data, svgRef, status, currentView, dispatch]);
+    });
+
+    return () => {
+      // Clean up the event listener when the component unmounts
+      d3State.dispatch.on("DRAW_PROFILE", null);
+    };
+  }, [d3State]);
 
   return null; // Component doesn't render any HTML directly, uses D3 with the SVG ref
 };
 
 async function drawProfileVisualization(
-  svg: SVGSVGElement,
-  dispatch: ReturnType<typeof useVisualizerContext>["dispatch"],
-  data: VisualizerData
+  d3State: VisualizerD3State,
+  data: VisualizerData,
+  origin: VisualizerAnimationStartPosition
 ): Promise<void> {
+  const { svgRef, rootRef, dispatch, zoom, width, height, minZoom, maxZoom } =
+    d3State;
+  if (!svgRef.current) return;
   const { resume, gravatarUrl } = data;
   const { basics } = resume;
   const name = basics?.name || "Unknown";
 
   // Clear existing content
-  destoryVisualization(svg, ".profile-visualization");
+  destoryVisualization(svgRef.current, ".profile-visualization");
 
   // Get dimensions
-  const width = 1024;
-  const height = 768;
   const centerX = width / 2;
   const centerY = height / 2;
+  const scaleFactor = getScale(svgRef.current, width, height);
 
   // Define parameters
   const profileRadius = Math.min(width, height) * 0.15; // Size of central profile
@@ -105,10 +107,10 @@ async function drawProfileVisualization(
 
   // Create main container with transform
   const container = d3
-    .select(svg)
+    .select(rootRef.current)
     .append("g")
-    .attr("class", "profile-visualization")
-    .attr("transform", `translate(${centerX}, ${centerY})`)
+    .classed("profile-visualization", true)
+    .attr("transform", `translate(${origin.x}, ${origin.y})`)
     .style("opacity", 0);
 
   // Add subtle background glow
@@ -120,7 +122,10 @@ async function drawProfileVisualization(
     .style("opacity", 0);
 
   // Create a radial gradient for the glow effect
-  const defs = d3.select(svg).append("defs");
+  const defs = d3
+    .select(svgRef.current)
+    .append("defs")
+    .classed(".profile-visualization", true);
 
   const glowGradient = defs
     .append("radialGradient")
@@ -251,46 +256,30 @@ async function drawProfileVisualization(
     //     .attr("transform", "scale(1)");
     // })
     .on("click", function (event, d) {
-      // TODO: find the center of the segment clicked
+      // Find the center of the segment
       const [x, y] = arc.centroid(d as any);
 
-      // do a debug burst at the center of the segment clicked
-      const burst = container
-        .append("circle")
-        .attr("class", "burst")
-        .attr("cx", x)
-        .attr("cy", y)
-        .attr("r", 0)
-        .style("fill", d.data.color)
-        .style("opacity", 0.8);
-      burst
-        .transition()
-        .duration(500)
-        .attr("r", 20)
-        .style("opacity", 0)
-        .remove();
-
-      const angle = (d.startAngle + d.endAngle) / 2;
-
-      // Adjust the outermost point based on the angle of the segment to the end of the current segment that is furthest from the center
-      const outerMostPoint = {
-        x: Math.cos(angle) * outerRadius,
-        y: Math.sin(angle) * outerRadius,
-        angleFromCenter: angle,
-      };
-
-      const selectedSegment = d.data;
+      // Translate the coordinates to the SVG coordinate system
+      const originX = centerX + x;
+      const originY = centerY + y;
 
       // Dispatch action to set the view and origin
-      dispatch({
-        type: "SET_VIEW",
-        view: selectedSegment.view,
-        origin: {
-          x: outerMostPoint.x,
-          y: outerMostPoint.y,
-          angle: outerMostPoint.angleFromCenter,
-        },
-      });
+      const selectedSegment = d.data;
+      if (selectedSegment?.view === VisualizerView.Work) {
+        dispatch.call("DRAW_TIMELINE", {
+          type: "DRAW_TIMELINE",
+          data: data.timeline,
+          origin: {
+            x: originX,
+            y: originY,
+            angle: 0,
+          },
+        });
+      } else {
+        console.warn(
+          `No action defined for segment ${selectedSegment.name} with view ${selectedSegment.view}`
+        );
+      }
     });
 
   // Add segment labels

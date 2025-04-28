@@ -2,16 +2,17 @@ import React, { FC, useCallback, useEffect } from "react";
 import { useVisualizerContext } from "./VisualizerHook";
 import { useFullscreen } from "./FullScreenHook";
 import { useResize } from "./ResizeHook";
+import * as d3 from "d3";
 
 export const VisualizerContainerUI: FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const { state, dispatch } = useVisualizerContext();
-  const { isFullscreen, containerRef, svgRef } = state;
+  const { isFullscreen, d3State } = state;
 
   // Custom hook to handle fullscreen functionality
   useFullscreen(
-    containerRef,
+    d3State.containerRef,
     isFullscreen,
     useCallback(
       (change: boolean) => {
@@ -24,11 +25,29 @@ export const VisualizerContainerUI: FC<React.PropsWithChildren> = ({
   );
 
   // Custom hook to handle resize functionality
-  useResize(containerRef);
+  useResize(d3State.containerRef);
+
+  // Initialize the SVG element and set its dimensions
+  useEffect(() => {
+    if (!d3State.svgRef.current || !state.data) return;
+    const svg = d3.select(d3State.svgRef.current);
+    // Apply zoom to the SVG element
+    svg.call(d3State.zoom as any);
+    // Dispatch the draw timeline event
+    d3State.dispatch.call("DRAW_PROFILE", {
+      type: "DRAW_PROFILE",
+      data: state.data,
+      origin: {
+        x: d3State.width / 2,
+        y: d3State.height / 2,
+        angle: 0,
+      },
+    });
+  }, [d3State, state.data]);
 
   return (
     <div
-      ref={containerRef}
+      ref={d3State.containerRef}
       style={{
         width: "100%",
         height: "100%",
@@ -48,7 +67,7 @@ export const VisualizerContainerUI: FC<React.PropsWithChildren> = ({
     >
       <svg
         className="container"
-        ref={svgRef}
+        ref={d3State.svgRef}
         style={{
           width: isFullscreen ? "100vw" : "100%",
           height: isFullscreen ? "100vh" : "auto",
@@ -57,8 +76,10 @@ export const VisualizerContainerUI: FC<React.PropsWithChildren> = ({
         }}
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="xMidYMid meet"
-        viewBox="0 0 1024 768"
-      ></svg>
+        viewBox={`0 0 ${d3State.width} ${d3State.height}`}
+      >
+        <g ref={d3State.rootRef}></g>
+      </svg>
       {children}
     </div>
   );

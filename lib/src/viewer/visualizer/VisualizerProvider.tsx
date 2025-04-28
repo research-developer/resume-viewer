@@ -16,10 +16,11 @@ export const VisualizerProvider: React.FC<{
 }> = ({ resume: initialResume, children }) => {
   const svgRef = React.useRef<SVGSVGElement | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const rootRef = React.useRef<SVGGraphicsElement | null>(null);
   const { data: initialData } = useVisualizerData(initialResume);
   const initializeState = useMemo(
-    () => ({ svgRef, containerRef }),
-    [svgRef, containerRef]
+    () => ({ svgRef, containerRef, rootRef }),
+    [svgRef, containerRef, rootRef]
   );
   const [state, dispatch] = useReducer(
     visualizerReducer,

@@ -1,6 +1,7 @@
 import React, { act, createContext, useContext } from "react";
-import { Resume } from "../../ResumeModel";
-import { buildVisualizerData, VisualizerData } from "./VisualizerModel";
+import { VisualizerData } from "./VisualizerModel";
+import { TimelineData } from "./TimelineModel";
+import * as d3 from "d3";
 
 export enum VisualizerView {
   Home = "home",
@@ -31,6 +32,32 @@ export interface VisualizerAnimationStartPosition {
   angle: number; // Direction of the animation in degrees
 }
 
+export interface VisualizerD3State {
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  svgRef: React.RefObject<SVGSVGElement | null>;
+  rootRef: React.RefObject<SVGGraphicsElement | null>;
+  dispatch: d3.Dispatch<VisualizerDispatchAction>;
+  zoom: d3.ZoomBehavior<Element, unknown>;
+  width: number;
+  height: number;
+  minZoom: number;
+  maxZoom: number;
+}
+
+export type VisualizerDispatch = d3.Dispatch<VisualizerDispatchAction>;
+
+export type VisualizerDispatchAction =
+  | {
+      type: "DRAW_TIMELINE";
+      origin: VisualizerAnimationStartPosition;
+      data: TimelineData;
+    }
+  | {
+      type: "DRAW_PROFILE";
+      origin: VisualizerAnimationStartPosition;
+      data: VisualizerData;
+    };
+
 export interface VisualizerState {
   currentView: VisualizerView;
   timelineViewOrigin: VisualizerAnimationStartPosition | null;
@@ -38,10 +65,63 @@ export interface VisualizerState {
   transition: VisualizerTransition;
   selectedEvent: string | null;
   isFullscreen: boolean | null;
+  data: VisualizerData | null;
+  d3State: VisualizerD3State;
+}
+
+const defaultState: Omit<VisualizerState, "d3State"> = {
+  currentView: VisualizerView.Timeline,
+  timelineViewOrigin: null,
+  status: VisualizerStatus.Stopped,
+  transition: VisualizerTransition.None,
+  selectedEvent: null,
+  isFullscreen: null,
+  data: null,
+};
+
+const defaultD3State: Omit<
+  VisualizerD3State,
+  "svgRef" | "containerRef" | "rootRef" | "dispatch" | "zoom"
+> = {
+  minZoom: 1,
+  maxZoom: 40,
+  width: 1024,
+  height: 768,
+};
+
+export const createInitialState = ({
+  svgRef,
+  containerRef,
+  rootRef,
+}: {
   svgRef: React.RefObject<SVGSVGElement | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
-  data: VisualizerData | null;
-}
+  rootRef: React.RefObject<SVGGraphicsElement | null>;
+}): VisualizerState => ({
+  ...defaultState,
+  d3State: {
+    ...defaultD3State,
+    svgRef,
+    containerRef,
+    rootRef,
+    dispatch: d3.dispatch<VisualizerDispatchAction>(
+      "DRAW_TIMELINE",
+      "DRAW_PROFILE"
+    ),
+    zoom: d3
+      .zoom()
+      .scaleExtent([defaultD3State.minZoom, defaultD3State.maxZoom])
+      .translateExtent([
+        // Use width and height of the SVG element to set the translation extent
+        [-defaultD3State.width, -defaultD3State.height],
+        [defaultD3State.width * 2, defaultD3State.height * 2],
+      ])
+      .on("zoom", (event) => {
+        if (!rootRef.current) return;
+        d3.select(rootRef.current).attr("transform", event.transform);
+      }),
+  },
+});
 
 type VisualizerAction =
   | {
@@ -58,28 +138,6 @@ type VisualizerAction =
   | { type: "STARTED" }
   | { type: "STOP" }
   | { type: "STOPPED" };
-
-const defaultState: Omit<VisualizerState, "svgRef" | "containerRef"> = {
-  currentView: VisualizerView.Timeline,
-  timelineViewOrigin: null,
-  status: VisualizerStatus.Stopped,
-  transition: VisualizerTransition.None,
-  selectedEvent: null,
-  isFullscreen: null,
-  data: null,
-};
-
-export const createInitialState = ({
-  svgRef,
-  containerRef,
-}: {
-  svgRef: React.RefObject<SVGSVGElement | null>;
-  containerRef: React.RefObject<HTMLDivElement | null>;
-}): VisualizerState => ({
-  ...defaultState,
-  svgRef,
-  containerRef,
-});
 
 export const VisualizerContext = createContext<
   | {
