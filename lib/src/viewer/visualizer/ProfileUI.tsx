@@ -41,13 +41,13 @@ async function drawProfileVisualization(
 ): Promise<void> {
   const { svgRef, rootRef, dispatch, zoom, width, height, minZoom, maxZoom } =
     d3State;
-  if (!svgRef.current) return;
+  if (!svgRef.current || !rootRef.current) return;
   const { resume, gravatarUrl } = data;
   const { basics } = resume;
   const name = basics?.name || "Unknown";
 
-  // Clear existing content
-  destoryVisualization(svgRef.current, ".profile-visualization");
+  const svg = d3.select(svgRef.current);
+  const root = d3.select(rootRef.current);
 
   // Get dimensions
   const centerX = width / 2;
@@ -105,16 +105,22 @@ async function drawProfileVisualization(
   const outerRadius = profileRadius * 2;
   const textRadius = (innerRadius + outerRadius) / 2;
 
-  // Create main container with transform
-  const container = d3
-    .select(rootRef.current)
+  // Create a base group to contain the layers of the visualization
+  const layers = root
     .append("g")
     .classed("profile-visualization", true)
-    .attr("transform", `translate(${origin.x}, ${origin.y})`)
+    .attr("transform", `translate(${centerX}, ${centerY})`)
     .style("opacity", 0);
 
+  // Add the layers (g) to the base group so that they can be visually stacked
+  const connectingLinesLayer = layers
+    .append("g")
+    .classed("connecting-lines-layer", true);
+  const segmentsLayer = layers.append("g").classed("segments-layer", true);
+  const profileLayer = layers.append("g").classed("profile-layer", true);
+
   // Add subtle background glow
-  container
+  connectingLinesLayer
     .append("circle")
     .attr("class", "background-glow")
     .attr("r", profileRadius * 1.15)
@@ -122,10 +128,7 @@ async function drawProfileVisualization(
     .style("opacity", 0);
 
   // Create a radial gradient for the glow effect
-  const defs = d3
-    .select(svgRef.current)
-    .append("defs")
-    .classed(".profile-visualization", true);
+  const defs = svg.append("defs").classed(".profile-visualization", true);
 
   const glowGradient = defs
     .append("radialGradient")
@@ -155,7 +158,7 @@ async function drawProfileVisualization(
     .attr("r", profileRadius);
 
   // Profile background (white circle)
-  container
+  profileLayer
     .append("circle")
     .attr("class", "profile-background")
     .attr("r", profileRadius)
@@ -164,7 +167,7 @@ async function drawProfileVisualization(
     .style("stroke-width", "2px");
 
   // Placeholder for profile image
-  const imageGroup = container
+  const imageGroup = profileLayer
     .append("g")
     .attr("clip-path", "url(#profile-clip)");
 
@@ -181,7 +184,7 @@ async function drawProfileVisualization(
 
   // Fallback text with initials (shown if image fails to load)
   const initials = getInitials(name);
-  const initialsText = container
+  const initialsText = profileLayer
     .append("text")
     .attr("class", "profile-initials")
     .attr("text-anchor", "middle")
@@ -222,7 +225,7 @@ async function drawProfileVisualization(
   const segmentData = pie(segments);
 
   // Create segment group
-  const segmentGroup = container.append("g").attr("class", "segments");
+  const segmentGroup = segmentsLayer.append("g").attr("class", "segments");
 
   // Add segments with labels
   const segment = segmentGroup
@@ -312,7 +315,7 @@ async function drawProfileVisualization(
     .attr("transform", function (d) {
       const [x, y] = arc.centroid(d as any);
       // Position slightly below the main label
-      return `translate(${x}, ${y + 15})`;
+      return `translate(${x}, ${y})`;
     })
     .attr("text-anchor", "middle")
     .style("fill", "#fff")
@@ -320,7 +323,7 @@ async function drawProfileVisualization(
     .text((d) => (d.data.count > 0 ? d.data.count : ""));
 
   // Add name label beneath profile
-  container
+  profileLayer
     .append("text")
     .attr("class", "name-label")
     .attr("y", profileRadius + 30)
@@ -332,7 +335,7 @@ async function drawProfileVisualization(
 
   // Add job title/label if available
   if (basics?.label) {
-    container
+    profileLayer
       .append("text")
       .attr("class", "job-title")
       .attr("y", profileRadius + 60)
@@ -343,27 +346,34 @@ async function drawProfileVisualization(
   }
 
   // Add connecting lines from center to segments
-  const connectionLines = container
+  const connectionLines = connectingLinesLayer
     .append("g")
     .attr("class", "connection-lines");
 
   segmentData.forEach((d) => {
     const angle = (d.startAngle + d.endAngle) / 2;
-    const innerPoint = [
-      Math.cos(angle) * profileRadius,
-      Math.sin(angle) * profileRadius,
-    ];
-    const outerPoint = [
-      Math.cos(angle) * innerRadius,
-      Math.sin(angle) * innerRadius,
-    ];
 
+    // Calculate points using D3's arc centroid method for consistency
+    const segmentCentroid = arc.centroid(d as any);
+    const centroidAngle = Math.atan2(segmentCentroid[1], segmentCentroid[0]);
+
+    // Calculate points on the outer edge of profile image and inner edge of segment
+    const innerPointX = Math.cos(centroidAngle) * profileRadius;
+    const innerPointY = Math.sin(centroidAngle) * profileRadius;
+
+    // Calculate the point on the inner edge of the segment
+    const outerPointX = Math.cos(centroidAngle) * innerRadius;
+    const outerPointY = Math.sin(centroidAngle) * innerRadius;
+
+    // Create a line from the profile edge to the segment inner edge
+
+    // Create a line from the profile edge to the segment inner edge
     connectionLines
       .append("line")
-      .attr("x1", innerPoint[0])
-      .attr("y1", innerPoint[1])
-      .attr("x2", outerPoint[0])
-      .attr("y2", outerPoint[1])
+      .attr("x1", innerPointX)
+      .attr("y1", innerPointY)
+      .attr("x2", outerPointX)
+      .attr("y2", outerPointY)
       .style("stroke", d.data.color)
       .style("stroke-width", "2px")
       .style("stroke-dasharray", "3,3")
@@ -371,9 +381,9 @@ async function drawProfileVisualization(
   });
 
   // Create animations for entrance
-  container.transition().duration(1000).style("opacity", 1);
+  layers.transition().duration(1000).style("opacity", 1);
 
-  container
+  layers
     .select(".background-glow")
     .transition()
     .delay(200)
