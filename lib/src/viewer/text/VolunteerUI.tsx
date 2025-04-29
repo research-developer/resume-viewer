@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumeVolunteer } from "../ResumeModel";
+import { ResumeVolunteer } from "../../ResumeModel";
 import { DateRangeUI } from "./DateRangeUI";
 
 interface VolunteerUIProps {

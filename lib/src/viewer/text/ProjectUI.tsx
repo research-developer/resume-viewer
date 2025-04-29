@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumeProject } from "../ResumeModel";
+import { ResumeProject } from "../../ResumeModel";
 import DateRangeUI from "./DateRangeUI";
 
 interface ProjectUIProps {

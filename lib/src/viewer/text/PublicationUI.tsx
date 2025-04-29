@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumePublication } from "../ResumeModel";
+import { ResumePublication } from "../../ResumeModel";
 import DateUI from "./DateUI";
 
 interface PublicationUIProps {

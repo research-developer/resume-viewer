@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumeWork } from "../ResumeModel";
+import { ResumeWork } from "../../ResumeModel";
 import { DateRangeUI } from "./DateRangeUI";
 
 interface WorkUIProps {

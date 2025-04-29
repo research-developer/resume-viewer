@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumeSkill } from "../ResumeModel";
+import { ResumeSkill } from "../../ResumeModel";
 
 interface SkillUIProps {
   skill: ResumeSkill;

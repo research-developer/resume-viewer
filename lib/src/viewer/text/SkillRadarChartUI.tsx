@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { SkillStatsSummaryTreeNode } from "../ResumeSkillStatsModel";
+import { SkillStatsSummaryTreeNode } from "../../ResumeSkillStatsModel";
 
 interface SkillRadarChartUIProps {
   skills: SkillStatsSummaryTreeNode[];

@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumeReference } from "../ResumeModel";
+import { ResumeReference } from "../../ResumeModel";
 
 interface ReferenceUIProps {
   reference: ResumeReference;

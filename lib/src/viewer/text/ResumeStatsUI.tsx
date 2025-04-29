@@ -1,16 +1,10 @@
 import React, { useMemo } from "react";
-import { ResumeStats } from "../ResumeStatsHook";
 import {
-  ResumeSkillStats,
-  SkillStats,
-  SkillStatsSummary,
-  SkillStatsSummaryTree,
   SkillStatsSummaryTreeNode,
   SkillTree,
-  SkillTreeNode,
-} from "../ResumeSkillStatsModel";
+} from "../../ResumeSkillStatsModel";
 import { SkillRadarChartUI } from "./SkillRadarChartUI";
-import { Resume } from "../ResumeModel";
+import { ResumeStats } from "../../ResumeHook";
 
 interface ResumeStatsUIProps {
   stats: ResumeStats | null;

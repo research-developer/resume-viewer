@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumeLocation } from "../ResumeModel";
+import { ResumeLocation } from "../../ResumeModel";
 
 interface LocationUIProps {
   location: ResumeLocation;

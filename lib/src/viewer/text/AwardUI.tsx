@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumeAward } from "../ResumeModel";
+import { ResumeAward } from "../../ResumeModel";
 import DateUI from "./DateUI";
 
 interface AwardUIProps {

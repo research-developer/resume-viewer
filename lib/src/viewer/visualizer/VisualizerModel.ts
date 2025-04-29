@@ -1,5 +1,5 @@
 import { Resume } from "../../ResumeModel";
-import { getGravatarUrl } from "./GravatarUtil";
+import { getGravatarUrl } from "../../GravatarUtil";
 import { buildTimeline, TimelineData } from "./TimelineModel";
 
 export interface VisualizerData {

@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumeBasics } from "../ResumeModel";
+import { ResumeBasics } from "../../ResumeModel";
 import { LocationUI } from "./LocationUI";
 import { ProfileUI } from "./ProfileUI";
 

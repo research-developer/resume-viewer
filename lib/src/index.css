@@ -1,1 +1,77 @@
 @import "tailwindcss";
+
+@theme {
+  /* Core Colors - Backgrounds and Neutrals */
+  --color-background: #1c1c1c;
+  --color-surface: #2b2b2b;
+  --color-primary: #ffffff;
+  --color-secondary: #cbd5e1;
+  --color-border: #3c3c3c;
+  --color-muted: #a1a1aa;
+  --color-base: #e5e7eb;
+
+  /* Accent Colors - Neon / Glow Feel */
+  --color-accent: #454545; /* base accent gray */
+  --color-accent-purple: #a855f7;
+  --color-accent-cyan: #06b6d4;
+  --color-accent-green: #22c55e;
+  --color-accent-orange: #f97316;
+  --color-accent-pink: #ec4899;
+  --color-accent-yellow: #facc15;
+  --color-accent-blue: #3b82f6;
+
+  /* Gradients */
+  --gradient-purple-pink: linear-gradient(90deg, #a855f7 0%, #ec4899 100%);
+  --gradient-cyan-blue: linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%);
+  --gradient-green-yellow: linear-gradient(90deg, #22c55e 0%, #facc15 100%);
+  --gradient-orange-red: linear-gradient(90deg, #f97316 0%, #ef4444 100%);
+
+  /* Fonts */
+  --font-sans: "Inter", sans-serif;
+  --font-heading: "Inter", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing */
+  --spacing-section: 3rem; /* e.g. py-12 */
+  --spacing-card: 1.5rem; /* e.g. p-6 */
+
+  /* Border Radius */
+  --radius-card: 1rem; /* rounded-2xl */
+  --radius-button: 0.75rem; /* rounded-xl */
+  --radius-input: 0.5rem; /* rounded-lg */
+  --radius-avatar: 9999px;
+
+  /* Shadows */
+  --shadow-card: 0 10px 25px rgba(0, 0, 0, 0.3);
+  --inset-shadow-button-inner: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --shadow-button-hover: 0 4px 6px rgba(0, 0, 0, 0.4);
+}
+
+button {
+  @apply bg-accent text-primary;
+  @apply text-sm font-semibold;
+  @apply px-5 py-2;
+  @apply rounded-[var(--radius-button)];
+  @apply shadow-[var(--shadow-button-hover)];
+  @apply shadow-[var(--inset-shadow-button-inner)];
+  @apply transition-all duration-200 ease-in-out;
+  @apply hover:bg-primary hover:text-accent;
+  @apply hover:shadow-[var(--shadow-card)];
+  @apply focus:bg-primary focus:text-accent;
+  @apply cursor-pointer;
+}
+
+.fill-screen {
+  @apply w-full h-full;
+}
+
+body.fill-screen {
+  @apply min-h-screen;
+  @apply bg-background;
+}

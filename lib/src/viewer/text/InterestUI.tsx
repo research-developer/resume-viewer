@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumeInterest } from "../ResumeModel";
+import { ResumeInterest } from "../../ResumeModel";
 
 interface InterestUIProps {
   interest: ResumeInterest;
