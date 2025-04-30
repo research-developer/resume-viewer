@@ -1,7 +1,10 @@
 import { FC, PropsWithChildren } from "react";
+import { CardTitleUI } from "./CardTitleUI";
 
 type InfographicCardProps = {
   title?: React.ReactElement | string;
+  className?: string;
+  size?: string;
 };
 
 /**
@@ -12,11 +15,17 @@ type InfographicCardProps = {
 export const CardUI: FC<PropsWithChildren<InfographicCardProps>> = ({
   title,
   children,
+  className,
+  size,
 }) => (
-  <div className="w-full max-w-md mx-auto rounded-[var(--radius-card)] shadow-[var(--shadow-card)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-transform duration-300 hover:scale-[1.01] p-4">
-    <div className="flex flex-col p-[var(--spacing-card)] text-[var(--color-secondary)]">
-      {title}
-      <div className="flex flex-col items-center mt-4 w-full">{children}</div>
+  <div
+    className={`flex flex-row rounded-[var(--radius-card)] shadow-[var(--shadow-card)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-transform duration-300 hover:scale-[1.01] gap-4 ${className} ${
+      size || "max-w-md"
+    }`}
+  >
+    <div className="flex flex-col gap-4 p-[var(--spacing-card)] text-[var(--color-secondary)]">
+      {typeof title === "string" ? <CardTitleUI title={title} /> : title}
+      <div className="flex flex-col items-center w-full">{children}</div>
     </div>
   </div>
 );

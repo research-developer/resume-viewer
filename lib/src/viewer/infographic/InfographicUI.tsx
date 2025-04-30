@@ -1,17 +1,17 @@
 import { FC, useMemo } from "react";
 import { CardUI } from "./CardUI";
-import { LineChartCard } from "./LineChartCard";
+import { LineChartUI } from "./LineChartUI";
 import { useViewerContext, ViewerView } from "../ViewerHook";
-import ProfileCardUI from "./ProfileCard";
-import { PieChartCard } from "./PieChartCard";
-import { KPIStatCardUI } from "./KPIStatCardUI";
-import { ProgressRingCardUI } from "./ProgressRingCardUI";
-import { BarChartCardUI } from "./BarChartCardUI";
+import { ProfileUI } from "./ProfileUI";
+import { PieChartCardUI } from "./PieChartUI";
+import { KPIStatUI } from "./KPIStatUI";
+import { ProgressRingCardUI } from "./ProgressRingUI";
+import { BarChartUI } from "./BarChartUI";
 import { ScoreRingGroupUI } from "./ScoreRingGroupUI";
-import { MetricListCardUI } from "./MetricListCardUI";
-import { TrendComparisonCardUI } from "./TrendComparisonCardUI";
-import { GroupedStatsCardUI } from "./GroupedStatsCardUI";
-import { getAccentColors, useChartColors } from "../../ColorUtils";
+import { MetricListUI } from "./MetricListUI";
+import { TrendComparisonUI } from "./TrendComparisonUI";
+import { GroupedStatsUI } from "./GroupedStatsUI";
+import { useChartColors } from "../../ColorUtils";
 
 type InfographicUIProps = {};
 
@@ -57,22 +57,24 @@ export const InfographicUI: FC<
   const totalYears = convertMonthsToYears(stats.skills.summary.months || 0);
 
   return (
-    <div className="fill-screen mx-auto max-w-7xl bg-background flex flex-wrap flex-row gap-4 justify-start items-start">
-      <ProfileCardUI
-        resume={resume}
-        buttons={[
-          {
-            label: "Text",
-            onClick: () =>
-              dispatch({ type: "SET_VIEW", view: ViewerView.Text }),
-          },
-          {
-            label: "Json",
-            onClick: () =>
-              dispatch({ type: "SET_VIEW", view: ViewerView.Json }),
-          },
-        ]}
-      />
+    <div className="fill-screen bg-background flex flex-wrap flex-row gap-4 justify-start items-start">
+      <CardUI className="max-w-md" title="Profile">
+        <ProfileUI
+          resume={resume}
+          buttons={[
+            {
+              label: "Text",
+              onClick: () =>
+                dispatch({ type: "SET_VIEW", view: ViewerView.Text }),
+            },
+            {
+              label: "Json",
+              onClick: () =>
+                dispatch({ type: "SET_VIEW", view: ViewerView.Json }),
+            },
+          ]}
+        />
+      </CardUI>
       <CardUI title="Skills">
         <div className="flex flex-col items-center gap-2 w-full">
           {categories.map((skill) => (
@@ -88,72 +90,85 @@ export const InfographicUI: FC<
           ))}
         </div>
       </CardUI>
-      <LineChartCard />
-      <PieChartCard
-        data={categories.map((c) => ({
-          name: c.skill.name,
-          value: convertMonthsToYears(c.summary.months),
-        }))}
-        colors={chartColors}
-      />
-      <KPIStatCardUI
-        label="Years of Experience"
-        value={formatYears(totalYears)}
-      />
-      {categories.slice(0, 1).map((skill) => (
-        <ProgressRingCardUI
-          key={skill.skill.name}
-          label={skill.skill.name}
-          value={convertMonthsToYears(skill.summary.months)}
-          total={totalYears}
+      <CardUI title="Line Chart Example">
+        <LineChartUI />
+      </CardUI>
+      <CardUI title="Category Distribution">
+        <PieChartCardUI
+          data={categories.map((c) => ({
+            name: c.skill.name,
+            value: convertMonthsToYears(c.summary.months),
+          }))}
+          colors={chartColors}
         />
+      </CardUI>
+      <CardUI title="Years of Experience">
+        <KPIStatUI value={formatYears(totalYears)} />
+      </CardUI>
+      {categories.slice(0, 1).map((skill) => (
+        <CardUI key={skill.skill.name} title={skill.skill.name}>
+          <ProgressRingCardUI
+            label={skill.skill.name}
+            value={convertMonthsToYears(skill.summary.months)}
+            total={totalYears}
+          />
+        </CardUI>
       ))}
-      <BarChartCardUI
-        title="Skills"
-        data={categories.map((c) => ({
-          name: c.skill.name,
-          value: convertMonthsToYears(c.summary.months),
-        }))}
-        color="blue"
-      />
-      <ScoreRingGroupUI
-        scores={categories.map((c, index) => ({
-          label: c.skill.name,
-          value: Math.min(
-            100,
-            Math.round(
-              (convertMonthsToYears(c.summary.months) / totalYears) * 100
-            )
-          ),
-          color: chartColors[index % chartColors.length],
-        }))}
-      />
-      <MetricListCardUI
-        title="Skills"
-        items={categories.map((c) => ({
-          label: c.skill.name,
-          value: convertMonthsToYears(c.summary.months),
-        }))}
-      />
-      <TrendComparisonCardUI
-        title="Skills Over Time"
-        series={categories.map((c, index) => ({
-          key: c.skill.name,
-          label: c.skill.name,
-          color: chartColors[index % chartColors.length],
-        }))}
-        data={categories.map((c) => ({
-          name: c.skill.name,
-          [c.skill.name]: convertMonthsToYears(c.summary.months),
-        }))}
-      />
-      <GroupedStatsCardUI
-        title="Skills"
-        stats={categories.map((c) => ({
-          label: c.skill.name,
-          value: convertMonthsToYears(c.summary.months),
-        }))}
-      />
+      <CardUI title="Skills">
+        <BarChartUI
+          title="Skills"
+          data={categories.map((c) => ({
+            name: c.skill.name,
+            value: convertMonthsToYears(c.summary.months),
+          }))}
+          color="blue"
+        />
+      </CardUI>
+      <CardUI title="System Health Scores">
+        <ScoreRingGroupUI
+          scores={categories.map((c, index) => ({
+            label: c.skill.name,
+            value: Math.min(
+              100,
+              Math.round(
+                (convertMonthsToYears(c.summary.months) / totalYears) * 100
+              )
+            ),
+            color: chartColors[index % chartColors.length],
+          }))}
+        />
+      </CardUI>
+      <CardUI title="Skills">
+        <MetricListUI
+          items={categories.map((c) => ({
+            label: c.skill.name,
+            value: convertMonthsToYears(c.summary.months),
+          }))}
+        />
+      </CardUI>
+      <CardUI title="Skills Over Time">
+        <TrendComparisonUI
+          title="Skills Over Time"
+          data={categories.map((c) => ({
+            name: c.skill.name,
+            [c.skill.name]: convertMonthsToYears(c.summary.months),
+          }))}
+          series={categories.map((c, index) => ({
+            key: c.skill.name,
+            label: c.skill.name,
+            color: chartColors[index % chartColors.length],
+          }))}
+        />
+      </CardUI>
+      <CardUI title="Skills">
+        <GroupedStatsUI
+          title="Skills"
+          stats={categories.map((c) => ({
+            label: c.skill.name,
+            value: convertMonthsToYears(c.summary.months),
+          }))}
+        />
+      </CardUI>
     </div>
   );
 };

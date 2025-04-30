@@ -1,6 +1,5 @@
 import { FC } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import { CardUI } from "./CardUI"; // replaces InfographicCard
 
 type ProgressRingCardProps = {
   label: string; // What this ring represents (e.g. "Storage Used")
@@ -30,31 +29,29 @@ export const ProgressRingCardUI: FC<ProgressRingCardProps> = ({
   ];
 
   return (
-    <CardUI title={label}>
-      <div className="w-full h-52 relative">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={50}
-              outerRadius={70}
-              startAngle={90}
-              endAngle={-270}
-              dataKey="value"
-            >
-              <Cell key="progress" fill={color} />
-              <Cell key="background" fill="var(--color-border)" />
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-2xl font-bold text-[var(--color-primary)]">
-            {Math.round(percentage)}%
-          </span>
-        </div>
+    <div className="w-full h-52 relative">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            innerRadius={50}
+            outerRadius={70}
+            startAngle={90}
+            endAngle={-270}
+            dataKey="value"
+          >
+            <Cell key="progress" fill={color} />
+            <Cell key="background" fill="var(--color-border)" />
+          </Pie>
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-2xl font-bold text-[var(--color-primary)]">
+          {Math.round(percentage)}%
+        </span>
       </div>
-    </CardUI>
+    </div>
   );
 };

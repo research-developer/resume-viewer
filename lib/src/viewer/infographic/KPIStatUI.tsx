@@ -1,8 +1,6 @@
 import { FC } from "react";
-import { CardUI } from "./CardUI";
 
-type KPIStatCardProps = {
-  label: string; // E.g. "Revenue"
+type KPIStatUIProps = {
   value: string; // E.g. "$1.2M"
   trend?: {
     value: string; // E.g. "+4.9%" or "-2.1%"
@@ -18,11 +16,7 @@ type KPIStatCardProps = {
  * - `value` is the large stat to emphasize (e.g. "$1.2M")
  * - `trend` is optional and shows an arrow + change percentage (e.g. "▲ +4.9%")
  */
-export const KPIStatCardUI: FC<KPIStatCardProps> = ({
-  label,
-  value,
-  trend,
-}) => {
+export const KPIStatUI: FC<KPIStatUIProps> = ({ value, trend }) => {
   const trendColor =
     trend?.direction === "up"
       ? "text-[var(--color-accent-green)]"
@@ -30,17 +24,15 @@ export const KPIStatCardUI: FC<KPIStatCardProps> = ({
   const trendArrow = trend?.direction === "up" ? "▲" : "▼";
 
   return (
-    <CardUI title={label}>
-      <div className="flex flex-col items-center">
-        <span className="text-5xl font-bold text-[var(--color-primary)]">
-          {value}
+    <div className="flex flex-col items-center">
+      <span className="text-5xl font-bold text-[var(--color-primary)]">
+        {value}
+      </span>
+      {trend && (
+        <span className={`mt-2 text-sm font-medium ${trendColor}`}>
+          {trendArrow} {trend.value}
         </span>
-        {trend && (
-          <span className={`mt-2 text-sm font-medium ${trendColor}`}>
-            {trendArrow} {trend.value}
-          </span>
-        )}
-      </div>
-    </CardUI>
+      )}
+    </div>
   );
 };
