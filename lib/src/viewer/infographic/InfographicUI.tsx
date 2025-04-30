@@ -5,12 +5,13 @@ import { useViewerContext, ViewerView } from "../ViewerHook";
 import { ProfileUI } from "./ProfileUI";
 import { PieChartCardUI } from "./PieChartUI";
 import { KPIStatUI } from "./KPIStatUI";
-import { ProgressRingCardUI } from "./ProgressRingUI";
+import { ProgressRingUI } from "./ProgressRingUI";
 import { BarChartUI } from "./BarChartUI";
 import { ScoreRingGroupUI } from "./ScoreRingGroupUI";
 import { MetricListUI } from "./MetricListUI";
 import { TrendComparisonUI } from "./TrendComparisonUI";
 import { GroupedStatsUI } from "./GroupedStatsUI";
+import { RadarChartUI } from "./RadarChartUI"; // Add this import
 import { useChartColors } from "../../ColorUtils";
 
 type InfographicUIProps = {};
@@ -42,6 +43,16 @@ export const InfographicUI: FC<
   // Use the color utility hook
   const chartColors = useChartColors(categories.length);
 
+  // Create radar chart data
+  const radarData = useMemo(
+    () =>
+      categories.map((category) => ({
+        subject: category.skill.name,
+        value: convertMonthsToYears(category.summary.months),
+      })),
+    [categories]
+  );
+
   if (resumeIsPending) {
     return (
       <div className="p-4 text-center text-secondary">Loading resume...</div>
@@ -57,7 +68,7 @@ export const InfographicUI: FC<
   const totalYears = convertMonthsToYears(stats.skills.summary.months || 0);
 
   return (
-    <div className="fill-screen bg-background flex flex-wrap flex-row gap-4 justify-start items-start">
+    <div className="fill-screen bg-background flex flex-row flex-wrap gap-4 justify-start items-start p-4">
       <CardUI className="max-w-md" title="Profile">
         <ProfileUI
           resume={resume}
@@ -73,6 +84,17 @@ export const InfographicUI: FC<
                 dispatch({ type: "SET_VIEW", view: ViewerView.Json }),
             },
           ]}
+        />
+      </CardUI>
+      <CardUI title="Skills" size="max-w-md">
+        <ScoreRingGroupUI
+          scores={categories.map((c, index) => ({
+            label: c.skill.name,
+            value: convertMonthsToYears(c.summary.months),
+            total: totalYears,
+            size: 100,
+            displayLabel: formatYears(convertMonthsToYears(c.summary.months)),
+          }))}
         />
       </CardUI>
       <CardUI title="Skills">
@@ -107,10 +129,14 @@ export const InfographicUI: FC<
       </CardUI>
       {categories.slice(0, 1).map((skill) => (
         <CardUI key={skill.skill.name} title={skill.skill.name}>
-          <ProgressRingCardUI
+          <ProgressRingUI
             label={skill.skill.name}
             value={convertMonthsToYears(skill.summary.months)}
             total={totalYears}
+            displayLabel={formatYears(
+              convertMonthsToYears(skill.summary.months)
+            )}
+            size={200}
           />
         </CardUI>
       ))}
@@ -124,20 +150,6 @@ export const InfographicUI: FC<
           color="blue"
         />
       </CardUI>
-      <CardUI title="System Health Scores">
-        <ScoreRingGroupUI
-          scores={categories.map((c, index) => ({
-            label: c.skill.name,
-            value: Math.min(
-              100,
-              Math.round(
-                (convertMonthsToYears(c.summary.months) / totalYears) * 100
-              )
-            ),
-            color: chartColors[index % chartColors.length],
-          }))}
-        />
-      </CardUI>
       <CardUI title="Skills">
         <MetricListUI
           items={categories.map((c) => ({
@@ -146,7 +158,7 @@ export const InfographicUI: FC<
           }))}
         />
       </CardUI>
-      <CardUI title="Skills Over Time">
+      <CardUI title="Skills Over Time" size="min-w-200">
         <TrendComparisonUI
           title="Skills Over Time"
           data={categories.map((c) => ({
@@ -167,6 +179,18 @@ export const InfographicUI: FC<
             label: c.skill.name,
             value: convertMonthsToYears(c.summary.months),
           }))}
+        />
+      </CardUI>
+      <CardUI title="Skills Radar">
+        <RadarChartUI
+          data={radarData}
+          series={[
+            {
+              key: "value",
+              label: "Experience (years)",
+              color: chartColors[0],
+            },
+          ]}
         />
       </CardUI>
     </div>

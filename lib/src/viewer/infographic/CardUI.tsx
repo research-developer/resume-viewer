@@ -19,13 +19,15 @@ export const CardUI: FC<PropsWithChildren<InfographicCardProps>> = ({
   size,
 }) => (
   <div
-    className={`flex flex-row rounded-[var(--radius-card)] shadow-[var(--shadow-card)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-transform duration-300 hover:scale-[1.01] gap-4 ${className} ${
-      size || "max-w-md"
+    className={`flex flex-col rounded-[var(--radius-card)] shadow-[var(--shadow-card)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-transform duration-300 hover:scale-[1.01] gap-4 ${className} ${
+      size || "min-w-md max-w-md"
     }`}
   >
-    <div className="flex flex-col gap-4 p-[var(--spacing-card)] text-[var(--color-secondary)]">
+    <div className="flex-auto flex flex-col gap-4 p-[var(--spacing-card)] text-[var(--color-secondary)]">
       {typeof title === "string" ? <CardTitleUI title={title} /> : title}
-      <div className="flex flex-col items-center w-full">{children}</div>
+      <div className="flex-auto flex flex-col items-center w-full">
+        {children}
+      </div>
     </div>
   </div>
 );

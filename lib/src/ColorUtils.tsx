@@ -1,4 +1,5 @@
 import { JSX, useMemo } from "react";
+import { ac } from "vitest/dist/chunks/reporters.d.79o4mouw.js";
 
 /**
  * @fileoverview Color utility functions and constants for the application
@@ -34,6 +35,10 @@ export const ACCENT_COLORS = [
 ] as const;
 
 export type AccentColor = (typeof ACCENT_COLORS)[number];
+export type AccentColorBase = (typeof BASE_ACCENT_COLORS)[number];
+export type AccentColorLight =
+  `${AccentColorBase}${typeof LIGHT_ACCENT_SUFFIX}`;
+export type AccentColorDark = `${AccentColorBase}${typeof DARK_ACCENT_SUFFIX}`;
 
 /* -------------------------------------------------------------------------- */
 /*                                 Gradients                                  */
@@ -143,10 +148,12 @@ export const cssVar = (name: string, fallback = ""): string =>
         .trim() || fallback;
 
 export const getAccentColor = (token: AccentColor): string =>
-  `var(--color-accent-${token})`;
+  token.startsWith("var(") || !ACCENT_COLORS.includes(token as AccentColor)
+    ? token
+    : `var(--color-accent-${token})`;
 
 export const getGradient = (token: GradientType): string =>
-  `var(--gradient-${token})`;
+  token.startsWith("var(") ? token : `var(--gradient-${token})`;
 
 /* -------------------------------------------------------------------------- */
 /*                              Palette Helpers                               */

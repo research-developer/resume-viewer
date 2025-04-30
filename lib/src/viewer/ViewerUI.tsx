@@ -13,7 +13,7 @@ export const JsonResumeViewer: FC<JsonResumeViewerProps> = ({
 }) => {
   return (
     <ViewerProvider url={jsonResumeUrl}>
-      <div className="fill-screen mx-auto px-4 py-6 max-w-7xl bg-background items-center justify-center">
+      <div className="fill-screen bg-background items-center justify-center">
         <ViewerUI />
       </div>
     </ViewerProvider>

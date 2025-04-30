@@ -32,20 +32,20 @@ export const BarChartUI: FC<BarChartUIProps> = ({ data, color = "purple" }) => {
       : getAccentColor(color as AccentColor);
 
   return (
-    <div className="w-full h-64">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={data}
-          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-          <XAxis dataKey="name" stroke="var(--color-secondary)" />
-          <YAxis stroke="var(--color-secondary)" />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="value" fill={barColor} radius={[4, 4, 0, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
+    <ResponsiveContainer
+      width="100%"
+      height="100%"
+      minWidth={data.length * 50}
+      minHeight={data.length * 50}
+    >
+      <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+        <XAxis dataKey="name" stroke="var(--color-secondary)" />
+        <YAxis stroke="var(--color-secondary)" />
+        <Tooltip />
+        <Legend />
+        <Bar dataKey="value" fill={barColor} radius={[4, 4, 0, 0]} />
+      </BarChart>
+    </ResponsiveContainer>
   );
 };

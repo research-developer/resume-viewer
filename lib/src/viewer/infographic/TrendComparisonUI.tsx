@@ -36,32 +36,34 @@ export const TrendComparisonUI: FC<TrendComparisonUIProps> = ({
   series,
 }) => {
   return (
-    <div className="w-full h-64">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart
-          data={data}
-          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-          <XAxis dataKey="name" stroke="var(--color-secondary)" />
-          <YAxis stroke="var(--color-secondary)" />
-          <Tooltip />
-          <Legend />
-          {series.map(
-            ({ key, label, color = "var(--color-accent-cyan)" }, index) => (
-              <Line
-                key={index}
-                type="monotone"
-                dataKey={key}
-                name={label}
-                stroke={color}
-                strokeWidth={2}
-                dot={{ r: 2 }}
-              />
-            )
-          )}
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+    <ResponsiveContainer
+      width="100%"
+      height="100%"
+      minHeight={data.length * 50}
+    >
+      <LineChart
+        data={data}
+        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+        <XAxis dataKey="name" stroke="var(--color-secondary)" />
+        <YAxis stroke="var(--color-secondary)" />
+        <Tooltip />
+        <Legend />
+        {series.map(
+          ({ key, label, color = "var(--color-accent-cyan)" }, index) => (
+            <Line
+              key={index}
+              type="monotone"
+              dataKey={key}
+              name={label}
+              stroke={color}
+              strokeWidth={2}
+              dot={{ r: 2 }}
+            />
+          )
+        )}
+      </LineChart>
+    </ResponsiveContainer>
   );
 };
