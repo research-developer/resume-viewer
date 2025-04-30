@@ -19,12 +19,41 @@
   --color-accent-pink: #ec4899;
   --color-accent-yellow: #facc15;
   --color-accent-blue: #3b82f6;
+  --color-accent-red: #ef4444;
+  --color-accent-purple-light: #d8b4fe;
+  --color-accent-cyan-light: #67e8f9;
+  --color-accent-green-light: #86efac;
+  --color-accent-orange-light: #fdba74;
+  --color-accent-pink-light: #f9a8d4;
+  --color-accent-yellow-light: #fef08a;
+  --color-accent-blue-light: #93c5fd;
+  --color-accent-red-light: #fca5a1;
+  --color-accent-purple-dark: #7e22ce;
+  --color-accent-cyan-dark: #0e7490;
+  --color-accent-green-dark: #15803d;
+  --color-accent-orange-dark: #c2410c;
+  --color-accent-pink-dark: #db2777;
+  --color-accent-yellow-dark: #ca8a04;
+  --color-accent-blue-dark: #1d4ed8;
+  --color-accent-red-dark: #b91c1c;
 
   /* Gradients */
   --gradient-purple-pink: linear-gradient(90deg, #a855f7 0%, #ec4899 100%);
   --gradient-cyan-blue: linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%);
   --gradient-green-yellow: linear-gradient(90deg, #22c55e 0%, #facc15 100%);
   --gradient-orange-red: linear-gradient(90deg, #f97316 0%, #ef4444 100%);
+  --gradient-blue-purple: linear-gradient(90deg, #3b82f6 0%, #a855f7 100%);
+  --gradient-pink-purple: linear-gradient(90deg, #ec4899 0%, #a855f7 100%);
+  --gradient-yellow-green: linear-gradient(90deg, #facc15 0%, #22c55e 100%);
+  --gradient-red-orange: linear-gradient(90deg, #ef4444 0%, #f97316 100%);
+  --gradient-purple-blue: linear-gradient(90deg, #a855f7 0%, #3b82f6 100%);
+  --gradient-pink-blue: linear-gradient(90deg, #ec4899 0%, #3b82f6 100%);
+  --gradient-yellow-red: linear-gradient(90deg, #facc15 0%, #ef4444 100%);
+  --gradient-green-blue: linear-gradient(90deg, #22c55e 0%, #3b82f6 100%);
+  --gradient-orange-purple: linear-gradient(90deg, #f97316 0%, #a855f7 100%);
+  --gradient-blue-green: linear-gradient(90deg, #3b82f6 0%, #22c55e 100%);
+  --gradient-red-yellow: linear-gradient(90deg, #ef4444 0%, #facc15 100%);
+  --gradient-purple-orange: linear-gradient(90deg, #a855f7 0%, #f97316 100%);
 
   /* Fonts */
   --font-sans: "Inter", sans-serif;
