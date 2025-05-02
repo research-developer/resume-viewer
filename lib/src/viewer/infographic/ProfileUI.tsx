@@ -68,7 +68,7 @@ export const ProfileUI: React.FC<ProfileUIProps> = ({
       {buttons.length > 0 && (
         <div className="flex flex-wrap gap-4 mt-6">
           {buttons.map((button, idx) => (
-            <button key={idx} onClick={button.onClick}>
+            <button className="btn" key={idx} onClick={button.onClick}>
               {button.label}
             </button>
           ))}

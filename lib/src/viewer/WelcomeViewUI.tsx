@@ -1,21 +1,28 @@
 import React, { useState, FC } from "react";
+import { useViewerContext } from "./ViewerHook";
 
-interface WelcomeUIProps {
-  onUrlSubmit: (url: string) => void;
-}
+interface WelcomeViewUIProps {}
 
-export const WelcomeUI: FC<WelcomeUIProps> = ({ onUrlSubmit }) => {
-  const [url, setUrl] = useState<string>("");
+export const WelcomeViewUI: FC<WelcomeViewUIProps> = ({}) => {
+  const [state] = useViewerContext();
+  const { resume } = state;
+  const [urlState, setUrlState] = useState<string>("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (url.trim()) {
-      onUrlSubmit(url.trim());
+    if (urlState?.length > 0) {
+      if (resume?.setUrl) {
+        resume.setUrl(urlState);
+      } else {
+        console.error("setUrl function is not available in viewerData");
+      }
+    } else {
+      console.warn("URL state is empty");
     }
   };
 
   const handleExampleClick = (exampleUrl: string) => {
-    setUrl(exampleUrl);
+    resume?.setUrl?.(exampleUrl);
   };
 
   return (
@@ -57,8 +64,8 @@ export const WelcomeUI: FC<WelcomeUIProps> = ({ onUrlSubmit }) => {
                 <input
                   id="resume-url"
                   type="url"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
+                  value={urlState}
+                  onChange={(e) => setUrlState(e.target.value)}
                   placeholder="https://example.com/resume.json"
                   className="px-4 py-3 bg-background border border-border rounded-[var(--radius-input)] text-primary w-full focus:border-accent-blue focus:outline-none transition-colors"
                   required
@@ -66,7 +73,7 @@ export const WelcomeUI: FC<WelcomeUIProps> = ({ onUrlSubmit }) => {
               </div>
               <button
                 type="submit"
-                className="bg-accent-blue hover:bg-accent-blue-dark text-white font-semibold py-3 px-6 rounded-[var(--radius-button)] transition-colors mt-2"
+                className="btn bg-accent-blue hover:bg-accent-blue-dark text-white font-semibold py-3 px-6 rounded-[var(--radius-button)] transition-colors mt-2"
               >
                 Load Resume
               </button>
@@ -85,7 +92,7 @@ export const WelcomeUI: FC<WelcomeUIProps> = ({ onUrlSubmit }) => {
                     "https://www.richardadleta.com/assets/downloads/adleta_richard_resume_full.json"
                   )
                 }
-                className="text-sm border border-accent-blue text-accent-blue hover:bg-accent-blue hover:text-white"
+                className="btn text-sm border border-accent-blue text-accent-blue hover:bg-accent-blue hover:text-white"
               >
                 Richard Adleta
               </button>
@@ -95,7 +102,7 @@ export const WelcomeUI: FC<WelcomeUIProps> = ({ onUrlSubmit }) => {
                     "https://registry.jsonresume.org/thomasdavis.json"
                   )
                 }
-                className="text-sm border border-accent-green text-accent-green hover:bg-accent-green hover:text-white"
+                className="btn text-sm border border-accent-green text-accent-green hover:bg-accent-green hover:text-white"
               >
                 Thomas Davis
               </button>

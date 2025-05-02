@@ -9,12 +9,9 @@ import { useViewerContext } from "../ViewerHook";
 interface VisualizerViewUIProps {}
 
 export const VisualizerViewUI: FC<VisualizerViewUIProps> = ({}) => {
-  const { state } = useViewerContext();
-  const { data: viewerData } = state;
-  const { data, isPending: resumeIsPending } = viewerData || {
-    isPending: true,
-    data: null,
-  };
+  const [state] = useViewerContext();
+  const { resume: viewerData } = state;
+  const { data, isPending: resumeIsPending } = viewerData || {};
 
   if (resumeIsPending) {
     return (

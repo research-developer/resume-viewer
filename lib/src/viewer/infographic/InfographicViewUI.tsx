@@ -19,12 +19,9 @@ type InfographicViewUIProps = {};
 export const InfographicViewUI: FC<
   InfographicViewUIProps
 > = ({}: InfographicViewUIProps) => {
-  const { state, dispatch } = useViewerContext();
-  const { data: viewerData } = state;
-  const { data: resumeData, isPending: resumeIsPending } = viewerData || {
-    isPending: true,
-    data: null,
-  };
+  const [state, dispatch] = useViewerContext();
+  const { resume: viewerData } = state;
+  const { data: resumeData, isPending: resumeIsPending } = viewerData || {};
   const { resume, stats } = resumeData || {
     resume: null,
     stats: null,

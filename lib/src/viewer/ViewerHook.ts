@@ -1,7 +1,13 @@
-import React, { createContext, useContext } from "react";
+import React, {
+  ActionDispatch,
+  createContext,
+  useContext,
+  useReducer,
+} from "react";
 import { ResumeHook } from "../ResumeHook";
 
 export enum ViewerView {
+  Welcome = "welcome",
   Infographic = "infographic",
   Text = "text",
   Json = "json",
@@ -11,13 +17,13 @@ export enum ViewerView {
 export interface ViewerState {
   currentView: ViewerView;
   isFullscreen: boolean | null;
-  data: ResumeHook | null;
+  resume: ResumeHook | null;
 }
 
 export const initialState: ViewerState = {
-  currentView: ViewerView.Infographic,
+  currentView: ViewerView.Welcome,
   isFullscreen: null,
-  data: null,
+  resume: null,
 };
 
 type ViewerAction =
@@ -38,11 +44,7 @@ type ViewerAction =
     };
 
 export const ViewerContext = createContext<
-  | {
-      state: ViewerState;
-      dispatch: React.Dispatch<ViewerAction>;
-    }
-  | undefined
+  [ViewerState, React.ActionDispatch<[action: ViewerAction]>] | undefined
 >(undefined);
 
 // This is a debug version of the reducer that logs the state and action to the console
@@ -78,13 +80,20 @@ const viewerReducerProd = (
         currentView: action.view,
       };
     case "SET_RESUME":
-      if (state.data === action.resume) {
+      if (state.resume === action.resume) {
         console.warn("Resume data is the same, no need to update viewer data.");
         return state;
       }
+      let currentView = state.currentView;
+      if (action.resume.data !== null) {
+        currentView = ViewerView.Infographic;
+      } else {
+        currentView = ViewerView.Welcome;
+      }
       return {
         ...state,
-        data: action.resume,
+        resume: action.resume,
+        currentView: currentView,
       };
     case "TOGGLE_FULLSCREEN":
       return {

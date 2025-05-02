@@ -11,12 +11,13 @@ import {
   DocumentTextIcon,
   CodeBracketIcon,
   EyeIcon,
+  HomeIcon,
 } from "@heroicons/react/20/solid";
 
 export const ViewerNavUI: FC = () => {
-  const { state, dispatch } = useViewerContext();
-  const { currentView, isFullscreen, data: viewerData } = state;
-  const { data, isPending } = viewerData || { isPending: true, data: null };
+  const [state, dispatch] = useViewerContext();
+  const { currentView, isFullscreen, resume } = state;
+  const { isPending, data: resumeData } = resume || {};
   const [showToast, setShowToast] = useState<string | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -28,7 +29,7 @@ export const ViewerNavUI: FC = () => {
     }
   }, [showToast]);
 
-  if (isPending || !data) return null;
+  if (isPending || !resumeData) return null;
 
   const handleViewChange = (view: ViewerView) => {
     dispatch({ type: "SET_VIEW", view });
@@ -39,7 +40,7 @@ export const ViewerNavUI: FC = () => {
   };
 
   const handleDownload = () => {
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
+    const blob = new Blob([JSON.stringify(resumeData.resume, null, 2)], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);
@@ -52,15 +53,19 @@ export const ViewerNavUI: FC = () => {
   };
 
   const handleCopy = () => {
-    const text = JSON.stringify(data, null, 2);
+    const text = JSON.stringify(resumeData.resume, null, 2);
     navigator.clipboard.writeText(text).then(
       () => setShowToast("Copied to clipboard"),
-      (err) => setShowToast("Failed to copy")
+      () => setShowToast("Failed to copy")
     );
   };
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleStartOver = () => {
+    dispatch({ type: "SET_VIEW", view: ViewerView.Welcome });
   };
 
   return (
@@ -120,10 +125,8 @@ export const ViewerNavUI: FC = () => {
                   <div className="flex overflow-hidden gap-2">
                     <button
                       onClick={() => handleViewChange(ViewerView.Infographic)}
-                      className={`px-3 py-1 text-xs font-medium ${
-                        currentView === ViewerView.Infographic
-                          ? "bg-accent-blue text-white"
-                          : "text-secondary hover:bg-background"
+                      className={`btn px-3 py-1 text-xs font-medium ${
+                        currentView === ViewerView.Infographic ? "active" : ""
                       }`}
                       title="Infographic View (Alt+1)"
                     >
@@ -134,10 +137,8 @@ export const ViewerNavUI: FC = () => {
                     </button>
                     <button
                       onClick={() => handleViewChange(ViewerView.Visualizer)}
-                      className={`px-3 py-1 text-xs font-medium ${
-                        currentView === ViewerView.Visualizer
-                          ? "bg-accent-blue text-white"
-                          : "text-secondary hover:bg-background"
+                      className={`btn px-3 py-1 text-xs font-medium ${
+                        currentView === ViewerView.Visualizer ? "active" : ""
                       }`}
                       title="Visualizer View (Alt+1)"
                     >
@@ -148,10 +149,8 @@ export const ViewerNavUI: FC = () => {
                     </button>
                     <button
                       onClick={() => handleViewChange(ViewerView.Text)}
-                      className={`px-3 py-1 text-xs font-medium ${
-                        currentView === ViewerView.Text
-                          ? "bg-accent-blue text-white"
-                          : "text-secondary hover:bg-background"
+                      className={`btn px-3 py-1 text-xs font-medium ${
+                        currentView === ViewerView.Text ? "active" : ""
                       }`}
                       title="Text View (Alt+2)"
                     >
@@ -162,10 +161,8 @@ export const ViewerNavUI: FC = () => {
                     </button>
                     <button
                       onClick={() => handleViewChange(ViewerView.Json)}
-                      className={`px-3 py-1 text-xs font-medium ${
-                        currentView === ViewerView.Json
-                          ? "bg-accent-blue text-white"
-                          : "text-secondary hover:bg-background"
+                      className={`btn px-3 py-1 text-xs font-medium ${
+                        currentView === ViewerView.Json ? "active" : ""
                       }`}
                       title="JSON View (Alt+3)"
                     >
@@ -179,12 +176,12 @@ export const ViewerNavUI: FC = () => {
               </div>
 
               {/* Right Side Actions */}
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 {/* Dynamic actions based on current view */}
                 {currentView === ViewerView.Text && (
                   <button
                     onClick={handlePrint}
-                    className="p-1.5 rounded-full"
+                    className="btn p-1.5 rounded-full"
                     title="Print resume (Ctrl+P)"
                   >
                     <PrinterIcon className="w-4 h-4" />
@@ -193,7 +190,7 @@ export const ViewerNavUI: FC = () => {
 
                 <button
                   onClick={handleToggleFullscreen}
-                  className="p-1.5 rounded-full"
+                  className="btn p-1.5 rounded-full"
                   title="Toggle fullscreen (F11)"
                 >
                   {isFullscreen ? (
@@ -207,7 +204,7 @@ export const ViewerNavUI: FC = () => {
 
                 <button
                   onClick={handleCopy}
-                  className="p-1.5 rounded-full"
+                  className="btn p-1.5 rounded-full"
                   title="Copy resume data to clipboard"
                 >
                   <DocumentDuplicateIcon className="w-4 h-4" />
@@ -215,10 +212,20 @@ export const ViewerNavUI: FC = () => {
 
                 <button
                   onClick={handleDownload}
-                  className="p-1.5 rounded-full"
+                  className="btn p-1.5 rounded-full"
                   title="Download resume as JSON"
                 >
                   <ArrowDownTrayIcon className="w-4 h-4" />
+                </button>
+
+                <div className="h-4 border-r border-border mx-1"></div>
+
+                <button
+                  onClick={handleStartOver}
+                  className="btn p-1.5 rounded-full"
+                  title="Start over"
+                >
+                  <HomeIcon className="w-4 h-4" />
                 </button>
               </div>
             </div>

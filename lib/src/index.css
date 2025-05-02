@@ -83,17 +83,33 @@
 }
 
 button {
+  @apply hover:cursor-pointer;
+}
+
+button.btn {
   @apply rounded-[var(--radius-button)];
   @apply shadow-[var(--shadow-button-hover)];
   @apply shadow-[var(--inset-shadow-button-inner)];
   @apply hover:shadow-[var(--shadow-card)];
-  @apply hover:cursor-pointer;
   @apply px-4 py-2;
   @apply bg-accent text-primary;
-  @apply text-sm font-semibold;
+  @apply text-sm;
   @apply transition-all duration-200 ease-in-out;
-  @apply hover:bg-primary hover:text-accent;
-  @apply focus:bg-primary focus:text-accent;
+  @apply hover:bg-accent-blue hover:outline-none;
+  @apply focus:border-primary;
+}
+
+button.btn:disabled {
+  @apply bg-accent/50;
+  @apply text-primary/50;
+  @apply cursor-not-allowed;
+}
+
+button.active {
+  @apply bg-accent-blue/25;
+  @apply font-bold;
+  @apply text-primary;
+  @apply inset-shadow-[var(--inset-shadow-button-inner)];
 }
 
 .fill-screen {

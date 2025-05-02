@@ -5,12 +5,9 @@ import JsonViewerUI from "./JsonViewerUI";
 type JsonViewUIProps = {};
 
 export const JsonViewUI: FC<JsonViewUIProps> = ({}: JsonViewUIProps) => {
-  const { state } = useViewerContext();
-  const { data: viewerData } = state;
-  const { data, isPending: resumeIsPending } = viewerData || {
-    isPending: true,
-    data: null,
-  };
+  const [state] = useViewerContext();
+  const { resume: viewerData } = state;
+  const { data, isPending: resumeIsPending } = viewerData || {};
 
   if (resumeIsPending) {
     return (

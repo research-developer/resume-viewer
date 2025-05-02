@@ -17,12 +17,9 @@ import { ResumeStatsUI } from "./ResumeStatsUI";
 interface TextViewUIProps {}
 
 export const TextViewUI: React.FC<TextViewUIProps> = () => {
-  const { state } = useViewerContext();
-  const { data: viewerData } = state;
-  const { isPending, data: resumeData } = viewerData || {
-    isPending: true,
-    data: null,
-  };
+  const [state] = useViewerContext();
+  const { resume: viewerData } = state;
+  const { isPending, data: resumeData } = viewerData || {};
 
   if (isPending) {
     return (

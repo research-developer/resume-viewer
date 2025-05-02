@@ -1,10 +1,4 @@
-import {
-  startTransition,
-  useActionState,
-  useCallback,
-  useEffect,
-  useMemo,
-} from "react";
+import { startTransition, useActionState, useCallback, useMemo } from "react";
 import { ResumeSchema } from "./ResumeModel";
 import { ResumeAnalyzer } from "./analyzer/ResumeAnalyzer";
 
@@ -26,10 +20,10 @@ const initialState: ResumeState = {
  * @returns An object containing the resume state, loading status, and a function to set the URL.
  */
 export function useResume(url?: string | null) {
-  const [state, dispatch, isPending] = useActionState(
-    fetchResume,
-    initialState
-  );
+  const [state, dispatch, isPending] = useActionState(fetchResume, {
+    ...initialState,
+    url: url || null,
+  });
 
   const setUrl = useCallback(
     (url: string | null) => {
@@ -47,20 +41,14 @@ export function useResume(url?: string | null) {
   }, [dispatch, state.url]);
 
   const newState = useMemo(() => {
-    return {
+    const n = {
       ...state,
-      isPending,
       setUrl,
       refresh,
+      isPending,
     };
-  }, [state, isPending, setUrl, refresh]);
-
-  // Effect to handle URL changes
-  useEffect(() => {
-    if (url !== undefined && url !== state.url) {
-      setUrl(url);
-    }
-  }, [url, state.url, setUrl]);
+    return n;
+  }, [state.data, state.error, state.url, isPending, setUrl, refresh]);
 
   return newState;
 }

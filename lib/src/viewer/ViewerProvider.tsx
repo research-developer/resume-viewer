@@ -1,9 +1,14 @@
-import { useReducer, useMemo, PropsWithChildren, useEffect } from "react";
-import { viewerReducer, initialState, ViewerContext } from "./ViewerHook";
+import { useReducer, useMemo, PropsWithChildren, useEffect, use } from "react";
+import {
+  viewerReducer,
+  initialState,
+  ViewerContext,
+  ViewerView,
+} from "./ViewerHook";
 import { useResume } from "../ResumeHook";
 
 type ViewerProviderProps = PropsWithChildren<{
-  url?: string;
+  url?: string | null;
 }>;
 
 export const ViewerProvider: React.FC<ViewerProviderProps> = ({
@@ -11,27 +16,22 @@ export const ViewerProvider: React.FC<ViewerProviderProps> = ({
   children,
 }: ViewerProviderProps) => {
   const resume = useResume(url);
-  const [state, dispatch] = useReducer(viewerReducer, initialState);
+  const viewer = useReducer(viewerReducer, {
+    ...initialState,
+    resume,
+    currentView: !!resume.data ? ViewerView.Infographic : ViewerView.Welcome,
+  });
+  const [_, dispatch] = viewer;
 
-  // Notify the reducer of the resume data
+  // Notify the viewer when the resume data changes
   useEffect(() => {
-    if (resume) {
+    if (!!resume) {
+      console.log("Resume data changed:", resume);
       dispatch({ type: "SET_RESUME", resume });
     }
-  }, [resume]);
-
-  // Memoize the context value to avoid unnecessary re-renders
-  const contextValue = useMemo(
-    () => ({
-      state,
-      dispatch,
-    }),
-    [state, dispatch]
-  );
+  }, [resume, dispatch]);
 
   return (
-    <ViewerContext.Provider value={contextValue}>
-      {children}
-    </ViewerContext.Provider>
+    <ViewerContext.Provider value={viewer}>{children}</ViewerContext.Provider>
   );
 };

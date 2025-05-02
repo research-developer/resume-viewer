@@ -1,9 +1,9 @@
-import { FC, useCallback, useRef, useState } from "react";
-import { TextViewUI } from "./text/TextUI";
+import { FC, useCallback, useRef } from "react";
+import { TextViewUI } from "./text/TextViewUI";
 import { useViewerContext } from "./ViewerHook";
 import { InfographicViewUI } from "./infographic/InfographicViewUI";
 import { ViewerProvider } from "./ViewerProvider";
-import { WelcomeUI } from "./WelcomeUI";
+import { WelcomeViewUI } from "./WelcomeViewUI";
 import { ErrorViewUI } from "./ErrorViewUI";
 import { JsonViewUI } from "./json/JsonViewUI";
 import { ViewerNavUI } from "./ViewerNavUI";
@@ -11,7 +11,7 @@ import { VisualizerViewUI } from "./visualizer/VisualizerViewUI";
 import { useFullscreen } from "./FullScreenHook";
 
 type ResumeViewerUIProps = {
-  jsonResumeUrl?: string;
+  jsonResumeUrl?: string | null;
 };
 
 /**
@@ -21,25 +21,7 @@ type ResumeViewerUIProps = {
  * @param {string} jsonResumeUrl - The URL of the JSON resume to be displayed.
  * @returns {JSX.Element} The rendered component.
  */
-export const ResumeViewerUI: FC<ResumeViewerUIProps> = ({
-  jsonResumeUrl: initialUrl,
-}) => {
-  const [jsonResumeUrl, setJsonResumeUrl] = useState<string | undefined>(
-    initialUrl
-  );
-
-  const handleUrlSubmit = (url: string) => {
-    setJsonResumeUrl(url);
-  };
-
-  if (!jsonResumeUrl) {
-    return (
-      <div className="fill-screen bg-background flex items-center justify-center">
-        <WelcomeUI onUrlSubmit={handleUrlSubmit} />
-      </div>
-    );
-  }
-
+export const ResumeViewerUI: FC<ResumeViewerUIProps> = ({ jsonResumeUrl }) => {
   return (
     <ViewerProvider url={jsonResumeUrl}>
       <div className="fill-screen bg-background items-center justify-center">
@@ -49,15 +31,14 @@ export const ResumeViewerUI: FC<ResumeViewerUIProps> = ({
   );
 };
 
-const ViewerUI: FC = () => {
-  const viewer = useViewerContext();
-  const { state, dispatch } = viewer;
-  const { data, currentView, isFullscreen } = state;
-  const { isPending, error, refresh } = data || {
-    isPending: true,
-    error: null,
-  };
+type ViewerUIProps = {};
+
+const ViewerUI: FC<ViewerUIProps> = () => {
+  const [state, dispatch] = useViewerContext();
+  const { resume, currentView, isFullscreen } = state;
+  const { isPending, error, refresh } = resume || {};
   const viewerRef = useRef<HTMLDivElement>(null);
+  const showNav = currentView !== "welcome";
 
   // Custom hook to handle fullscreen functionality
   useFullscreen(
@@ -89,6 +70,8 @@ const ViewerUI: FC = () => {
 
   const renderView = () => {
     switch (currentView) {
+      case "welcome":
+        return <WelcomeViewUI />;
       case "infographic":
         return <InfographicViewUI />;
       case "text":
@@ -113,7 +96,7 @@ const ViewerUI: FC = () => {
       className="fill-screen bg-background flex flex-col items-center justify-start"
     >
       {renderView()}
-      <ViewerNavUI />
+      {showNav && <ViewerNavUI />}
     </div>
   );
 };
