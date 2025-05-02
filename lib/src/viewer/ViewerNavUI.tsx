@@ -7,6 +7,10 @@ import {
   ArrowDownTrayIcon,
   PrinterIcon,
   ChevronRightIcon,
+  ChartBarIcon,
+  DocumentTextIcon,
+  CodeBracketIcon,
+  EyeIcon,
 } from "@heroicons/react/20/solid";
 
 export const ViewerNavUI: FC = () => {
@@ -71,40 +75,44 @@ export const ViewerNavUI: FC = () => {
       {/* Navigation Bar */}
       <div
         className={`fixed ${
-          isCollapsed ? "bottom-8 pl-8" : "bottom-2 right-4"
-        } left-4 transition-all duration-300 ease-in-out z-40 max-w-[800px]`}
+          isCollapsed ? "" : ""
+        } bottom-2 left-4 right-4 transition-all duration-500 ease-in-out z-40 max-w-[800px]`}
       >
         <div
-          className={`${
+          className={`p-2 rounded-full bg-accent-blue/25 backdrop-blur-sm border border-border shadow-lg flex items-center ${
             isCollapsed
-              ? "w-0 h-0 transform translate-y-0"
-              : "transform translate-y-0"
-          } rounded-full bg-surface/25 backdrop-blur-sm border border-border shadow-lg flex ${
-            isCollapsed
-              ? "items-center justify-center"
-              : "items-center justify-between px-4 py-2"
-          } transition-all duration-500 ease-in-out`}
+              ? "items-start justify-start"
+              : "items-center justify-between"
+          } transition-all duration-2000 ease-in-out`}
           style={{
             animation: isCollapsed
               ? "collapse 0.5s ease forwards"
-              : "expand 0.5s ease forwards",
+              : "expand 0.5s ease backwards",
           }}
         >
-          {/* Collapse Toggle - Fixed arrow direction */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="!p-1 !bg-accent/50 !active:bg-accent text-muted hover:text-primary p-1 rounded-full focus:outline-none focus:ring-1 focus:ring-accent transition-transform duration-300"
+            className="bg-accent-blue/75 active:bg-accent-blue text-accent-blue-light hover:text-primary hover:border-primary p-1 rounded-full focus:outline-none focus:ring-1 focus:ring-accent"
             title={isCollapsed ? "Expand toolbar" : "Collapse toolbar"}
           >
             <ChevronRightIcon
               className={`w-5 h-5 transition-transform duration-300 ${
-                isCollapsed ? "rotate-180" : ""
+                isCollapsed ? "rotate-180" : "rotate-0"
               }`}
             />
           </button>
 
-          {!isCollapsed && (
-            <div className="flex flex-grow justify-between animate-fade-in transition-opacity duration-300">
+          <div
+            className={`overflow-hidden transition-all duration-500 ease-in-out ${
+              isCollapsed ? "w-0 opacity-0" : "w-full opacity-100"
+            }`}
+          >
+            <div
+              className="flex flex-grow justify-between transition-transform duration-500 ease-in-out"
+              style={{
+                transform: isCollapsed ? "translateX(50px)" : "translateX(0px)",
+              }}
+            >
               {/* View Switcher */}
               <div className="flex-auto flex justify-center gap-2">
                 <div className="flex items-center space-x-2">
@@ -120,7 +128,9 @@ export const ViewerNavUI: FC = () => {
                       title="Infographic View (Alt+1)"
                     >
                       <span className="hidden sm:inline">Infographic</span>
-                      <span className="sm:hidden">📊</span>
+                      <span className="sm:hidden">
+                        <ChartBarIcon className="w-4 h-4" />
+                      </span>
                     </button>
                     <button
                       onClick={() => handleViewChange(ViewerView.Visualizer)}
@@ -132,7 +142,9 @@ export const ViewerNavUI: FC = () => {
                       title="Visualizer View (Alt+1)"
                     >
                       <span className="hidden sm:inline">Visualizer</span>
-                      <span className="sm:hidden"></span>
+                      <span className="sm:hidden">
+                        <EyeIcon className="w-4 h-4" />
+                      </span>
                     </button>
                     <button
                       onClick={() => handleViewChange(ViewerView.Text)}
@@ -144,7 +156,9 @@ export const ViewerNavUI: FC = () => {
                       title="Text View (Alt+2)"
                     >
                       <span className="hidden sm:inline">Text</span>
-                      <span className="sm:hidden">📝</span>
+                      <span className="sm:hidden">
+                        <DocumentTextIcon className="w-4 h-4" />
+                      </span>
                     </button>
                     <button
                       onClick={() => handleViewChange(ViewerView.Json)}
@@ -156,7 +170,9 @@ export const ViewerNavUI: FC = () => {
                       title="JSON View (Alt+3)"
                     >
                       <span className="hidden sm:inline">JSON</span>
-                      <span className="sm:hidden">{}</span>
+                      <span className="sm:hidden">
+                        <CodeBracketIcon className="w-4 h-4" />
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -206,7 +222,7 @@ export const ViewerNavUI: FC = () => {
                 </button>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -215,41 +231,29 @@ export const ViewerNavUI: FC = () => {
           0% {
             max-height: 60px;
             width: 100%;
-            right: 4px;
             left: 0;
-          }
-          50% {
-            max-height: 40px;
-            width: 70%;
-            right: 0;
-            left: auto;
+            padding: 0 1rem 0 0;
           }
           100% {
             max-height: 48px;
-            width: 0;
-            right: 0;
+            width: 48px;
             left: auto;
+            padding: 0;
           }
         }
         
         @keyframes expand {
           0% {
             max-height: 48px;
-            width: 0;
-            right: 0;
+            width: 48px;
             left: auto;
-          }
-          50% {
-            max-height: 40px;
-            width: 70%;
-            right: 0;
-            left: auto;
+            padding: 0;
           }
           100% {
             max-height: 60px;
             width: 100%;
-            right: 0;
             left: 0;
+            padding: 0 1rem 0 0;
           }
         }
         

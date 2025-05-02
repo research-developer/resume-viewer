@@ -10,14 +10,14 @@ export const PublicationUI: React.FC<PublicationUIProps> = ({
   publication,
 }) => {
   return (
-    <div className="mb-4 pb-3 border-b border-gray-200 last:border-0">
-      <h3 className="text-lg font-semibold text-gray-800">
+    <div className="mb-4 pb-3 border-b border-border last:border-0">
+      <h3 className="text-lg font-semibold text-primary">
         {publication.url ? (
           <a
             href={publication.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:underline hover:text-blue-800"
+            className="text-accent-blue hover:text-accent-blue-light hover:underline"
           >
             {publication.name}
           </a>
@@ -26,22 +26,24 @@ export const PublicationUI: React.FC<PublicationUIProps> = ({
         )}
       </h3>
 
-      <div className="mt-1 text-sm text-gray-600">
+      <div className="mt-1 text-sm text-muted">
         {publication.publisher && (
-          <span className="font-medium">{publication.publisher}</span>
+          <span className="font-medium text-secondary">
+            {publication.publisher}
+          </span>
         )}
         {publication.releaseDate && publication.publisher && (
-          <span className="mx-1 text-gray-400">•</span>
+          <span className="mx-1 text-muted">•</span>
         )}
         {publication.releaseDate && (
-          <span className="text-gray-500">
+          <span className="text-muted">
             <DateUI date={publication.releaseDate} />
           </span>
         )}
       </div>
 
       {publication.summary && (
-        <p className="mt-2 text-gray-700">{publication.summary}</p>
+        <p className="mt-2 text-secondary">{publication.summary}</p>
       )}
     </div>
   );
@@ -58,7 +60,7 @@ export const PublicationListUI: React.FC<PublicationListUIProps> = ({
 
   return (
     <section className="mb-6">
-      <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-300">
+      <h2 className="text-xl font-bold text-primary mb-4 pb-2 border-b border-border">
         Publications
       </h2>
       {publicationList.map((publication, index) => (

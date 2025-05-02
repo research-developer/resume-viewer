@@ -1,10 +1,11 @@
-import { FC, useMemo } from "react";
+import { FC } from "react";
 import { useViewerContext } from "../ViewerHook";
+import JsonViewerUI from "./JsonViewerUI";
 
 type JsonViewUIProps = {};
 
 export const JsonViewUI: FC<JsonViewUIProps> = ({}: JsonViewUIProps) => {
-  const { state, dispatch } = useViewerContext();
+  const { state } = useViewerContext();
   const { data: viewerData } = state;
   const { data, isPending: resumeIsPending } = viewerData || {
     isPending: true,
@@ -26,16 +27,12 @@ export const JsonViewUI: FC<JsonViewUIProps> = ({}: JsonViewUIProps) => {
   }
 
   return (
-    <div className="p-4 text-secondary">
-      <pre
-        style={{
-          whiteSpace: "pre-wrap",
-          wordBreak: "break-word",
-          overflowY: "auto",
-        }}
-      >
-        {JSON.stringify(data, null, 2)}
-      </pre>
+    <div className="min-h-screen w-full h-full overflow-hidden gap-4 p-6 self-start">
+      <div className="text-lg font-semibold text-primary">JSON</div>
+      <div className="text-sm text-secondary mb-4">
+        The below is the JSON representation of the resume.
+      </div>
+      <JsonViewerUI data={data.resume} />
     </div>
   );
 };

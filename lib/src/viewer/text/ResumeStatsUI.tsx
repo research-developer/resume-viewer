@@ -10,9 +10,7 @@ interface ResumeStatsUIProps {
 export const ResumeStatsUI: React.FC<ResumeStatsUIProps> = ({ analyzer }) => {
   if (!analyzer?.stats) {
     return (
-      <div className="text-gray-500 py-4 text-center">
-        No statistics available
-      </div>
+      <div className="text-muted py-4 text-center">No statistics available</div>
     );
   }
 
@@ -45,27 +43,27 @@ export const ResumeStatsUI: React.FC<ResumeStatsUIProps> = ({ analyzer }) => {
   }, [analyzer.stats]);
 
   return (
-    <div className="space-y-6 p-4 bg-white rounded-lg shadow">
-      <h2 className="text-2xl font-bold text-gray-800">Resume Statistics</h2>
+    <div className="space-y-6 p-4 bg-surface rounded-lg shadow border border-border">
+      <h2 className="text-2xl font-bold text-primary">Resume Statistics</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="p-4 bg-gray-50 rounded-lg shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-700">
+        <div className="p-4 bg-accent rounded-lg shadow border border-border">
+          <h3 className="text-lg font-semibold text-primary">
             Total Work Experience
           </h3>
-          <div className="text-2xl font-bold text-blue-600">
+          <div className="text-2xl font-bold text-accent-blue">
             {careerYears.toFixed(1)} years
-            <span className="ml-2 text-sm font-normal text-gray-500">
+            <span className="ml-2 text-sm font-normal text-muted">
               ({careerMonths.toFixed(0)} months)
             </span>
           </div>
         </div>
 
-        <div className="p-4 bg-gray-50 rounded-lg shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-700">Skills Count</h3>
-          <div className="text-2xl font-bold text-blue-600">
+        <div className="p-4 bg-accent rounded-lg shadow border border-border">
+          <h3 className="text-lg font-semibold text-primary">Skills Count</h3>
+          <div className="text-2xl font-bold text-accent-blue">
             {analyzer.stats.career.root.occurrences.size}
-            <span className="ml-2 text-sm font-normal text-gray-500">
+            <span className="ml-2 text-sm font-normal text-muted">
               ({categorySkills.length} categories)
             </span>
           </div>
@@ -100,8 +98,8 @@ export const SkillCategoriesChart: React.FC<SkillCategoriesChartProps> = ({
   const maxYears = maxMonths / 12;
 
   return (
-    <div className="bg-gray-50 p-4 rounded-lg shadow-sm border-l-4 border-blue-600">
-      <h3 className="text-lg font-semibold text-gray-700 mb-4">
+    <div className="bg-accent p-4 rounded-lg shadow border border-border border-l-4 border-l-accent-blue">
+      <h3 className="text-lg font-semibold text-primary mb-4">
         Skill Categories
       </h3>
 
@@ -109,23 +107,23 @@ export const SkillCategoriesChart: React.FC<SkillCategoriesChartProps> = ({
         {skills.map((skill) => (
           <div key={skill.skill.name} className="flex flex-col">
             <div className="flex items-center mb-1">
-              <div className="w-1/4 font-medium text-gray-800">
+              <div className="w-1/4 font-medium text-secondary">
                 {skill.skill.name}
               </div>
               <div className="w-3/4 flex items-center">
                 <div
-                  className="h-6 bg-blue-600 rounded-md"
+                  className="h-6 bg-accent-blue rounded-md"
                   style={{
                     width: `${(skill.months / maxMonths) * 100}%`,
                   }}
                 />
-                <div className="ml-2 text-sm text-gray-600">
+                <div className="ml-2 text-sm text-muted">
                   {maxYears.toFixed(1)} years
                 </div>
               </div>
             </div>
             {skill.skill.children && skill.skill.children.size > 0 && (
-              <div className="ml-6 text-xs text-gray-500">
+              <div className="ml-6 text-xs text-muted">
                 Includes:
                 {Array.from(skill.skill.children.entries()).join(", ")}
               </div>
@@ -150,25 +148,25 @@ export const TopSkillsChart: React.FC<TopSkillsChartProps> = ({ skills }) => {
   const maxYears = maxMonths / 12;
 
   return (
-    <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
-      <h3 className="text-lg font-semibold text-gray-700 mb-4">
+    <div className="bg-accent p-4 rounded-lg shadow border border-border">
+      <h3 className="text-lg font-semibold text-primary mb-4">
         Top Skills by Experience
       </h3>
 
       <div className="space-y-3">
         {skills.map((skill) => (
           <div key={skill.skill.name} className="flex items-center">
-            <div className="w-1/4 font-medium text-gray-700">
+            <div className="w-1/4 font-medium text-secondary">
               {skill.skill.name}
             </div>
             <div className="w-3/4 flex items-center">
               <div
-                className="h-5 bg-blue-500 rounded-md"
+                className="h-5 bg-accent-blue rounded-md"
                 style={{
                   width: `${(skill.months / maxMonths) * 100}%`,
                 }}
               />
-              <div className="ml-2 text-sm text-gray-600">
+              <div className="ml-2 text-sm text-muted">
                 {maxYears.toFixed(1)} years
               </div>
             </div>
@@ -191,8 +189,8 @@ export const SkillHierarchyTree: React.FC<SkillHierarchyTreeProps> = ({
     return null;
   }
   return (
-    <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
-      <h3 className="text-lg font-semibold text-gray-700 mb-4">
+    <div className="bg-accent p-4 rounded-lg shadow border border-border">
+      <h3 className="text-lg font-semibold text-primary mb-4">
         Skill Hierarchies
       </h3>
 
@@ -226,28 +224,30 @@ const HierarchyNode: React.FC<HierarchyNodeProps> = ({ node, depth }) => {
     <div className={`ml-${depth * 5}`}>
       <div
         className={`flex items-center p-1 ${
-          hasChildren ? "cursor-pointer hover:bg-gray-200 rounded" : ""
+          hasChildren ? "cursor-pointer hover:bg-background rounded" : ""
         } ${isCategory ? "font-semibold" : ""}`}
         onClick={() => hasChildren && setExpanded(!expanded)}
       >
         {hasChildren && (
           <span
-            className="mr-1 inline-block w-4 text-gray-500 transition-transform"
+            className="mr-1 inline-block w-4 text-muted transition-transform"
             style={{ transform: expanded ? "rotate(90deg)" : "none" }}
           >
             {expanded ? "▼" : "►"}
           </span>
         )}
-        <span className={`${isCategory ? "text-blue-700" : "text-gray-800"}`}>
+        <span
+          className={`${isCategory ? "text-accent-blue" : "text-secondary"}`}
+        >
           {node.skill.name}
         </span>
-        <span className="ml-2 text-xs text-gray-600">
+        <span className="ml-2 text-xs text-muted">
           {(node.months / 12).toFixed(1)} yrs
         </span>
       </div>
 
       {expanded && hasChildren && (
-        <div className="pl-5 border-l border-gray-200 ml-2">
+        <div className="pl-5 border-l border-border ml-2">
           {node.children.fluent().map((child) => (
             <HierarchyNode
               key={child.skill.name}
@@ -302,8 +302,8 @@ export const KeywordConnections: React.FC<KeywordConnectionsProps> = ({
   }
 
   return (
-    <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
-      <h3 className="text-lg font-semibold text-gray-700 mb-4">
+    <div className="bg-accent p-4 rounded-lg shadow border border-border">
+      <h3 className="text-lg font-semibold text-primary mb-4">
         Shared Keywords
       </h3>
 
@@ -311,10 +311,10 @@ export const KeywordConnections: React.FC<KeywordConnectionsProps> = ({
         {sharedKeywords.map(({ parent, others }) => (
           <div
             key={parent.name}
-            className="border-b border-gray-200 pb-2 last:border-0"
+            className="border-b border-border pb-2 last:border-0"
           >
-            <div className="font-medium text-blue-600">{parent.name}</div>
-            <div className="text-sm text-gray-700">
+            <div className="font-medium text-accent-blue">{parent.name}</div>
+            <div className="text-sm text-secondary">
               <span>Used in: </span>
               {others.map((other, idx) => (
                 <React.Fragment key={other}>

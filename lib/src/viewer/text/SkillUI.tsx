@@ -7,11 +7,11 @@ interface SkillUIProps {
 
 export const SkillUI: React.FC<SkillUIProps> = ({ skill }) => {
   return (
-    <div className="mb-3 p-3 bg-gray-50 rounded-md">
+    <div className="mb-3 p-3 bg-accent rounded-md">
       <div className="mb-1">
-        <span className="font-medium text-gray-800">{skill.name}</span>
+        <span className="font-medium text-primary">{skill.name}</span>
         {skill.level && (
-          <span className="ml-2 text-sm text-gray-500">({skill.level})</span>
+          <span className="ml-2 text-sm text-muted">({skill.level})</span>
         )}
       </div>
 
@@ -20,7 +20,7 @@ export const SkillUI: React.FC<SkillUIProps> = ({ skill }) => {
           {skill.keywords.map((keyword, index) => (
             <span
               key={index}
-              className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-md"
+              className="bg-accent-blue bg-opacity-20 text-accent-blue-light text-xs px-2 py-1 rounded-md"
             >
               {keyword}
             </span>
@@ -40,7 +40,7 @@ export const SkillListUI: React.FC<SkillListUIProps> = ({ skillList }) => {
 
   return (
     <section className="mb-6">
-      <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-300">
+      <h2 className="text-xl font-bold text-primary mb-4 pb-2 border-b border-border">
         Skills
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

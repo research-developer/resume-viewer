@@ -11,9 +11,9 @@ export const BasicsUI: React.FC<BasicsUIProps> = ({ basics }) => {
   return (
     <section className="mb-8">
       <div className="mb-4">
-        <h1 className="text-3xl font-bold text-gray-900">{basics.name}</h1>
+        <h1 className="text-3xl font-bold text-primary">{basics.name}</h1>
         {basics.label && (
-          <h2 className="text-xl text-gray-600 mt-1">{basics.label}</h2>
+          <h2 className="text-xl text-secondary mt-1">{basics.label}</h2>
         )}
       </div>
 
@@ -22,7 +22,7 @@ export const BasicsUI: React.FC<BasicsUIProps> = ({ basics }) => {
           <div className="flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-2 text-gray-500"
+              className="h-4 w-4 mr-2 text-muted"
               viewBox="0 0 20 20"
               fill="currentColor"
             >
@@ -31,7 +31,7 @@ export const BasicsUI: React.FC<BasicsUIProps> = ({ basics }) => {
             </svg>
             <a
               href={`mailto:${basics.email}`}
-              className="text-blue-600 hover:underline"
+              className="text-accent-blue hover:text-accent-blue-light hover:underline"
             >
               {basics.email}
             </a>
@@ -42,13 +42,13 @@ export const BasicsUI: React.FC<BasicsUIProps> = ({ basics }) => {
           <div className="flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-2 text-gray-500"
+              className="h-4 w-4 mr-2 text-muted"
               viewBox="0 0 20 20"
               fill="currentColor"
             >
               <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
             </svg>
-            <span className="text-gray-700">{basics.phone}</span>
+            <span className="text-secondary">{basics.phone}</span>
           </div>
         )}
 
@@ -56,7 +56,7 @@ export const BasicsUI: React.FC<BasicsUIProps> = ({ basics }) => {
           <div className="flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-2 text-gray-500"
+              className="h-4 w-4 mr-2 text-muted"
               viewBox="0 0 20 20"
               fill="currentColor"
             >
@@ -70,7 +70,7 @@ export const BasicsUI: React.FC<BasicsUIProps> = ({ basics }) => {
               href={basics.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
+              className="text-accent-blue hover:text-accent-blue-light hover:underline"
             >
               {basics.url}
             </a>
@@ -81,7 +81,7 @@ export const BasicsUI: React.FC<BasicsUIProps> = ({ basics }) => {
       {basics.location && <LocationUI location={basics.location} />}
 
       {basics.summary && (
-        <div className="my-4 text-gray-700 bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <div className="my-4 text-secondary bg-accent p-4 rounded-lg border border-border">
           {basics.summary}
         </div>
       )}
@@ -99,7 +99,7 @@ export const BasicsUI: React.FC<BasicsUIProps> = ({ basics }) => {
           <img
             src={basics.image}
             alt={basics.name}
-            className="w-32 h-32 object-cover rounded-full border-2 border-gray-300 shadow-sm"
+            className="w-32 h-32 object-cover rounded-full border-2 border-border shadow"
           />
         </div>
       )}

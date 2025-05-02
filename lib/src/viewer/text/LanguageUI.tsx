@@ -7,10 +7,10 @@ interface LanguageUIProps {
 
 export const LanguageUI: React.FC<LanguageUIProps> = ({ language }) => {
   return (
-    <div className="bg-gray-50 px-3 py-2 rounded-md inline-block mr-2 mb-2">
-      <span className="font-medium text-gray-800">{language.language}</span>
+    <div className="bg-accent px-3 py-2 rounded-md inline-block mr-2 mb-2">
+      <span className="font-medium text-primary">{language.language}</span>
       {language.fluency && (
-        <span className="text-gray-600 text-sm ml-1">({language.fluency})</span>
+        <span className="text-muted text-sm ml-1">({language.fluency})</span>
       )}
     </div>
   );
@@ -27,7 +27,7 @@ export const LanguageListUI: React.FC<LanguageListUIProps> = ({
 
   return (
     <section className="mb-6">
-      <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-300">
+      <h2 className="text-xl font-bold text-primary mb-4 pb-2 border-b border-border">
         Languages
       </h2>
       <div className="flex flex-wrap">

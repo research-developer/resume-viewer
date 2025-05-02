@@ -67,10 +67,10 @@ export const DateRangeUI: React.FC<DateRangeUIProps> = ({
   locale = "en-US",
   currentText = "Present",
   separator = " - ",
-  className = "inline-flex items-center text-sm text-gray-600",
+  className = "inline-flex items-center text-sm text-muted",
   startClassName = "font-medium",
   endClassName = "font-medium",
-  separatorClassName = "mx-1 text-gray-400",
+  separatorClassName = "mx-1 text-muted opacity-50",
 }) => {
   // If both dates are missing, don't render anything
   if (!startDate && !endDate) {
@@ -100,7 +100,9 @@ export const DateRangeUI: React.FC<DateRangeUIProps> = ({
           className={endClassName}
         />
       ) : startDate && currentText ? (
-        <span className={endClassName}>{currentText}</span>
+        <span className={`${endClassName} text-accent-green`}>
+          {currentText}
+        </span>
       ) : null}
     </div>
   );

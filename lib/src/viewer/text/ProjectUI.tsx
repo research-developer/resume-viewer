@@ -8,15 +8,15 @@ interface ProjectUIProps {
 
 export const ProjectUI: React.FC<ProjectUIProps> = ({ project }) => {
   return (
-    <div className="mb-5 pb-4 border-b border-gray-200 last:border-0">
+    <div className="mb-5 pb-4 border-b border-border last:border-0">
       <div className="mb-2">
-        <h3 className="text-lg font-semibold text-gray-800">
+        <h3 className="text-lg font-semibold text-primary">
           {project.url ? (
             <a
               href={project.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:underline hover:text-blue-800"
+              className="text-accent-blue hover:text-accent-blue-light hover:underline"
             >
               {project.name}
             </a>
@@ -36,11 +36,11 @@ export const ProjectUI: React.FC<ProjectUIProps> = ({ project }) => {
       )}
 
       {project.description && (
-        <p className="text-gray-700 mb-3">{project.description}</p>
+        <p className="text-secondary mb-3">{project.description}</p>
       )}
 
       {project.highlights && project.highlights.length > 0 && (
-        <ul className="list-disc pl-5 space-y-1 text-gray-700">
+        <ul className="list-disc pl-5 space-y-1 text-secondary">
           {project.highlights.map((highlight, index) => (
             <li key={index}>{highlight}</li>
           ))}
@@ -61,7 +61,7 @@ export const ProjectListUI: React.FC<ProjectListUIProps> = ({
 
   return (
     <section className="mb-6">
-      <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-300">
+      <h2 className="text-xl font-bold text-primary mb-4 pb-2 border-b border-border">
         Projects
       </h2>
       {projectList.map((project, index) => (

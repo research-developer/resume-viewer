@@ -20,7 +20,7 @@ export const SkillRadarChartUI: React.FC<SkillRadarChartUIProps> = ({
 }) => {
   if (!skills || skills.length === 0) {
     return (
-      <div className="text-gray-500 py-4 text-center">
+      <div className="text-muted py-4 text-center">
         No skill data available for radar chart
       </div>
     );
@@ -34,22 +34,23 @@ export const SkillRadarChartUI: React.FC<SkillRadarChartUIProps> = ({
   }));
 
   return (
-    <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
-      <h3 className="text-lg font-semibold text-gray-700 mb-4">
+    <div className="bg-accent p-4 rounded-lg shadow border border-border">
+      <h3 className="text-lg font-semibold text-primary mb-4">
         Skill Experience Radar
       </h3>
       <div className="w-full h-80">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart cx="50%" cy="50%" outerRadius="80%" data={formattedData}>
-            <PolarGrid gridType="circle" />
+            <PolarGrid stroke="#3c3c3c" />
             <PolarAngleAxis
               dataKey="subject"
-              tick={{ fill: "#4B5563", fontSize: 12 }}
+              tick={{ fill: "#cbd5e1", fontSize: 12 }}
             />
             <PolarRadiusAxis
               angle={30}
               domain={[0, "auto"]}
-              tick={{ fill: "#4B5563" }}
+              tick={{ fill: "#cbd5e1" }}
+              stroke="#3c3c3c"
             />
             <Radar
               name="Years of Experience"
@@ -63,13 +64,19 @@ export const SkillRadarChartUI: React.FC<SkillRadarChartUIProps> = ({
                 `${value.toFixed(1)} years`,
                 "Experience",
               ]}
-              contentStyle={{ backgroundColor: "white", borderRadius: "4px" }}
+              contentStyle={{
+                backgroundColor: "#2b2b2b",
+                borderRadius: "4px",
+                borderColor: "#3c3c3c",
+                color: "#cbd5e1",
+              }}
+              labelStyle={{ color: "#cbd5e1" }}
             />
-            <Legend wrapperStyle={{ paddingTop: "10px" }} />
+            <Legend wrapperStyle={{ paddingTop: "10px", color: "#cbd5e1" }} />
           </RadarChart>
         </ResponsiveContainer>
       </div>
-      <div className="mt-2 text-sm text-gray-600 text-center">
+      <div className="mt-2 text-sm text-muted text-center">
         Visualizes relative experience levels across different skills
       </div>
     </div>

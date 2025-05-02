@@ -8,15 +8,15 @@ interface EducationUIProps {
 
 export const EducationItem: React.FC<EducationUIProps> = ({ education }) => {
   return (
-    <div className="mb-5 pb-4 border-b border-gray-200 last:border-0">
+    <div className="mb-5 pb-4 border-b border-border last:border-0">
       <div className="mb-2">
-        <h3 className="text-lg font-semibold text-gray-800">
+        <h3 className="text-lg font-semibold text-primary">
           {education.url ? (
             <a
               href={education.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:underline hover:text-blue-800"
+              className="text-accent-blue hover:text-accent-blue-light hover:underline"
             >
               {education.institution}
             </a>
@@ -25,7 +25,7 @@ export const EducationItem: React.FC<EducationUIProps> = ({ education }) => {
           )}
         </h3>
         {education.area && education.studyType && (
-          <div className="text-base text-gray-700 font-medium">
+          <div className="text-base text-secondary font-medium">
             {education.studyType} in {education.area}
           </div>
         )}
@@ -44,13 +44,13 @@ export const EducationItem: React.FC<EducationUIProps> = ({ education }) => {
       )}
 
       {education.score && (
-        <div className="text-sm text-gray-600 mb-2">GPA: {education.score}</div>
+        <div className="text-sm text-muted mb-2">GPA: {education.score}</div>
       )}
 
       {education.courses && education.courses.length > 0 && (
         <div className="mt-3">
-          <h4 className="text-sm font-semibold text-gray-700 mb-1">Courses</h4>
-          <ul className="list-disc pl-5 text-sm text-gray-600 space-y-1">
+          <h4 className="text-sm font-semibold text-secondary mb-1">Courses</h4>
+          <ul className="list-disc pl-5 text-sm text-muted space-y-1">
             {education.courses.map((course, index) => (
               <li key={index}>{course}</li>
             ))}
@@ -72,7 +72,7 @@ export const EducationListUI: React.FC<EducationListUIProps> = ({
 
   return (
     <section className="mb-6">
-      <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-300">
+      <h2 className="text-xl font-bold text-primary mb-4 pb-2 border-b border-border">
         Education
       </h2>
       {educationList.map((education, index) => (

@@ -9,10 +9,12 @@ export const LocationUI: React.FC<LocationUIProps> = ({ location }) => {
   if (!location) return null;
 
   return (
-    <div className="flex flex-col text-sm text-gray-600 my-2">
+    <div className="flex flex-col text-sm text-muted my-2">
       {location.address && <div className="mb-1">{location.address}</div>}
       <div className="flex flex-wrap">
-        {location.city && <span className="font-medium">{location.city}</span>}
+        {location.city && (
+          <span className="font-medium text-secondary">{location.city}</span>
+        )}
         {location.region && location.city && <span className="mx-1">,</span>}
         {location.region && <span>{location.region}</span>}
         {location.postalCode && (
