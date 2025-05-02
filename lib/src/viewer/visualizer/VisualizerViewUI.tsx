@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { VisualizerProvider } from "./VisualizerProvider";
 import { VisualizerControlsUI } from "./VisualizerControlsUI";
 import { VisualizerContainerUI } from "./VisualizerContainerUI";
@@ -31,7 +31,6 @@ export const VisualizerViewUI: FC<VisualizerViewUIProps> = ({}) => {
     <VisualizerProvider resume={data.resume}>
       <VisualizerContainerUI>
         <TimelineUI />
-        <ProfileUI />
         <VisualizerControlsUI />
       </VisualizerContainerUI>
     </VisualizerProvider>

@@ -4,13 +4,15 @@ import {
   useVisualizerContext,
   VisualizerAnimationStartPosition,
   VisualizerD3State,
+  VisualizerStatus,
 } from "./VisualizerHook";
 import { TimelineData, TimelineEvent } from "./TimelineModel";
 import { destoryVisualization } from "./VisualizationUtil";
 
 export const TimelineUI: React.FC = () => {
   const { state } = useVisualizerContext();
-  const { d3State } = state;
+  const { d3State, status: status, data } = state;
+  const { timeline } = data || {};
 
   // Trigger replay animation when isAnimating changes
   useEffect(() => {
@@ -26,6 +28,21 @@ export const TimelineUI: React.FC = () => {
       d3State.dispatch.on("DRAW_TIMELINE", null);
     };
   }, [d3State]);
+
+  useEffect(() => {
+    if (timeline && status === VisualizerStatus.Started) {
+      // Trigger the timeline drawing when the status changes to Started
+      d3State.dispatch.call("DRAW_TIMELINE", {
+        type: "DRAW_TIMELINE",
+        data: timeline,
+        origin: {
+          x: d3State.width / 2,
+          y: d3State.height / 2,
+          angle: 0,
+        },
+      });
+    }
+  }, [status, timeline]);
 
   return null;
 };
