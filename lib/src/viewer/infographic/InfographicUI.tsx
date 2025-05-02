@@ -1,6 +1,6 @@
 import { FC, useMemo } from "react";
 import { CardUI } from "./CardUI";
-import { LineChartUI } from "./LineChartUI";
+import { LineChartDataPoint, LineChartUI } from "./LineChartUI";
 import { useViewerContext, ViewerView } from "../ViewerHook";
 import { ProfileUI } from "./ProfileUI";
 import { PieChartCardUI } from "./PieChartUI";
@@ -13,6 +13,7 @@ import { TrendComparisonUI } from "./TrendComparisonUI";
 import { GroupedStatsUI } from "./GroupedStatsUI";
 import { RadarChartUI } from "./RadarChartUI"; // Add this import
 import { useChartColors } from "../../ColorUtils";
+import { FluentMap } from "../../FluentMap";
 
 type InfographicUIProps = {};
 
@@ -32,11 +33,10 @@ export const InfographicUI: FC<
 
   const categories = useMemo(
     () =>
-      stats?.skills.all.topLevel
-        .fluentValues()
-        .filter((skill) => skill.skill.isCategory)
+      stats?.career.root.children
+        .fluent()
         .toArray()
-        .sort((a, b) => b.summary.months - a.summary.months) || [],
+        .sort((a, b) => b.months - a.months) || [],
     [stats]
   );
 
@@ -48,10 +48,46 @@ export const InfographicUI: FC<
     () =>
       categories.map((category) => ({
         subject: category.skill.name,
-        value: convertMonthsToYears(category.summary.months),
+        value: convertMonthsToYears(category.months),
       })),
     [categories]
   );
+
+  // Create skills by year data for the line chart
+  const skillsByYearData = useMemo(() => {
+    if (!stats?.yearCummulative) return [];
+
+    // Get available years and sort them
+    const years = Array.from(stats.yearCummulative.keys()).sort();
+
+    const lineData: LineChartDataPoint[] = years.map((year) => {
+      return stats.yearCummulative
+        .get(year)
+        ?.fluentValues()
+        .reduce(
+          (acc, topLevel) => {
+            const category = topLevel.skill.name;
+            const years = convertMonthsToYears(topLevel.months);
+            (acc as unknown as any)[category] = years;
+            return acc;
+          },
+          { name: year.toString() }
+        ) as LineChartDataPoint;
+    });
+
+    console.log("skillsByYearData", { lineData });
+
+    return lineData;
+  }, [stats?.yearCummulative]);
+
+  // Create series configuration for the line chart
+  const skillsLineSeries = useMemo(() => {
+    return categories.map((category, index) => ({
+      key: category.skill.name,
+      label: category.skill.name,
+      color: chartColors[index % chartColors.length],
+    }));
+  }, [categories, chartColors]);
 
   if (resumeIsPending) {
     return (
@@ -65,7 +101,7 @@ export const InfographicUI: FC<
     );
   }
 
-  const totalYears = convertMonthsToYears(stats.skills.summary.months || 0);
+  const totalYears = convertMonthsToYears(stats.career.root.months || 0);
 
   return (
     <div className="fill-screen bg-background flex flex-row flex-wrap gap-4 justify-start items-start p-4">
@@ -88,12 +124,12 @@ export const InfographicUI: FC<
       </CardUI>
       <CardUI title="Skills" size="max-w-md">
         <ScoreRingGroupUI
-          scores={categories.map((c, index) => ({
+          scores={categories.map((c) => ({
             label: c.skill.name,
-            value: convertMonthsToYears(c.summary.months),
+            value: convertMonthsToYears(c.months),
             total: totalYears,
             size: 100,
-            displayLabel: formatYears(convertMonthsToYears(c.summary.months)),
+            displayLabel: formatYears(convertMonthsToYears(c.months)),
           }))}
         />
       </CardUI>
@@ -106,20 +142,20 @@ export const InfographicUI: FC<
             >
               <div className="text-secondary">{skill.skill.name}</div>
               <div className="text-primary font-bold">
-                {formatYears(convertMonthsToYears(skill.summary.months))}
+                {formatYears(convertMonthsToYears(skill.months))}
               </div>
             </div>
           ))}
         </div>
       </CardUI>
-      <CardUI title="Line Chart Example">
-        <LineChartUI />
+      <CardUI title="Skills Growth Over Time">
+        <LineChartUI data={skillsByYearData} series={skillsLineSeries} />
       </CardUI>
       <CardUI title="Category Distribution">
         <PieChartCardUI
           data={categories.map((c) => ({
             name: c.skill.name,
-            value: convertMonthsToYears(c.summary.months),
+            value: convertMonthsToYears(c.months),
           }))}
           colors={chartColors}
         />
@@ -131,11 +167,9 @@ export const InfographicUI: FC<
         <CardUI key={skill.skill.name} title={skill.skill.name}>
           <ProgressRingUI
             label={skill.skill.name}
-            value={convertMonthsToYears(skill.summary.months)}
+            value={convertMonthsToYears(skill.months)}
             total={totalYears}
-            displayLabel={formatYears(
-              convertMonthsToYears(skill.summary.months)
-            )}
+            displayLabel={formatYears(convertMonthsToYears(skill.months))}
             size={200}
           />
         </CardUI>
@@ -145,7 +179,7 @@ export const InfographicUI: FC<
           title="Skills"
           data={categories.map((c) => ({
             name: c.skill.name,
-            value: convertMonthsToYears(c.summary.months),
+            value: convertMonthsToYears(c.months),
           }))}
           color="blue"
         />
@@ -154,7 +188,7 @@ export const InfographicUI: FC<
         <MetricListUI
           items={categories.map((c) => ({
             label: c.skill.name,
-            value: convertMonthsToYears(c.summary.months),
+            value: convertMonthsToYears(c.months),
           }))}
         />
       </CardUI>
@@ -163,7 +197,7 @@ export const InfographicUI: FC<
           title="Skills Over Time"
           data={categories.map((c) => ({
             name: c.skill.name,
-            [c.skill.name]: convertMonthsToYears(c.summary.months),
+            [c.skill.name]: convertMonthsToYears(c.months),
           }))}
           series={categories.map((c, index) => ({
             key: c.skill.name,
@@ -177,7 +211,7 @@ export const InfographicUI: FC<
           title="Skills"
           stats={categories.map((c) => ({
             label: c.skill.name,
-            value: convertMonthsToYears(c.summary.months),
+            value: convertMonthsToYears(c.months),
           }))}
         />
       </CardUI>
@@ -198,9 +232,17 @@ export const InfographicUI: FC<
 };
 
 function convertMonthsToYears(months: number): number {
-  return Math.floor(months / 12);
+  return rountToOneDecimalPlace(months / 12);
 }
 
 function formatYears(value: number): string {
   return `${value.toLocaleString()} yrs`;
+}
+
+function roundToTwoDecimalPlaces(value: number): number {
+  return Math.round(value * 100) / 100; // Round the value to two decimal places
+}
+
+function rountToOneDecimalPlace(value: number): number {
+  return Math.round(value * 10) / 10; // Round the value to one decimal place
 }

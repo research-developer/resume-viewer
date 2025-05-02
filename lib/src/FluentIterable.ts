@@ -1,3 +1,4 @@
+import { FluentMap } from "./FluentMap";
 import { FluentSet } from "./FluentSet";
 
 export class FluentIterable<T> implements Iterable<T> {
@@ -19,12 +20,30 @@ export class FluentIterable<T> implements Iterable<T> {
     return Array.from(this);
   }
 
-  toSet(): Set<T> {
-    return new Set(this);
+  toSet(): FluentSet<T> {
+    return new FluentSet(this);
   }
 
-  toFluentSet(): FluentSet<T> {
-    return new FluentSet(this);
+  toMapKV<K, V>(
+    keyFn: (item: T) => K,
+    valueFn: (item: T) => V
+  ): FluentMap<K, V> {
+    const map = new FluentMap<K, V>();
+    for (const item of this) {
+      const key = keyFn(item);
+      const value = valueFn(item);
+      map.set(key, value);
+    }
+    return map;
+  }
+
+  toMap<K>(keyFn: (item: T) => K): FluentMap<K, T> {
+    const map = new FluentMap<K, T>();
+    for (const item of this) {
+      const key = keyFn(item);
+      map.set(key, item);
+    }
+    return map;
   }
 
   first(): T | undefined {
@@ -175,7 +194,74 @@ export class FluentIterable<T> implements Iterable<T> {
     return this.filter((item) => Boolean(item));
   }
 
+  groupBy<K>(keyFn: (item: T) => K): FluentMap<K, T[]> {
+    const map = new FluentMap<K, T[]>();
+    for (const item of this) {
+      const key = keyFn(item);
+      if (!map.has(key)) {
+        map.set(key, []);
+      }
+      map.get(key)?.push(item);
+    }
+    return map;
+  }
+
+  flatMap<U>(
+    fn: (item: T) => Iterable<U> | FluentIterable<U>
+  ): FluentIterable<U> {
+    return new FluentIterable(() => {
+      const self = this;
+      function* generator(): Generator<U> {
+        for (const item of self) {
+          const innerIterable = fn(item);
+          if (innerIterable instanceof FluentIterable) {
+            yield* innerIterable;
+          } else {
+            yield* innerIterable;
+          }
+        }
+      }
+      return generator();
+    });
+  }
+
+  sortBy<K>(
+    keyFn: (item: T) => K,
+    compareFn: (a: K, b: K) => number = (a, b) => {
+      return (a < b ? -1 : 1) as unknown as number;
+    }
+  ): FluentIterable<T> {
+    return new FluentIterable(() => {
+      const items = this.toArray();
+      items.sort((a, b) => {
+        const keyA = keyFn(a);
+        const keyB = keyFn(b);
+        if (compareFn) {
+          return compareFn(keyA, keyB);
+        }
+        return (keyA < keyB ? -1 : 1) as unknown as number;
+      });
+      return items;
+    });
+  }
+
+  sort(): FluentIterable<T> {
+    return new FluentIterable(() => {
+      const items = this.toArray();
+      items.sort();
+      return items;
+    });
+  }
+
+  json(): T[] {
+    return this.toArray();
+  }
+
   static from<T>(iterable: Iterable<T>): FluentIterable<T> {
     return new FluentIterable(() => iterable);
+  }
+
+  static empty<T>(): FluentIterable<T> {
+    return new FluentIterable(() => []);
   }
 }

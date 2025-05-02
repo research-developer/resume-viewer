@@ -31,8 +31,8 @@ export const PieChartCardUI: FC<PieChartCardUIProps> = ({ data, colors }) => {
     <ResponsiveContainer
       width="100%"
       height="100%"
-      minWidth={data.length * 50}
-      minHeight={data.length * 50}
+      minWidth={250}
+      minHeight={250}
     >
       <PieChart>
         <Pie

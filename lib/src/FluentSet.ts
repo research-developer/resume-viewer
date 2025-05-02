@@ -11,4 +11,15 @@ export class FluentSet<T> extends Set<T> {
   fluent(): FluentIterable<T> {
     return new FluentIterable(() => this.values());
   }
+
+  append(items: FluentIterable<T>): FluentSet<T> {
+    for (const item of items) {
+      this.add(item);
+    }
+    return this;
+  }
+
+  json(): T[] {
+    return Array.from(this.values());
+  }
 }

@@ -19,4 +19,11 @@ export class FluentMap<K, V> extends Map<K, V> {
   fluentKeys(): FluentIterable<K> {
     return new FluentIterable(() => this.keys());
   }
+
+  json(): Record<string, V> {
+    return this.fluent().reduce((acc, [key, value]) => {
+      acc[key as unknown as string] = value;
+      return acc;
+    }, {} as Record<string, V>);
+  }
 }

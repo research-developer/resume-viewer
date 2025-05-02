@@ -198,7 +198,7 @@ export const createChartGradient = (
   color: AccentColor,
   opacity: { start?: number; end?: number } = { start: 0.8, end: 0 }
 ): JSX.Element => (
-  <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+  <linearGradient key={id} id={id} x1="0" y1="0" x2="0" y2="1">
     <stop
       offset="5%"
       stopColor={getAccentColor(color)}

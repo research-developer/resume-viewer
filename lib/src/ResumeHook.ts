@@ -6,22 +6,11 @@ import {
   useMemo,
 } from "react";
 import { Resume, ResumeSchema } from "./ResumeModel";
-import { getGravatarUrl } from "./GravatarUtil";
-import { getResumeSkillStats, ResumeSkillStats } from "./ResumeSkillStatsModel";
-
-export interface ResumeStats {
-  skills: ResumeSkillStats;
-}
-
-export interface ResumeData {
-  resume: Resume;
-  stats: ResumeStats;
-  gravatarUrl: string | null;
-}
+import { ResumeAnalyzer } from "./analyzer/ResumeAnalyzer";
 
 export interface ResumeState {
   url: string | null;
-  data: ResumeData | null;
+  data: ResumeAnalyzer | null;
   error: Error | null;
 }
 
@@ -105,7 +94,7 @@ async function fetchResume(
     }
     const jsonData = await response.json();
     const parsedData = await ResumeSchema.parseAsync(jsonData);
-    const data = await createResumeData(parsedData);
+    const data = await ResumeAnalyzer.analyzeAsync(parsedData);
 
     return {
       ...prevState,
@@ -114,24 +103,12 @@ async function fetchResume(
       error: null,
     };
   } catch (err) {
+    console.error("Error fetching resume:", err);
     return {
       ...prevState,
       url,
       data: null,
       error: err as Error,
     };
-  }
-}
-
-export async function createResumeData(resume: Resume): Promise<ResumeData> {
-  console.time("createResumeData");
-  try {
-    const stats = {
-      skills: getResumeSkillStats(resume),
-    };
-    const gravatarUrl = await getGravatarUrl(resume.basics?.email || "", 200);
-    return { resume, stats, gravatarUrl };
-  } finally {
-    console.timeEnd("createResumeData");
   }
 }

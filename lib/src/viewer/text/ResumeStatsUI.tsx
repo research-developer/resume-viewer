@@ -1,8 +1,5 @@
 import React, { useMemo } from "react";
-import {
-  SkillStatsSummaryTreeNode,
-  SkillTree,
-} from "../../ResumeSkillStatsModel";
+import { SkillStatsTreeNode, SkillTree } from "../../analyzer/SkillAnalyzer";
 import { SkillRadarChartUI } from "./SkillRadarChartUI";
 import { ResumeStats } from "../../ResumeHook";
 
@@ -23,21 +20,21 @@ export const ResumeStatsUI: React.FC<ResumeStatsUIProps> = ({ stats }) => {
   const allSkills = stats.skills.all;
 
   // Filter out category skills using isCategory property from skill.skill
-  const categorySkills = allSkills.all
+  const categorySkills = allSkills.bySkill
     .fluentValues()
     .filter((skill) => skill.skill.isCategory)
     .toArray()
-    .sort((a, b) => b.summary.months - a.summary.months);
+    .sort((a, b) => b.group.months - a.group.months);
 
   // Get top 5 category skills
   const topCategorySkills = categorySkills.slice(0, 5);
 
   // Get top skills by experience from stats.skills.all.skills
-  const topSkills = allSkills.all
+  const topSkills = allSkills.bySkill
     .fluentValues()
     .filter((skill) => !skill.skill.isCategory)
     .toArray()
-    .sort((a, b) => b.summary.months - a.summary.months)
+    .sort((a, b) => b.group.months - a.group.months)
     .slice(0, 10);
 
   const summaryMonths = stats.skills.summary.months;
@@ -85,13 +82,13 @@ export const ResumeStatsUI: React.FC<ResumeStatsUIProps> = ({ stats }) => {
 
 // New component for displaying skill categories
 interface SkillCategoriesChartProps {
-  skills: SkillStatsSummaryTreeNode[];
+  skills: SkillStatsTreeNode[];
 }
 
 export const SkillCategoriesChart: React.FC<SkillCategoriesChartProps> = ({
   skills,
 }) => {
-  const maxMonths = Math.max(...skills.map((s) => s.summary.months));
+  const maxMonths = Math.max(...skills.map((s) => s.group.months));
 
   return (
     <div className="bg-gray-50 p-4 rounded-lg shadow-sm border-l-4 border-blue-600">
@@ -110,11 +107,11 @@ export const SkillCategoriesChart: React.FC<SkillCategoriesChartProps> = ({
                 <div
                   className="h-6 bg-blue-600 rounded-md"
                   style={{
-                    width: `${(skill.summary.months / maxMonths) * 100}%`,
+                    width: `${(skill.group.months / maxMonths) * 100}%`,
                   }}
                 />
                 <div className="ml-2 text-sm text-gray-600">
-                  {(skill.summary.months / 12).toFixed(1)} years
+                  {(skill.group.months / 12).toFixed(1)} years
                 </div>
               </div>
             </div>
@@ -133,11 +130,11 @@ export const SkillCategoriesChart: React.FC<SkillCategoriesChartProps> = ({
 
 // Component for displaying top skills as a bar chart
 interface TopSkillsChartProps {
-  skills: SkillStatsSummaryTreeNode[];
+  skills: SkillStatsTreeNode[];
 }
 
 export const TopSkillsChart: React.FC<TopSkillsChartProps> = ({ skills }) => {
-  const maxMonths = Math.max(...skills.map((s) => s.summary.months));
+  const maxMonths = Math.max(...skills.map((s) => s.group.months));
 
   return (
     <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
@@ -155,11 +152,11 @@ export const TopSkillsChart: React.FC<TopSkillsChartProps> = ({ skills }) => {
               <div
                 className="h-5 bg-blue-500 rounded-md"
                 style={{
-                  width: `${(skill.summary.months / maxMonths) * 100}%`,
+                  width: `${(skill.group.months / maxMonths) * 100}%`,
                 }}
               />
               <div className="ml-2 text-sm text-gray-600">
-                {(skill.summary.months / 12).toFixed(1)} years
+                {(skill.group.months / 12).toFixed(1)} years
               </div>
             </div>
           </div>
@@ -171,7 +168,7 @@ export const TopSkillsChart: React.FC<TopSkillsChartProps> = ({ skills }) => {
 
 // Component for displaying skill hierarchies as a tree
 interface SkillHierarchyTreeProps {
-  categories: SkillStatsSummaryTreeNode[];
+  categories: SkillStatsTreeNode[];
 }
 
 export const SkillHierarchyTree: React.FC<SkillHierarchyTreeProps> = ({
@@ -200,7 +197,7 @@ export const SkillHierarchyTree: React.FC<SkillHierarchyTreeProps> = ({
 };
 
 interface HierarchyNodeProps {
-  node: SkillStatsSummaryTreeNode;
+  node: SkillStatsTreeNode;
   depth: number;
 }
 
@@ -232,7 +229,7 @@ const HierarchyNode: React.FC<HierarchyNodeProps> = ({ node, depth }) => {
           {node.skill.name}
         </span>
         <span className="ml-2 text-xs text-gray-600">
-          {(node.summary.months / 12).toFixed(1)} yrs
+          {(node.group.months / 12).toFixed(1)} yrs
         </span>
       </div>
 
