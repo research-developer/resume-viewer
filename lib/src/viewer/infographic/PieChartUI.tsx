@@ -7,7 +7,7 @@ import {
   Legend,
 } from "recharts";
 import { FC } from "react";
-import { getAccentColors, useChartColors } from "../../ColorUtils";
+import { useChartColors } from "../../ColorUtils";
 
 // Define type for pie chart data items
 export type PieChartDataItem = {
@@ -46,7 +46,7 @@ export const PieChartCardUI: FC<PieChartCardUIProps> = ({ data, colors }) => {
           paddingAngle={4}
           label
         >
-          {data.map((entry, index) => (
+          {data.map((_, index) => (
             <Cell
               key={`cell-${index}`}
               fill={chartColors[index % chartColors.length]}

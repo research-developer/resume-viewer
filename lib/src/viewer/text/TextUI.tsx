@@ -13,9 +13,9 @@ import { ReferenceListUI } from "./ReferenceUI";
 import { ProjectListUI } from "./ProjectUI";
 import { useViewerContext } from "../ViewerHook";
 
-interface ResumeUIProps {}
+interface TextViewUIProps {}
 
-export const ResumeUI: React.FC<ResumeUIProps> = () => {
+export const TextViewUI: React.FC<TextViewUIProps> = () => {
   const { state } = useViewerContext();
   const { data: viewerData } = state;
   const { isPending, data: resumeData } = viewerData || {
@@ -38,7 +38,7 @@ export const ResumeUI: React.FC<ResumeUIProps> = () => {
   const { resume } = resumeData;
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm">
+    <div className="p-6 rounded-lg shadow-sm">
       <BasicsUI basics={resume.basics} />
       {resume.work && <WorkListUI workList={resume.work} />}
       {resume.volunteer && <VolunteerListUI volunteerList={resume.volunteer} />}

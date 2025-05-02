@@ -9,8 +9,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: "src/index.ts",
-      name: "jsonresume-viewer",
-      fileName: "jsonresume-viewer",
+      name: "resume-viewer",
+      fileName: "resume-viewer",
       formats: ["es", "umd"],
     },
     rollupOptions: {

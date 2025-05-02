@@ -10,7 +10,6 @@ export function destoryVisualization(element: SVGSVGElement, selector: string) {
   viz.interrupt().selectAll("*").interrupt().remove();
   // Remove the timeline group itself
   viz.remove();
-  console.log("Visualization destroyed.");
 }
 
 export function burstAt(element: SVGSVGElement, x: number, y: number) {

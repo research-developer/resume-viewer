@@ -1,4 +1,4 @@
-import { useEffect, RefObject, useState } from "react";
+import { useEffect, RefObject } from "react";
 
 export function useFullscreen(
   containerRef: RefObject<HTMLDivElement | null>,
@@ -11,9 +11,6 @@ export function useFullscreen(
       const newIsFullscreen = !!document.fullscreenElement;
       // Only dispatch if the state has changed
       if (isFullscreen !== newIsFullscreen) {
-        console.log(
-          `Fullscreen state changed: ${isFullscreen} -> ${newIsFullscreen}`
-        );
         onFullscreenChange?.(newIsFullscreen);
       }
     };

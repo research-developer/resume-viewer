@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect } from "react";
 import { useVisualizerContext } from "./VisualizerHook";
-import { useFullscreen } from "./FullScreenHook";
-import { useResize } from "./ResizeHook";
+import { useFullscreen } from "../FullScreenHook";
+import { useResize } from "../ResizeHook";
 import * as d3 from "d3";
 
 export const VisualizerContainerUI: FC<React.PropsWithChildren> = ({

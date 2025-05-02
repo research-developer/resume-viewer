@@ -22,15 +22,18 @@ export const ProfileUI: React.FC<ProfileUIProps> = ({
   const email = basics.email || "";
   const summary = basics.summary || "";
 
-  const location = basics.location
-    ? [
-        basics.location.city,
-        basics.location.region,
-        basics.location.countryCode,
-      ]
-        .filter(Boolean)
-        .join(", ")
-    : undefined;
+  const location =
+    typeof basics.location === "string"
+      ? basics.location
+      : basics.location
+      ? [
+          basics.location.city,
+          basics.location.region,
+          basics.location.countryCode,
+        ]
+          .filter(Boolean)
+          .join(", ")
+      : undefined;
 
   return (
     <div className="flex flex-col items-center p-spacing-card text-secondary">

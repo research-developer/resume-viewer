@@ -4,10 +4,9 @@ import {
   useVisualizerContext,
   VisualizerAnimationStartPosition,
   VisualizerD3State,
-  VisualizerDispatchAction,
 } from "./VisualizerHook";
 import { TimelineData, TimelineEvent } from "./TimelineModel";
-import { burstAt, destoryVisualization } from "./VisualizationUtil";
+import { destoryVisualization } from "./VisualizationUtil";
 
 export const TimelineUI: React.FC = () => {
   const { state } = useVisualizerContext();
@@ -19,8 +18,6 @@ export const TimelineUI: React.FC = () => {
       if (!d3State.svgRef.current) return; // Ensure the SVG reference is available
       if (this.type === "DRAW_TIMELINE") {
         drawTimeline(d3State, this.data, this.origin);
-        // do burst animation
-        //burstAt(d3State.svgRef.current, this.origin.x, this.origin.y);
       }
     });
 
@@ -38,8 +35,7 @@ function drawTimeline(
   data: TimelineData,
   origin: VisualizerAnimationStartPosition
 ) {
-  const { svgRef, rootRef, dispatch, zoom, width, height, minZoom, maxZoom } =
-    d3State;
+  const { svgRef, rootRef, zoom, width, height, maxZoom } = d3State;
   if (!svgRef.current || !rootRef.current) return; // Ensure the SVG reference is available
   if (!data?.events) return; // Ensure timeline data is available
 
@@ -54,13 +50,6 @@ function drawTimeline(
   // Get the SVG dimensions from the element
   const svgRect = svg.node()?.getBBox();
   if (!svgRect) return; // No dimensions available
-
-  // Use a fixed size and let the SVG scale it
-  const xMid = width / 2;
-  const yMid = height / 2;
-
-  // Calculate the scale factor based on the SVG dimensions to fit the view
-  const scaleFactor = Math.min(svgRect.width / width, svgRect.height / height);
 
   // Find min and max dates for the domain
   const minDate = new Date(
@@ -97,14 +86,7 @@ function drawTimeline(
     .range([baselineStartX, baselineEndX])
     .nice();
   const todayX = xTimelineScale(now); // X position of today on the timeline
-  const minDateX = xTimelineScale(paddedMinDate); // X position of min date on the timeline
   const maxDateX = xTimelineScale(paddedMaxDate); // X position of max date on the timeline
-
-  // Need to translate the x,y by hand due to weird zoom behavior
-  const xWidthScale = d3
-    .scaleLinear()
-    .domain([0, width])
-    .range([baselineStartX, baselineEndX]);
 
   // Assign levels to events based on their proximity
   const eventPositions = events

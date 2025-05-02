@@ -1,20 +1,35 @@
 {
-  "name": "jsonresume-viewer",
+  "name": "resume-viewer",
   "author": "Richard Adleta <radleta@gmail.com> (https://www.richardadleta.com)",
-  "description": "A simple JSON Resume viewer built with React and Tailwind CSS.",
+  "description": "A personal resume viewer and showcase of Richard Adleta's software engineering capabilities using React, Tailwind CSS, and modern frontend technologies.",
   "license": "MIT",
-  "private": true,
-  "version": "1.0.0",
+  "private": false,
+  "homepage": "https://www.richardadleta.com/resume",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/radleta/resume-viewer"
+  },
+  "keywords": [
+    "resume",
+    "portfolio",
+    "react",
+    "tailwindcss",
+    "d3",
+    "developer-portfolio",
+    "software-architect",
+    "richard-adleta"
+  ],
+  "version": "0.1.0",
   "type": "module",
   "files": [
     "dist/"
   ],
-  "main": "./dist/jsonresume-viewer.umd.js",
-  "module": "./dist/jsonresume-viewer.js",
+  "main": "./dist/resume-viewer.umd.js",
+  "module": "./dist/resume-viewer.js",
   "exports": {
     ".": {
-      "import": "./dist/jsonresume-viewer.js",
-      "require": "./dist/jsonresume-viewer.umd.js"
+      "import": "./dist/resume-viewer.js",
+      "require": "./dist/resume-viewer.umd.js"
     }
   },
   "scripts": {
@@ -27,6 +42,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@types/d3": "^7.4.3",
     "d3": "^7.9.0",
     "recharts": "^2.15.3",
@@ -52,8 +68,8 @@
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.26.1",
     "vite": "^6.3.1",
+    "vite-plugin-checker": "latest",
     "vite-plugin-dts": "^4.5.3",
-    "vitest": "^3.1.2",
-    "vite-plugin-checker": "latest"
+    "vitest": "^3.1.2"
   }
 }

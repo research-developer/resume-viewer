@@ -3,7 +3,7 @@ import { viewerReducer, initialState, ViewerContext } from "./ViewerHook";
 import { useResume } from "../ResumeHook";
 
 type ViewerProviderProps = PropsWithChildren<{
-  url?: string | null;
+  url?: string;
 }>;
 
 export const ViewerProvider: React.FC<ViewerProviderProps> = ({

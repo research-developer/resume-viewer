@@ -1,18 +1,14 @@
-import React, { useEffect, useRef } from "react";
+import { FC, useEffect } from "react";
 import * as d3 from "d3";
 import { getInitials } from "../../GravatarUtil";
 import {
   useVisualizerContext,
-  VisualizerAnimationStartPosition,
   VisualizerD3State,
-  VisualizerDispatch,
-  VisualizerStatus,
   VisualizerView,
 } from "./VisualizerHook";
 import { VisualizerData } from "./VisualizerModel";
-import { destoryVisualization, getScale } from "./VisualizationUtil";
 
-export const ProfileUI: React.FC = () => {
+export const ProfileUI: FC = () => {
   const { state } = useVisualizerContext();
   const { d3State } = state;
 
@@ -21,7 +17,7 @@ export const ProfileUI: React.FC = () => {
     d3State.dispatch.on("DRAW_PROFILE", function () {
       if (!d3State.svgRef.current) return; // Ensure the SVG reference is available
       if (this.type === "DRAW_PROFILE") {
-        drawProfileVisualization(d3State, this.data, this.origin);
+        drawProfileVisualization(d3State, this.data);
       }
     });
 
@@ -36,11 +32,9 @@ export const ProfileUI: React.FC = () => {
 
 async function drawProfileVisualization(
   d3State: VisualizerD3State,
-  data: VisualizerData,
-  origin: VisualizerAnimationStartPosition
+  data: VisualizerData
 ): Promise<void> {
-  const { svgRef, rootRef, dispatch, zoom, width, height, minZoom, maxZoom } =
-    d3State;
+  const { svgRef, rootRef, dispatch, width, height } = d3State;
   if (!svgRef.current || !rootRef.current) return;
   const { resume, gravatarUrl } = data;
   const { basics } = resume;
@@ -52,7 +46,6 @@ async function drawProfileVisualization(
   // Get dimensions
   const centerX = width / 2;
   const centerY = height / 2;
-  const scaleFactor = getScale(svgRef.current, width, height);
 
   // Define parameters
   const profileRadius = Math.min(width, height) * 0.15; // Size of central profile
@@ -103,7 +96,6 @@ async function drawProfileVisualization(
 
   const innerRadius = profileRadius * 1.2;
   const outerRadius = profileRadius * 2;
-  const textRadius = (innerRadius + outerRadius) / 2;
 
   // Create a base group to contain the layers of the visualization
   const layers = root
@@ -244,21 +236,7 @@ async function drawProfileVisualization(
     .style("opacity", 0.7)
     .style("stroke", "#fff")
     .style("stroke-width", "1px")
-    // .on("mouseover", function () {
-    //   d3.select(this)
-    //     .transition()
-    //     .duration(200)
-    //     .style("opacity", 1)
-    //     .attr("transform", "scale(1.05)");
-    // })
-    // .on("mouseout", function () {
-    //   d3.select(this)
-    //     .transition()
-    //     .duration(200)
-    //     .style("opacity", 0.7)
-    //     .attr("transform", "scale(1)");
-    // })
-    .on("click", function (event, d) {
+    .on("click", function (_, d) {
       // Find the center of the segment
       const [x, y] = arc.centroid(d as any);
 
@@ -351,8 +329,6 @@ async function drawProfileVisualization(
     .attr("class", "connection-lines");
 
   segmentData.forEach((d) => {
-    const angle = (d.startAngle + d.endAngle) / 2;
-
     // Calculate points using D3's arc centroid method for consistency
     const segmentCentroid = arc.centroid(d as any);
     const centroidAngle = Math.atan2(segmentCentroid[1], segmentCentroid[0]);
@@ -364,8 +340,6 @@ async function drawProfileVisualization(
     // Calculate the point on the inner edge of the segment
     const outerPointX = Math.cos(centroidAngle) * innerRadius;
     const outerPointY = Math.sin(centroidAngle) * innerRadius;
-
-    // Create a line from the profile edge to the segment inner edge
 
     // Create a line from the profile edge to the segment inner edge
     connectionLines

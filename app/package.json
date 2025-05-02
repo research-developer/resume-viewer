@@ -1,5 +1,5 @@
 {
-  "name": "jsonresume-viewer-app",
+  "name": "resume-viewer-app",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,12 +7,15 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepack": "npm run build"
   },
   "dependencies": {
-    "jsonresume-viewer": "file:../lib/jsonresume-viewer-1.0.0.tgz",
+    "@tailwindcss/vite": "^4.1.5",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "resume-viewer": "file:../lib/resume-viewer-0.1.0.tgz",
+    "tailwindcss": "^4.1.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",

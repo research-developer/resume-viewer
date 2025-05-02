@@ -13,13 +13,12 @@ import { TrendComparisonUI } from "./TrendComparisonUI";
 import { GroupedStatsUI } from "./GroupedStatsUI";
 import { RadarChartUI } from "./RadarChartUI"; // Add this import
 import { useChartColors } from "../../ColorUtils";
-import { FluentMap } from "../../FluentMap";
 
-type InfographicUIProps = {};
+type InfographicViewUIProps = {};
 
-export const InfographicUI: FC<
-  InfographicUIProps
-> = ({}: InfographicUIProps) => {
+export const InfographicViewUI: FC<
+  InfographicViewUIProps
+> = ({}: InfographicViewUIProps) => {
   const { state, dispatch } = useViewerContext();
   const { data: viewerData } = state;
   const { data: resumeData, isPending: resumeIsPending } = viewerData || {
@@ -74,8 +73,6 @@ export const InfographicUI: FC<
           { name: year.toString() }
         ) as LineChartDataPoint;
     });
-
-    console.log("skillsByYearData", { lineData });
 
     return lineData;
   }, [stats?.yearCummulative]);
@@ -237,10 +234,6 @@ function convertMonthsToYears(months: number): number {
 
 function formatYears(value: number): string {
   return `${value.toLocaleString()} yrs`;
-}
-
-function roundToTwoDecimalPlaces(value: number): number {
-  return Math.round(value * 100) / 100; // Round the value to two decimal places
 }
 
 function rountToOneDecimalPlace(value: number): number {

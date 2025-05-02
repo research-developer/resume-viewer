@@ -1,4 +1,4 @@
-import React, { act, createContext, useContext } from "react";
+import React, { createContext, useContext } from "react";
 import { VisualizerData } from "./VisualizerModel";
 import { TimelineData } from "./TimelineModel";
 import * as d3 from "d3";
@@ -158,7 +158,7 @@ const visualizerReducerDebug = (
   });
   try {
     const result = visualizerReducerProd(state, action);
-    console.log(`New State:`, result);
+    console.debug(`New State:`, result);
     return result;
   } finally {
     console.groupEnd();

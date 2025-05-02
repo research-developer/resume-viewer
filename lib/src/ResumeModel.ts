@@ -1,17 +1,20 @@
 import { z } from "zod";
 import { generateRandomId } from "./Identity";
 
-export const LocationSchema = z.object({
-  id: z
-    .string()
-    .optional()
-    .default(() => generateRandomId("loc-")),
-  address: z.string().optional(),
-  postalCode: z.string().optional(),
-  city: z.string().optional(),
-  countryCode: z.string().optional(),
-  region: z.string().optional(),
-});
+export const LocationSchema = z.union([
+  z.object({
+    id: z
+      .string()
+      .optional()
+      .default(() => generateRandomId("loc-")),
+    address: z.string().optional(),
+    postalCode: z.string().optional(),
+    city: z.string().optional(),
+    countryCode: z.string().optional(),
+    region: z.string().optional(),
+  }),
+  z.string().optional(),
+]);
 
 export const ProfileSchema = z.object({
   id: z

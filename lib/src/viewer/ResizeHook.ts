@@ -14,7 +14,6 @@ export function useResize(containerRef: RefObject<HTMLDivElement | null>) {
 
     const rect = containerRef.current.getBoundingClientRect();
     setDimensions(rect);
-    console.log(`useResize: Initial dimensions: ${rect.width}x${rect.height}`);
   }, []);
 
   //
@@ -29,9 +28,6 @@ export function useResize(containerRef: RefObject<HTMLDivElement | null>) {
         dimensions.width !== newDimensions.width ||
         dimensions.height !== newDimensions.height
       ) {
-        console.log(
-          `useResize: Dimensions changed: ${dimensions?.width}x${dimensions?.height} -> ${newDimensions.width}x${newDimensions.height}`
-        );
         // Update the state only if the dimensions have changed
         setDimensions(newDimensions);
       }

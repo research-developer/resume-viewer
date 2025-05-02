@@ -5,7 +5,7 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { Resume, ResumeSchema } from "./ResumeModel";
+import { ResumeSchema } from "./ResumeModel";
 import { ResumeAnalyzer } from "./analyzer/ResumeAnalyzer";
 
 export interface ResumeState {
@@ -40,13 +40,20 @@ export function useResume(url?: string | null) {
     [dispatch]
   );
 
+  const refresh = useCallback(() => {
+    startTransition(() => {
+      dispatch(state.url);
+    });
+  }, [dispatch, state.url]);
+
   const newState = useMemo(() => {
     return {
       ...state,
       isPending,
       setUrl,
+      refresh,
     };
-  }, [state, isPending, setUrl]);
+  }, [state, isPending, setUrl, refresh]);
 
   // Effect to handle URL changes
   useEffect(() => {

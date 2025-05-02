@@ -5,6 +5,7 @@ export enum ViewerView {
   Infographic = "infographic",
   Text = "text",
   Json = "json",
+  Visualizer = "visualizer",
 }
 
 export interface ViewerState {

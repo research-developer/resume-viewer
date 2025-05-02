@@ -227,19 +227,16 @@ export class FluentIterable<T> implements Iterable<T> {
 
   sortBy<K>(
     keyFn: (item: T) => K,
-    compareFn: (a: K, b: K) => number = (a, b) => {
-      return (a < b ? -1 : 1) as unknown as number;
-    }
+    descending: boolean = false
   ): FluentIterable<T> {
     return new FluentIterable(() => {
       const items = this.toArray();
       items.sort((a, b) => {
         const keyA = keyFn(a);
         const keyB = keyFn(b);
-        if (compareFn) {
-          return compareFn(keyA, keyB);
-        }
-        return (keyA < keyB ? -1 : 1) as unknown as number;
+        if (keyA === keyB) return 0;
+        if (descending) return (keyA < keyB ? -1 : 1) * -1;
+        return keyA < keyB ? -1 : 1;
       });
       return items;
     });

@@ -1,13 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import {
-  SkillAnalyzer,
-  SkillTree,
-  SkillOccurrenceIndex,
-  SkillSource,
-} from "./SkillAnalyzer";
+import { SkillAnalyzer, SkillTree, SkillSource } from "./SkillAnalyzer";
 import { Resume, ResumeSkill } from "../ResumeModel";
 import { FluentIterable } from "../FluentIterable";
-import { jsonable } from "../jsonable";
 
 describe("SkillAnalyzer", () => {
   // Sample test data

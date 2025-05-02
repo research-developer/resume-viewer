@@ -1,5 +1,4 @@
 import { JSX, useMemo } from "react";
-import { ac } from "vitest/dist/chunks/reporters.d.79o4mouw.js";
 
 /**
  * @fileoverview Color utility functions and constants for the application

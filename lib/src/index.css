@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "tailwindcss" important;
 
 @theme {
   /* Core Colors - Backgrounds and Neutrals */
@@ -83,17 +83,17 @@
 }
 
 button {
-  @apply bg-accent text-primary;
-  @apply text-sm font-semibold;
-  @apply px-5 py-2;
   @apply rounded-[var(--radius-button)];
   @apply shadow-[var(--shadow-button-hover)];
   @apply shadow-[var(--inset-shadow-button-inner)];
+  @apply hover:shadow-[var(--shadow-card)];
+  @apply hover:cursor-pointer;
+  @apply px-4 py-2;
+  @apply bg-accent text-primary;
+  @apply text-sm font-semibold;
   @apply transition-all duration-200 ease-in-out;
   @apply hover:bg-primary hover:text-accent;
-  @apply hover:shadow-[var(--shadow-card)];
   @apply focus:bg-primary focus:text-accent;
-  @apply cursor-pointer;
 }
 
 .fill-screen {
@@ -103,4 +103,6 @@ button {
 body.fill-screen {
   @apply min-h-screen;
   @apply bg-background;
+  @apply flex items-center justify-center;
+  @apply text-primary;
 }

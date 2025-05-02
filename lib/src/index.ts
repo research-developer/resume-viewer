@@ -4,4 +4,4 @@
 import "./index.css";
 
 // Export the main component
-export { JsonResumeViewer } from "./viewer/ViewerUI";
+export { ResumeViewerUI as ResumeViewer } from "./viewer/ViewerUI";

@@ -1,14 +1,14 @@
 import React, { useMemo } from "react";
-import { SkillStatsTreeNode, SkillTree } from "../../analyzer/SkillAnalyzer";
+import { SkillStats, SkillTree } from "../../analyzer/SkillAnalyzer";
 import { SkillRadarChartUI } from "./SkillRadarChartUI";
-import { ResumeStats } from "../../ResumeHook";
+import { ResumeAnalyzer } from "../../analyzer/ResumeAnalyzer";
 
 interface ResumeStatsUIProps {
-  stats: ResumeStats | null;
+  analyzer: ResumeAnalyzer | null;
 }
 
-export const ResumeStatsUI: React.FC<ResumeStatsUIProps> = ({ stats }) => {
-  if (!stats?.skills) {
+export const ResumeStatsUI: React.FC<ResumeStatsUIProps> = ({ analyzer }) => {
+  if (!analyzer?.stats) {
     return (
       <div className="text-gray-500 py-4 text-center">
         No statistics available
@@ -16,28 +16,33 @@ export const ResumeStatsUI: React.FC<ResumeStatsUIProps> = ({ stats }) => {
     );
   }
 
-  // Get all skills from the stats.skills.all.stats array
-  const allSkills = stats.skills.all;
-
-  // Filter out category skills using isCategory property from skill.skill
-  const categorySkills = allSkills.bySkill
-    .fluentValues()
-    .filter((skill) => skill.skill.isCategory)
-    .toArray()
-    .sort((a, b) => b.group.months - a.group.months);
-
-  // Get top 5 category skills
-  const topCategorySkills = categorySkills.slice(0, 5);
-
-  // Get top skills by experience from stats.skills.all.skills
-  const topSkills = allSkills.bySkill
-    .fluentValues()
-    .filter((skill) => !skill.skill.isCategory)
-    .toArray()
-    .sort((a, b) => b.group.months - a.group.months)
-    .slice(0, 10);
-
-  const summaryMonths = stats.skills.summary.months;
+  const {
+    careerMonths,
+    careerYears,
+    categorySkills,
+    topCategorySkills,
+    topSkills,
+  } = useMemo(() => {
+    const careerStats = analyzer.stats.career.fluentValues();
+    const categorySkills = careerStats
+      .filter((skill) => skill.skill.isCategory)
+      .toArray();
+    const topCategorySkills = categorySkills.slice(0, 10);
+    const topSkills = careerStats
+      .filter((skill) => !skill.skill.isCategory)
+      .take(10)
+      .toArray();
+    const careerMonths = analyzer.stats.career.root.months;
+    const careerYears = careerMonths / 12;
+    return {
+      careerStats,
+      categorySkills,
+      topCategorySkills,
+      topSkills,
+      careerYears,
+      careerMonths,
+    };
+  }, [analyzer.stats]);
 
   return (
     <div className="space-y-6 p-4 bg-white rounded-lg shadow">
@@ -49,9 +54,9 @@ export const ResumeStatsUI: React.FC<ResumeStatsUIProps> = ({ stats }) => {
             Total Work Experience
           </h3>
           <div className="text-2xl font-bold text-blue-600">
-            {(summaryMonths / 12).toFixed(1)} years
+            {careerYears.toFixed(1)} years
             <span className="ml-2 text-sm font-normal text-gray-500">
-              ({summaryMonths} months)
+              ({careerMonths.toFixed(0)} months)
             </span>
           </div>
         </div>
@@ -59,9 +64,9 @@ export const ResumeStatsUI: React.FC<ResumeStatsUIProps> = ({ stats }) => {
         <div className="p-4 bg-gray-50 rounded-lg shadow-sm">
           <h3 className="text-lg font-semibold text-gray-700">Skills Count</h3>
           <div className="text-2xl font-bold text-blue-600">
-            {stats.skills.all.count}
+            {analyzer.stats.career.root.occurrences.size}
             <span className="ml-2 text-sm font-normal text-gray-500">
-              ({stats.skills.all.topLevel.size} categories)
+              ({categorySkills.length} categories)
             </span>
           </div>
         </div>
@@ -75,20 +80,24 @@ export const ResumeStatsUI: React.FC<ResumeStatsUIProps> = ({ stats }) => {
       <SkillRadarChartUI skills={categorySkills} />
       <TopSkillsChart skills={topSkills} />
       <SkillHierarchyTree categories={categorySkills} />
-      <KeywordConnections tree={stats.skills.tree} />
+      <KeywordConnections tree={analyzer.stats.tree} />
     </div>
   );
 };
 
 // New component for displaying skill categories
 interface SkillCategoriesChartProps {
-  skills: SkillStatsTreeNode[];
+  skills: SkillStats[];
 }
 
 export const SkillCategoriesChart: React.FC<SkillCategoriesChartProps> = ({
   skills,
 }) => {
-  const maxMonths = Math.max(...skills.map((s) => s.group.months));
+  const maxMonths = useMemo(
+    () => Math.max(...skills.map((s) => s.months)),
+    [skills]
+  );
+  const maxYears = maxMonths / 12;
 
   return (
     <div className="bg-gray-50 p-4 rounded-lg shadow-sm border-l-4 border-blue-600">
@@ -107,11 +116,11 @@ export const SkillCategoriesChart: React.FC<SkillCategoriesChartProps> = ({
                 <div
                   className="h-6 bg-blue-600 rounded-md"
                   style={{
-                    width: `${(skill.group.months / maxMonths) * 100}%`,
+                    width: `${(skill.months / maxMonths) * 100}%`,
                   }}
                 />
                 <div className="ml-2 text-sm text-gray-600">
-                  {(skill.group.months / 12).toFixed(1)} years
+                  {maxYears.toFixed(1)} years
                 </div>
               </div>
             </div>
@@ -130,11 +139,15 @@ export const SkillCategoriesChart: React.FC<SkillCategoriesChartProps> = ({
 
 // Component for displaying top skills as a bar chart
 interface TopSkillsChartProps {
-  skills: SkillStatsTreeNode[];
+  skills: SkillStats[];
 }
 
 export const TopSkillsChart: React.FC<TopSkillsChartProps> = ({ skills }) => {
-  const maxMonths = Math.max(...skills.map((s) => s.group.months));
+  const maxMonths = useMemo(
+    () => Math.max(...skills.map((s) => s.months)),
+    [skills]
+  );
+  const maxYears = maxMonths / 12;
 
   return (
     <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
@@ -152,11 +165,11 @@ export const TopSkillsChart: React.FC<TopSkillsChartProps> = ({ skills }) => {
               <div
                 className="h-5 bg-blue-500 rounded-md"
                 style={{
-                  width: `${(skill.group.months / maxMonths) * 100}%`,
+                  width: `${(skill.months / maxMonths) * 100}%`,
                 }}
               />
               <div className="ml-2 text-sm text-gray-600">
-                {(skill.group.months / 12).toFixed(1)} years
+                {maxYears.toFixed(1)} years
               </div>
             </div>
           </div>
@@ -168,7 +181,7 @@ export const TopSkillsChart: React.FC<TopSkillsChartProps> = ({ skills }) => {
 
 // Component for displaying skill hierarchies as a tree
 interface SkillHierarchyTreeProps {
-  categories: SkillStatsTreeNode[];
+  categories: SkillStats[];
 }
 
 export const SkillHierarchyTree: React.FC<SkillHierarchyTreeProps> = ({
@@ -197,14 +210,14 @@ export const SkillHierarchyTree: React.FC<SkillHierarchyTreeProps> = ({
 };
 
 interface HierarchyNodeProps {
-  node: SkillStatsTreeNode;
+  node: SkillStats;
   depth: number;
 }
 
 const HierarchyNode: React.FC<HierarchyNodeProps> = ({ node, depth }) => {
   const [expanded, setExpanded] = React.useState(depth < 2);
 
-  const hasChildren = node.children.length > 0;
+  const hasChildren = node.children.size > 0;
 
   // We're assuming that if it has keywords, it's a category
   const isCategory = hasChildren;
@@ -229,13 +242,13 @@ const HierarchyNode: React.FC<HierarchyNodeProps> = ({ node, depth }) => {
           {node.skill.name}
         </span>
         <span className="ml-2 text-xs text-gray-600">
-          {(node.group.months / 12).toFixed(1)} yrs
+          {(node.months / 12).toFixed(1)} yrs
         </span>
       </div>
 
       {expanded && hasChildren && (
         <div className="pl-5 border-l border-gray-200 ml-2">
-          {node.children.map((child) => (
+          {node.children.fluent().map((child) => (
             <HierarchyNode
               key={child.skill.name}
               node={child}
@@ -257,9 +270,14 @@ export const KeywordConnections: React.FC<KeywordConnectionsProps> = ({
   tree,
 }) => {
   // Find skills that appear as keywords in multiple parent skills
-  const parents = tree.all
-    .fluentValues()
-    .filter((skill) => skill.isCategory && skill.children.size > 1);
+  const parents = useMemo(
+    () =>
+      tree
+        .fluentValues()
+        .filter((skill) => skill.isCategory && skill.children.size > 1),
+    [tree]
+  );
+
   const sharedKeywords = parents
     .map((parent) => ({
       parent,
