@@ -83,6 +83,20 @@
   --shadow-card: 0 10px 25px rgba(0, 0, 0, 0.3);
   --inset-shadow-button-inner: inset 0 1px 0 rgba(255, 255, 255, 0.1);
   --shadow-button-hover: 0 4px 6px rgba(0, 0, 0, 0.4);
+
+  /* Glassmorphism */
+  --glass-bg: rgba(30, 41, 59, 0.35);
+  --glass-blur: blur(8px);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --neon-glow: 0 0 12px var(--color-accent-blue),
+    0 0 24px var(--color-accent-blue);
+  --neon-glow-magenta: 0 0 12px #a855f7, 0 0 24px #ec4899;
+  --neon-glow-amber: 0 0 12px #facc15, 0 0 24px #f97316;
+  --neon-glow-green: 0 0 12px #22c55e, 0 0 24px #86efac;
+  --neon-glow-red: 0 0 12px #ef4444, 0 0 24px #fca5a1;
+  --neon-glow-blue: 0 0 12px #3b82f6, 0 0 24px #93c5fd;
+  --neon-glow-cyan: 0 0 12px #06b6d4, 0 0 24px #67e8f9;
+  --neon-glow-purple: 0 0 12px #a855f7, 0 0 24px #d8b4fe;
 }
 
 button {

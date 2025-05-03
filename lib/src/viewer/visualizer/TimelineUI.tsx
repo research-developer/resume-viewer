@@ -153,7 +153,8 @@ function drawTimeline(
   const arcHeight = 30; // Height of the arc bow from the timeline
   const dotRadius = 6;
   const baseLineLength = arcHeight + dotRadius * 2 + 15; // Adjusted to include dot radius
-  const minLabelDistance = 150; // Increased minimum distance between labels
+  const isSmallScreen = width < 600; // Check if the screen is small
+  const minLabelDistance = isSmallScreen ? 50 : 80; // Minimum distance between labels
   const labelHeight = 14;
   const labelPadding = 15; // Increased padding for better spacing
   const maxLabelLength = 25; // Maximum characters for label before truncating
