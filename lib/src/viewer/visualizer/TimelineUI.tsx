@@ -76,37 +76,42 @@ function drawTimeline(
 
   // Define constants for colors and styles
   const COLORS = {
-    originDot: "var(--color-accent)",
+    originDot: "var(--color-accent-light)",
     //timeline: "url(#timeline-line-gradient)",
-    timeline: "var(--color-accent)",
+    timeline: "var(--color-accent-light)",
     timelineStart: "var(--color-accent-yellow)",
     timelineEnd: "var(--color-accent-yellow)",
-    jobArc: "url(#timeline-arc-gradient)",
-    jobArcArrow: "var(--color-accent-yellow-dark)",
-    eventStartDotFill: "var(--color-accent-yellow)",
-    eventStartDotStroke: "var(--color-accent-yellow)",
+    jobArc: "var(--color-accent-blue)",
+    jobArcHighlight: "var(--color-accent-yellow)",
+    jobArcArrow: "var(--color-accent-blue)",
+    jobArcArrowHighlight: "var(--color-accent-yellow)",
+    eventStartDotFill: "var(--color-accent-blue)",
+    eventStartDotStroke: null,
+    eventStartDotFillHighlight: "var(--color-accent-yellow)",
     eventLabelText: "var(--color-primary)",
-    eventLine: "var(--color-primary)",
-    eventEndDotFill: "var(--color-accent-yellow)",
-    eventEndDotStroke: "var(--color-accent-yellow)",
-    yearLine: "var(--color-accent)",
-    yearText: "var(--color-accent)",
+    eventLabelTextHighlight: "var(--color-accent-yellow)",
+    eventLine: "var(--color-accent-light)",
+    eventEndDotFill: null,
+    eventEndDotStroke: null,
+    eventEndDotFillHighlight: "var(--color-accent-yellow)",
+    yearLine: "var(--color-accent-light)",
+    yearText: "var(--color-accent-light)",
     background: "var(--color-background)",
-    currentYear: "var(--color-accent)",
+    currentYear: "var(--color-accent-light)",
   };
 
   const OPACITIES = {
-    eventLabel: 0.7,
+    eventLabel: 1,
     eventLabelHighlight: 1,
-    eventLine: 0.5,
-    jobArc: 0.7,
-    jobArcArrow: 0.7,
-    eventStartDotFill: 0.5,
-    eventStartDotStroke: 0.5,
-    eventEndDotFill: 0.5,
-    eventEndDotStroke: 0.5,
+    eventLine: 1,
+    jobArc: 1,
+    jobArcArrow: 1,
+    eventStartDotFill: 1,
+    eventStartDotStroke: 1,
+    eventEndDotFill: 1,
+    eventEndDotStroke: 1,
     originDot: 1,
-    timeline: 0.7,
+    timeline: 1,
     yearLine: 1,
     yearText: 1,
   };
@@ -258,24 +263,6 @@ function drawTimeline(
     .attr("stop-color", COLORS.timelineEnd)
     .attr("stop-opacity", 1); // Faded end for better visibility
 
-  // Arc gradient
-  const arcGradient = defs
-    .append("linearGradient")
-    .classed("timeline", true)
-    .attr("id", "timeline-arc-gradient")
-    .attr("x1", "0%")
-    .attr("y1", "0%")
-    .attr("x2", "70%")
-    .attr("y2", "0%");
-  arcGradient
-    .append("stop")
-    .attr("offset", "0%")
-    .attr("stop-color", COLORS.eventStartDotFill); // Use the same color as the start dot
-  arcGradient
-    .append("stop")
-    .attr("offset", "70%")
-    .attr("stop-color", COLORS.jobArcArrow); // Use the same color as the arrow marker
-
   // Create a group for the visualization with proper margins
   const container = root.append("g").classed("timeline", true);
 
@@ -339,9 +326,6 @@ function drawTimeline(
 
   const startViewport = calculateViewport(baselineStartX);
 
-  // Add a layer for sparks
-  const sparksLayer = topLayer.append("g").classed("sparks-layer", true);
-
   // draw a dot at the origin point
   const originDotX = startViewport.viewportCenterX;
   const originDotY = baselineY;
@@ -382,6 +366,7 @@ function drawTimeline(
 
   function startTimelineAnimation() {
     // Add the timeline baseline with left-to-right animation that triggers dots to appear
+    let isTimelineAnimating = true; // Flag to track animation state
     const animationDuration = Math.min(
       15000,
       Math.max(1500, events.length * 1500)
@@ -440,6 +425,37 @@ function drawTimeline(
       .attr("stroke-width", 1.5)
       .attr("transform", "scale(0.5)");
 
+    // TODO: need to centralize the job arc gradient creation so we can reuse it for both highlighted and non-highlighted arcs
+    function createJobArcGradient(
+      gradientId: string,
+      event: TimelineEvent,
+      highlight: boolean = false
+    ) {
+      const isOngoing = event.endDate.getTime() >= now.getTime() - 86400000; // Within a day of current date
+      const gradient = defs
+        .append("linearGradient")
+        .classed("timeline", true)
+        .attr("id", gradientId)
+        .attr("x1", "100%")
+        .attr("y1", "0%")
+        .attr("x2", highlight ? "100%" : isOngoing ? "80%" : "20%")
+        .attr("y2", "0%");
+
+      const color = highlight ? COLORS.jobArcHighlight : COLORS.jobArc;
+
+      gradient
+        .append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", color)
+        .attr("stop-opacity", 0);
+
+      gradient
+        .append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", color)
+        .attr("stop-opacity", 1);
+    }
+
     // Draw curved arcs between start and end dates for each job with animated path drawing
     const jobArcs = arcLayer
       .selectAll(".job-duration")
@@ -494,26 +510,9 @@ function drawTimeline(
       .attr("stroke", (d, i) => {
         // Create a unique gradient for each arc
         const gradientId = `comet-gradient-${i}`;
-        const gradient = defs
-          .append("linearGradient")
-          .classed("timeline", true)
-          .attr("id", gradientId)
-          .attr("x1", "0%")
-          .attr("y1", "0%")
-          .attr("x2", "100%")
-          .attr("y2", "0%");
 
-        gradient
-          .append("stop")
-          .attr("offset", "0%")
-          .attr("stop-color", COLORS.jobArcArrow) // Bright start
-          .attr("stop-opacity", 0);
-
-        gradient
-          .append("stop")
-          .attr("offset", "100%")
-          .attr("stop-color", COLORS.jobArcArrow) // Fading trail
-          .attr("stop-opacity", 1);
+        // Create gradient for non-highlighted arcs
+        createJobArcGradient(gradientId, d, false);
 
         return `url(#${gradientId})`;
       })
@@ -546,18 +545,25 @@ function drawTimeline(
       .attr("stroke-width", 3)
       .attr("opacity", OPACITIES.eventEndDotFill);
 
-    // Track pinned event state
-    let pinnedEventName: string | null = null;
+    // Track the state of the timeline animation in an object so we can access it from event handlers
+    const interactiveState = {
+      pinnedEventName: null as string | null,
+      hoveringEventName: null as string | null,
+      isTimelineAnimating: false,
+    };
 
     // Function to handle hover highlighting
     const highlightEvent = (
       eventName: string | null,
       isHighlighted: boolean
     ) => {
+      // Skip if we're still in the animation phase
+      if (isTimelineAnimating) return;
+
       // Skip if no event name is provided (this happens on mouseout with no target)
       if (eventName === null && !isHighlighted) {
         // If nothing is pinned, reset all highlighting when mouseleave
-        if (!pinnedEventName) {
+        if (!interactiveState.pinnedEventName) {
           resetAllHighlighting();
           return;
         }
@@ -565,7 +571,11 @@ function drawTimeline(
       }
 
       // If an event is pinned, only allow highlighting that event or unpinning it
-      if (pinnedEventName && eventName !== pinnedEventName && !isHighlighted)
+      if (
+        interactiveState.pinnedEventName &&
+        eventName !== interactiveState.pinnedEventName &&
+        !isHighlighted
+      )
         return;
 
       // Transition duration for smooth effects
@@ -586,30 +596,14 @@ function drawTimeline(
           if (isHighlighted && d.name === eventName) {
             // Create a unique gradient for the selected arc
             const gradientId = `highlight-gradient-${i}`;
-            const gradient = defs
-              .append("linearGradient")
-              .classed("timeline", true)
-              .attr("id", gradientId)
-              .attr("x1", "0%")
-              .attr("y1", "0%")
-              .attr("x2", "100%")
-              .attr("y2", "0%");
 
-            gradient
-              .append("stop")
-              .attr("offset", "0%")
-              .attr("stop-color", COLORS.jobArcArrow) // Bright start
-              .attr("stop-opacity", 0.2);
-
-            gradient
-              .append("stop")
-              .attr("offset", "100%")
-              .attr("stop-color", COLORS.jobArcArrow) // Fading trail
-              .attr("stop-opacity", 1);
+            // Create gradient for highlighted arc
+            createJobArcGradient(gradientId, d, true);
 
             return `url(#${gradientId})`;
           }
-          return `url(#comet-gradient-${i})`; // Use the original gradient for others
+          // Use the original gradient for others
+          return `url(#comet-gradient-${i})`;
         });
 
       // Add pulsing effect to the selected arc
@@ -625,6 +619,10 @@ function drawTimeline(
           .ease(d3.easeCubicInOut)
           .attr("stroke-width", 2)
           .on("end", function repeat() {
+            const continuePulsing =
+              interactiveState.pinnedEventName === eventName ||
+              interactiveState.hoveringEventName === eventName;
+            if (!continuePulsing) return; // Stop pulsing if not pinned or hovered
             d3.select(this)
               .transition()
               .duration(500)
@@ -670,6 +668,11 @@ function drawTimeline(
           return isHighlighted && d.event.name === eventName
             ? FONTS.eventLabelHighlight.size
             : FONTS.eventLabel.size;
+        })
+        .style("fill", (d: any) => {
+          return isHighlighted && d.event.name === eventName
+            ? COLORS.eventLabelTextHighlight
+            : COLORS.eventLabelText;
         });
     };
 
@@ -682,7 +685,8 @@ function drawTimeline(
         .transition()
         .duration(duration)
         .attr("stroke-width", 2)
-        .attr("opacity", OPACITIES.jobArc);
+        .attr("opacity", OPACITIES.jobArc)
+        .attr("stroke", (d, i) => `url(#comet-gradient-${i})`);
 
       // Reset event groups
       eventsGroup.transition().duration(duration).style("opacity", 1);
@@ -699,50 +703,67 @@ function drawTimeline(
         .transition()
         .duration(duration)
         .style("font-weight", FONTS.eventLabel.weight)
-        .style("font-size", FONTS.eventLabel.size);
+        .style("font-size", FONTS.eventLabel.size)
+        .style("fill", COLORS.eventLabelText);
     };
 
     // Function to handle clicking on timeline elements
     const handleEventClick = (eventName: string) => {
-      if (pinnedEventName === eventName) {
+      // always reset all highlighting on click
+      resetAllHighlighting();
+
+      // If an event is pinned, unpin it and reset highlighting
+      if (interactiveState.pinnedEventName === eventName) {
         // If clicking on already pinned event, unpin it
-        pinnedEventName = null;
-        resetAllHighlighting(); // Clean reset
+        interactiveState.pinnedEventName = null;
       } else {
         // Pin the new event
-        pinnedEventName = eventName;
-        highlightEvent(eventName, true);
+        interactiveState.pinnedEventName = eventName;
+
+        // Highlight the pinned event
+        highlightEvent(interactiveState.pinnedEventName, true);
       }
     };
 
     // Function to handle clicking on background (unpin any pinned event)
     const handleBackgroundClick = () => {
-      if (pinnedEventName) {
-        pinnedEventName = null;
+      if (interactiveState.pinnedEventName) {
+        interactiveState.pinnedEventName = null;
         resetAllHighlighting(); // Clean reset
       }
     };
 
     // Add background click handler to unpin events
-    mainGroup.on("click", function (event) {
+    root.on("click", function (event) {
       // Only handle clicks directly on the background
       if (event.target === this) {
         handleBackgroundClick();
       }
     });
 
+    function interactiveMouseEnter(d: TimelineEvent) {
+      interactiveState.hoveringEventName = d.name; // Store the name of the hovered event
+      if (!interactiveState.pinnedEventName) {
+        highlightEvent(d.name, true); // Highlight on mouse enter
+      }
+    }
+
+    function interactiveMouseLeave() {
+      interactiveState.hoveringEventName = null; // Clear the hovered event name
+      if (!interactiveState.pinnedEventName) {
+        highlightEvent(null, false); // Reset highlighting on mouse leave
+      }
+    }
+
     // Apply hover and click handlers to job arcs
     jobArcs
       .on("mouseenter", (_, d: TimelineEvent) => {
-        if (!pinnedEventName) {
-          highlightEvent(d.name, true);
-        }
+        interactiveMouseEnter(d);
       })
       .on("mouseleave", () => {
-        if (!pinnedEventName) {
-          highlightEvent(null, false);
-        }
+        interactiveMouseLeave();
       })
+      .on("click", null)
       .on("click", (event, d: TimelineEvent) => {
         event.stopPropagation(); // Prevent triggering background click
         handleEventClick(d.name);
@@ -752,14 +773,10 @@ function drawTimeline(
     // Apply hover and click handlers to event groups (dots, lines, labels)
     eventsGroup
       .on("mouseenter", (_, d: any) => {
-        if (!pinnedEventName) {
-          highlightEvent(d.event.name, true);
-        }
+        interactiveMouseEnter(d.event);
       })
       .on("mouseleave", () => {
-        if (!pinnedEventName) {
-          highlightEvent(null, false);
-        }
+        interactiveMouseLeave();
       })
       .on("click", (event, d: any) => {
         event.stopPropagation(); // Prevent triggering background click
@@ -770,15 +787,10 @@ function drawTimeline(
     // Apply hover and click handlers to end events
     endEvents
       .on("mouseenter", (_, d: any) => {
-        // Change from TimelineEvent to any to match D3's binding
-        if (!pinnedEventName) {
-          highlightEvent(d.name, true);
-        }
+        interactiveMouseEnter(d.event);
       })
       .on("mouseleave", () => {
-        if (!pinnedEventName) {
-          highlightEvent(null, false);
-        }
+        interactiveMouseLeave();
       })
       .on("click", (event, d: TimelineEvent) => {
         event.stopPropagation(); // Prevent triggering background click
@@ -841,16 +853,16 @@ function drawTimeline(
     yearMarkersGroup
       .append("text")
       .attr("x", 0)
+      // Position above or below based on alternating pattern
       .attr(
         "y",
         (d) => d.position * yearMarkerYOffset + (d.position > 0 ? 12 : -3)
-      ) // Position above or below based on alternating pattern
+      )
       .attr("text-anchor", "middle")
       .style("font-weight", "500")
       .style("opacity", OPACITIES.yearText)
       .style("font-family", "Arial, sans-serif")
       .style("font-size", "12px")
-      .style("stoke", COLORS.yearText)
       .style("fill", COLORS.yearText)
       .text((d) => d.year);
 
@@ -865,7 +877,6 @@ function drawTimeline(
       .attr("x2", todayX)
       .attr("y2", baselineY) // Position at the timeline
       .attr("stroke", COLORS.currentYear)
-      .attr("fill", COLORS.currentYear)
       .attr("stroke-width", 1)
       .attr("stroke-dasharray", "5,5") // Dashed line
       .attr("stroke-opacity", 1) // Slightly transparent
@@ -879,7 +890,7 @@ function drawTimeline(
       .attr("y", y1CurrentYearIndicator - 5) // Position above the timeline
       .attr("text-anchor", "middle")
       .attr("dy", "-0.35em") // Adjust vertical alignment
-      .attr("fill", "#e74c3c")
+      .attr("fill", COLORS.currentYear)
       .style("font-family", FONT.family)
       .style("font-size", "12px")
       .style("font-weight", "bold")
@@ -906,6 +917,9 @@ function drawTimeline(
       return function (t) {
         // Update the baseline drawing progress based on animation progress
         baselineDrawingProgress = baselineStartX + t * width;
+
+        // Check if animation is still in progress
+        isTimelineAnimating = t < 1;
 
         // Zoom in on the current viewport based on progress
         const { viewportCenterX, viewportCenterY, viewportZoom } =
@@ -1021,7 +1035,6 @@ function drawTimeline(
                   .style("font-weight", FONTS.eventLabel.weight)
                   .style("font-family", FONTS.eventLabel.family)
                   .style("fill", COLORS.eventLabelText)
-                  .style("stroke", COLORS.eventLabelText)
                   .style("line-height", "1.5")
                   .style("opacity", 0) // Start invisible
                   .transition() // Add transition for smoother opacity changes
@@ -1113,19 +1126,17 @@ function drawTimeline(
         }
 
         if (t < 1) {
-          if (!pinnedEventName) {
-            svg
-              .transition()
-              .duration(50)
-              .ease(d3.easeCubicInOut)
-              .call(
-                zoom.transform as any,
-                d3.zoomIdentity
-                  .translate(width / 2, height / 2)
-                  .scale(viewportZoom)
-                  .translate(-viewportCenterX, -viewportCenterY)
-              );
-          }
+          svg
+            .transition()
+            .duration(50)
+            .ease(d3.easeCubicInOut)
+            .call(
+              zoom.transform as any,
+              d3.zoomIdentity
+                .translate(width / 2, height / 2)
+                .scale(viewportZoom)
+                .translate(-viewportCenterX, -viewportCenterY)
+            );
         } else {
           // At the end of the animation, zoom out to show the full timeline
           const fullTimelineBounds = mainGroup.node()?.getBBox();
