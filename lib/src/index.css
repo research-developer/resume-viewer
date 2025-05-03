@@ -1,4 +1,5 @@
 @import "tailwindcss" important;
+@import "@fontsource/inter"; /* or static if preferred */
 
 @theme {
   /* Core Colors - Backgrounds and Neutrals */
@@ -12,6 +13,8 @@
 
   /* Accent Colors - Neon / Glow Feel */
   --color-accent: #454545; /* base accent gray */
+  --color-accent-light: #6b7280; /* light gray */
+  --color-accent-dark: #111827; /* dark gray */
   --color-accent-purple: #a855f7;
   --color-accent-cyan: #06b6d4;
   --color-accent-green: #22c55e;
@@ -114,11 +117,22 @@ button.active {
 
 .fill-screen {
   @apply w-full h-full;
+  @apply flex-auto;
 }
 
 body.fill-screen {
-  @apply min-h-screen;
+  @apply flex;
+}
+
+.resume-viewer {
+  @apply w-full;
+  @apply h-full;
   @apply bg-background;
-  @apply flex items-center justify-center;
   @apply text-primary;
+  @apply overflow-hidden;
+  @apply flex-auto;
+  @apply flex;
+  @apply flex-col;
+  @apply items-center;
+  @apply justify-center;
 }

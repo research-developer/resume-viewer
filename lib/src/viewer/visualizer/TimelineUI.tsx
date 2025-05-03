@@ -4,15 +4,17 @@ import {
   useVisualizerContext,
   VisualizerAnimationStartPosition,
   VisualizerD3State,
+  VisualizerDispatchAction,
   VisualizerStatus,
 } from "./VisualizerHook";
 import { TimelineData, TimelineEvent } from "./TimelineModel";
-import { destoryVisualization } from "./VisualizationUtil";
+import { destoryVisualization as destroyVisualization } from "./VisualizationUtil";
+import "./TimelineUI.css";
 
 export const TimelineUI: React.FC = () => {
-  const { state } = useVisualizerContext();
+  const [state] = useVisualizerContext();
   const { d3State, status: status, data } = state;
-  const { timeline } = data || {};
+  const { timeline, gravatarUrl } = data || {};
 
   // Trigger replay animation when isAnimating changes
   useEffect(() => {
@@ -26,15 +28,20 @@ export const TimelineUI: React.FC = () => {
     return () => {
       // Clean up the event listener when the component unmounts
       d3State.dispatch.on("DRAW_TIMELINE", null);
+
+      // Destroy the visualization when the component unmounts
+      if (d3State.svgRef.current) {
+        destroyVisualization(d3State.svgRef.current, ".timeline");
+      }
     };
   }, [d3State]);
 
   useEffect(() => {
-    if (timeline && status === VisualizerStatus.Started) {
+    if (d3State.dispatch && timeline && status === VisualizerStatus.Started) {
       // Trigger the timeline drawing when the status changes to Started
       d3State.dispatch.call("DRAW_TIMELINE", {
         type: "DRAW_TIMELINE",
-        data: timeline,
+        data: { timeline, gravatarUrl },
         origin: {
           x: d3State.width / 2,
           y: d3State.height / 2,
@@ -42,27 +49,93 @@ export const TimelineUI: React.FC = () => {
         },
       });
     }
-  }, [status, timeline]);
+  }, [status, timeline, gravatarUrl, d3State]);
 
   return null;
 };
 
 function drawTimeline(
   d3State: VisualizerD3State,
-  data: TimelineData,
+  data: VisualizerDispatchAction["data"],
   origin: VisualizerAnimationStartPosition
 ) {
-  const { svgRef, rootRef, zoom, width, height, maxZoom } = d3State;
-  if (!svgRef.current || !rootRef.current) return; // Ensure the SVG reference is available
-  if (!data?.events) return; // Ensure timeline data is available
+  const { svgRef, defsRef, rootRef, zoom, width, height, minZoom, maxZoom } =
+    d3State;
+  if (!svgRef.current || !rootRef.current || !defsRef.current) return; // Ensure the SVG reference is available
+  if (!data.timeline) return; // Ensure timeline data is available
 
-  const { events, now } = data;
+  const { timeline, gravatarUrl } = data;
+  const { events, now } = timeline;
 
   // Always clear the previous timeline before drawing a new one
-  destoryVisualization(svgRef.current, ".timeline");
+  destroyVisualization(svgRef.current, ".timeline");
 
-  const svg = d3.select(svgRef.current);
   const root = d3.select(rootRef.current);
+  const svg = d3.select(svgRef.current);
+  const defs = d3.select(defsRef.current);
+
+  // Define constants for colors and styles
+  const COLORS = {
+    originDot: "var(--color-accent)",
+    //timeline: "url(#timeline-line-gradient)",
+    timeline: "var(--color-accent)",
+    timelineStart: "var(--color-accent-yellow)",
+    timelineEnd: "var(--color-accent-yellow)",
+    jobArc: "url(#timeline-arc-gradient)",
+    jobArcArrow: "var(--color-accent-yellow-dark)",
+    eventStartDotFill: "var(--color-accent-yellow)",
+    eventStartDotStroke: "var(--color-accent-yellow)",
+    eventLabelText: "var(--color-primary)",
+    eventLine: "var(--color-primary)",
+    eventEndDotFill: "var(--color-accent-yellow)",
+    eventEndDotStroke: "var(--color-accent-yellow)",
+    yearLine: "var(--color-accent)",
+    yearText: "var(--color-accent)",
+    background: "var(--color-background)",
+    currentYear: "var(--color-accent)",
+  };
+
+  const OPACITIES = {
+    eventLabel: 0.7,
+    eventLabelHighlight: 1,
+    eventLine: 0.5,
+    jobArc: 0.7,
+    jobArcArrow: 0.7,
+    eventStartDotFill: 0.5,
+    eventStartDotStroke: 0.5,
+    eventEndDotFill: 0.5,
+    eventEndDotStroke: 0.5,
+    originDot: 1,
+    timeline: 0.7,
+    yearLine: 1,
+    yearText: 1,
+  };
+
+  const FONT = {
+    family: "Inter, Arial, sans-serif",
+    size: {
+      small: "10px",
+      medium: "14px",
+      large: "18px",
+    },
+    weight: {
+      normal: "400",
+      bold: "700",
+    },
+  };
+
+  const FONTS = {
+    eventLabel: {
+      family: FONT.family,
+      size: FONT.size.medium,
+      weight: FONT.weight.normal,
+    },
+    eventLabelHighlight: {
+      family: FONT.family,
+      size: FONT.size.large,
+      weight: FONT.weight.bold,
+    },
+  };
 
   // Get the SVG dimensions from the element
   const svgRect = svg.node()?.getBBox();
@@ -75,9 +148,6 @@ function drawTimeline(
   const maxDate = new Date(
     d3.max(events, (d: TimelineEvent) => d.endDate) || now.getTime()
   );
-
-  // Create a group for the visualization with proper margins
-  const container = root.append("g").classed("timeline", true);
 
   // Calculate positions for labels with improved staggering
   const arcHeight = 30; // Height of the arc bow from the timeline
@@ -151,20 +221,62 @@ function drawTimeline(
   });
 
   // Add an arrow marker definition for ongoing events
-  const defs = svg.append("defs").classed("timeline", true);
-
   defs
     .append("marker")
+    .classed("timeline", true)
     .attr("id", "arrow")
     .attr("viewBox", "0 -5 10 10")
     .attr("refX", 8)
     .attr("refY", 0)
-    .attr("markerWidth", 3) // Reduced to be 2x smaller (was 6)
-    .attr("markerHeight", 3) // Reduced to be 2x smaller (was 6)
+    .attr("markerWidth", 3)
+    .attr("markerHeight", 3)
     .attr("orient", "auto")
     .append("path")
     .attr("d", "M0,-5L10,0L0,5")
-    .attr("fill", "steelblue");
+    .attr("fill", COLORS.jobArcArrow);
+
+  // Timeline line gradient
+  const lineGradient = defs
+    .append("linearGradient")
+    .classed("timeline", true)
+    .attr("id", "timeline-line-gradient")
+    .attr("x1", "0%")
+    .attr("y1", "0%")
+    .attr("x2", "100%")
+    .attr("y2", "0%");
+
+  lineGradient
+    .append("stop")
+    .attr("offset", "0%")
+    .attr("stop-color", COLORS.timelineStart)
+    .attr("stop-opacity", 0.2); // Faded end for better visibility
+
+  lineGradient
+    .append("stop")
+    .attr("offset", "100%")
+    .attr("stop-color", COLORS.timelineEnd)
+    .attr("stop-opacity", 1); // Faded end for better visibility
+
+  // Arc gradient
+  const arcGradient = defs
+    .append("linearGradient")
+    .classed("timeline", true)
+    .attr("id", "timeline-arc-gradient")
+    .attr("x1", "0%")
+    .attr("y1", "0%")
+    .attr("x2", "70%")
+    .attr("y2", "0%");
+  arcGradient
+    .append("stop")
+    .attr("offset", "0%")
+    .attr("stop-color", COLORS.eventStartDotFill); // Use the same color as the start dot
+  arcGradient
+    .append("stop")
+    .attr("offset", "70%")
+    .attr("stop-color", COLORS.jobArcArrow); // Use the same color as the arrow marker
+
+  // Create a group for the visualization with proper margins
+  const container = root.append("g").classed("timeline", true);
 
   // Create a main group that will be transformed during zoom - needs to be created early
   const mainGroup = container
@@ -212,10 +324,8 @@ function drawTimeline(
     const viewportCenterY = minY + viewportHeight / 2;
 
     // Calculate appropriate zoom level based on viewport size
-    const viewportZoom = Math.min(
-      width / viewportWidth,
-      height / viewportHeight
-    ); // 80% to add some margin
+    const viewportZoom =
+      Math.min(width / viewportWidth, height / viewportHeight) * 0.9; // 90% of the available zoom level
 
     return {
       viewportWidth,
@@ -226,74 +336,48 @@ function drawTimeline(
     };
   }
 
-  const startViewport = calculateViewport(0);
+  const startViewport = calculateViewport(baselineStartX);
+
+  // Add a layer for sparks
+  const sparksLayer = topLayer.append("g").classed("sparks-layer", true);
 
   // draw a dot at the origin point
-  const originDotX = baselineStartX;
+  const originDotX = startViewport.viewportCenterX;
   const originDotY = baselineY;
   const originDot = topLayer
     .append("circle")
     .attr("cx", originDotX)
     .attr("cy", originDotY)
     .attr("r", 3)
-    .attr("fill", "steelblue")
-    .attr("opacity", 0)
-    // Ensure it's on top of the arc
-    .attr("z-index", 4);
+    .attr("fill", COLORS.originDot)
+    .attr("opacity", 0);
 
-  // Zoom in at the start of the animation
-  originDot
+  // zoom out to fill the screen
+  svg
     .transition()
-    .attr("opacity", 1) // Fade in the origin dot
-    .attr("r", 24) // Increase size to 24
-    .duration(500) // Duration of the zoom animation
-    .ease(d3.easeCubicInOut) // Easing function for smooth transition
-    .transition()
-    .duration(500) // Duration of the zoom animation
-    .attr("r", 3) // Fade out the origin dot
-    .ease(d3.easeCubicInOut) // Easing function for smooth transition
+    .duration(0) // No transition for initial zoom out
+    .call(
+      zoom.transform as any,
+      d3.zoomIdentity
+        .translate(width / 2, height / 2)
+        .scale(startViewport.viewportZoom)
+        .translate(
+          -startViewport.viewportCenterX,
+          -startViewport.viewportCenterY
+        )
+    )
     .on("end", () => {
-      // After the zoom, animate the origin dot to the timeline position
-      zoomToOrigin();
+      // Zoom in at the start of the animation
+      originDot
+        .transition()
+        .attr("opacity", OPACITIES.originDot) // Fade in the origin dot
+        .duration(2500) // Duration of the zoom animation
+        .ease(d3.easeCubicInOut) // Easing function for smooth transition
+        .on("end", () => {
+          // After the zoom, animate the origin dot to the timeline position
+          startTimelineAnimation();
+        });
     });
-
-  function zoomToOrigin() {
-    // Zoom to the origin point
-    svg
-      .transition()
-      .duration(2000) // Duration of the animation
-      .call(
-        zoom.transform as any,
-        d3.zoomIdentity
-          // Center the zoom on the origin dot
-          .translate(width / 2, height / 2)
-          .scale(maxZoom)
-          .translate(-originDotX, -originDotY)
-      )
-      .on("end", () => {
-        // Now we need to zoom to the viewport
-        zoomToViewport();
-      });
-  }
-
-  function zoomToViewport() {
-    // Apply zoom to the SVG element
-    svg
-      .transition()
-      .attr("x", baselineStartX)
-      .duration(1000) // Duration of the animation
-      .call(
-        zoom.transform as any,
-        d3.zoomIdentity
-          .translate(width / 2, height / 2)
-          .scale(startViewport.viewportZoom)
-          .translate(-baselineStartX, -baselineY)
-      )
-      .on("end", () => {
-        // After the zoom, animate the origin dot to the timeline position
-        startTimelineAnimation();
-      });
-  }
 
   function startTimelineAnimation() {
     // Add the timeline baseline with left-to-right animation that triggers dots to appear
@@ -307,14 +391,12 @@ function drawTimeline(
       .attr("x1", baselineStartX)
       .attr("y1", baselineY)
       .attr("x2", baselineEndX)
-      .attr("y2", baselineY)
-      .attr("stroke", "#adb5bd")
+      .attr("y2", baselineY + 0.01) // Small offset to avoid 0-length line
+      .attr("stroke", COLORS.timeline)
       .attr("stroke-width", 2)
+      .attr("opacity", OPACITIES.timeline)
       .attr("stroke-dasharray", width) // Set dash array to line length
       .attr("stroke-dashoffset", width) // Initially offset by full length (invisible)
-      .attr("opacity", 0.5) // Slightly transparent
-      .attr("stroke-opacity", 0.8) // Slightly transparent
-      .attr("z-index", 1) // Ensure it's below the arcs
       .transition()
       .duration(animationDuration) // Increased duration for slower animation
       .delay(300) // Start slightly before other animations
@@ -344,20 +426,18 @@ function drawTimeline(
       .attr("y1", 0)
       .attr("x2", 0)
       .attr("y2", 0) // Start with zero length
-      .attr("stroke", "#999")
-      .attr("stroke-width", 1)
-      .attr("opacity", 0.5) // Slightly transparent
-      .attr("z-index", 1); // Ensure it's on top of the arc
+      .attr("stroke", COLORS.eventLine)
+      .attr("stroke-width", 2)
+      .attr("opacity", OPACITIES.eventLine);
 
     // Add circles with 0 radius - they'll be revealed when the baseline passes them
     const startEvents = eventsGroup
       .append("circle")
       .attr("r", 0)
-      .attr("fill", "steelblue")
-      .attr("stroke", "steelblue")
+      .attr("fill", COLORS.eventStartDotFill)
+      .attr("stroke", COLORS.eventStartDotStroke)
       .attr("stroke-width", 1.5)
-      .attr("transform", "scale(0.5)") // Scale down to 50%
-      .attr("z-index", 2);
+      .attr("transform", "scale(0.5)");
 
     // Draw curved arcs between start and end dates for each job with animated path drawing
     const jobArcs = arcLayer
@@ -410,17 +490,42 @@ function drawTimeline(
         }
       })
       .attr("fill", "none")
-      .attr("stroke", "steelblue")
+      .attr("stroke", (d, i) => {
+        // Create a unique gradient for each arc
+        const gradientId = `comet-gradient-${i}`;
+        const gradient = defs
+          .append("linearGradient")
+          .classed("timeline", true)
+          .attr("id", gradientId)
+          .attr("x1", "0%")
+          .attr("y1", "0%")
+          .attr("x2", "100%")
+          .attr("y2", "0%");
+
+        gradient
+          .append("stop")
+          .attr("offset", "0%")
+          .attr("stop-color", COLORS.jobArcArrow) // Bright start
+          .attr("stop-opacity", 0);
+
+        gradient
+          .append("stop")
+          .attr("offset", "100%")
+          .attr("stop-color", COLORS.jobArcArrow) // Fading trail
+          .attr("stop-opacity", 1);
+
+        return `url(#${gradientId})`;
+      })
       .attr("stroke-width", 2)
-      .attr("opacity", 0.7)
+      .attr("opacity", OPACITIES.jobArc)
+      .attr("stroke-linecap", "round")
       .attr("marker-end", "") // Start with no arrow markers
       .attr("stroke-dasharray", function () {
         return (this as SVGPathElement).getTotalLength();
       })
       .attr("stroke-dashoffset", function () {
         return (this as SVGPathElement).getTotalLength();
-      })
-      .attr("z-index", 0);
+      });
 
     // Replace the end-dot circles with diamond shapes
     const endEvents = arcLayer
@@ -435,11 +540,10 @@ function drawTimeline(
           `translate(${xTimelineScale(d.endDate)}, ${baselineY}) scale(0.75)`
       )
       .attr("d", d3.symbol().type(d3.symbolX).size(0)) // Start with size 0
-      .attr("fill", "steelblue")
-      .attr("stroke", "steelblue")
+      .attr("fill", COLORS.eventEndDotFill)
+      .attr("stroke", COLORS.eventEndDotStroke)
       .attr("stroke-width", 3)
-      .attr("opacity", 0.25) // Slightly transparent
-      .attr("z-index", 1); // Ensure it's on top of the arc
+      .attr("opacity", OPACITIES.eventEndDotFill);
 
     // Track pinned event state
     let pinnedEventName: string | null = null;
@@ -474,9 +578,64 @@ function drawTimeline(
           isHighlighted && d.name === eventName ? 3 : 2
         )
         .attr("opacity", (d: TimelineEvent) => {
-          if (!isHighlighted) return 0.7; // Reset to default
-          return d.name === eventName ? 0.9 : 0.2; // Highlight target, dim others
+          if (!isHighlighted) return OPACITIES.jobArc; // Reset to default
+          return d.name === eventName ? 1 : 0.3; // Highlight target, dim others
+        })
+        .attr("stroke", (d: TimelineEvent, i) => {
+          if (isHighlighted && d.name === eventName) {
+            // Create a unique gradient for the selected arc
+            const gradientId = `highlight-gradient-${i}`;
+            const gradient = defs
+              .append("linearGradient")
+              .classed("timeline", true)
+              .attr("id", gradientId)
+              .attr("x1", "0%")
+              .attr("y1", "0%")
+              .attr("x2", "100%")
+              .attr("y2", "0%");
+
+            gradient
+              .append("stop")
+              .attr("offset", "0%")
+              .attr("stop-color", COLORS.jobArcArrow) // Bright start
+              .attr("stop-opacity", 0.2);
+
+            gradient
+              .append("stop")
+              .attr("offset", "100%")
+              .attr("stop-color", COLORS.jobArcArrow) // Fading trail
+              .attr("stop-opacity", 1);
+
+            return `url(#${gradientId})`;
+          }
+          return `url(#comet-gradient-${i})`; // Use the original gradient for others
         });
+
+      // Add pulsing effect to the selected arc
+      if (isHighlighted) {
+        jobArcs
+          .filter((d: TimelineEvent) => d.name === eventName)
+          .transition()
+          .duration(500)
+          .ease(d3.easeCubicInOut)
+          .attr("stroke-width", 6)
+          .transition()
+          .duration(500)
+          .ease(d3.easeCubicInOut)
+          .attr("stroke-width", 2)
+          .on("end", function repeat() {
+            d3.select(this)
+              .transition()
+              .duration(500)
+              .ease(d3.easeCubicInOut)
+              .attr("stroke-width", 6)
+              .transition()
+              .duration(500)
+              .ease(d3.easeCubicInOut)
+              .attr("stroke-width", 2)
+              .on("end", repeat); // Loop the pulsing effect
+          });
+      }
 
       // Handle event groups (dots, lines, labels)
       eventsGroup
@@ -492,7 +651,7 @@ function drawTimeline(
         .transition()
         .duration(duration)
         .attr("opacity", (d: TimelineEvent) => {
-          if (!isHighlighted) return 0.25; // Reset to default
+          if (!isHighlighted) return OPACITIES.eventEndDotFill; // Reset to default
           return d.name === eventName ? 0.7 : 0.1; // Highlight target, dim others
         });
 
@@ -502,10 +661,14 @@ function drawTimeline(
         .transition()
         .duration(duration)
         .style("font-weight", (d: any) => {
-          return isHighlighted && d.event.name === eventName ? "700" : "500";
+          return isHighlighted && d.event.name === eventName
+            ? FONTS.eventLabelHighlight.weight
+            : FONTS.eventLabel.weight;
         })
         .style("font-size", (d: any) => {
-          return isHighlighted && d.event.name === eventName ? "13px" : "12px";
+          return isHighlighted && d.event.name === eventName
+            ? FONTS.eventLabelHighlight.size
+            : FONTS.eventLabel.size;
         });
     };
 
@@ -518,21 +681,24 @@ function drawTimeline(
         .transition()
         .duration(duration)
         .attr("stroke-width", 2)
-        .attr("opacity", 0.7);
+        .attr("opacity", OPACITIES.jobArc);
 
       // Reset event groups
       eventsGroup.transition().duration(duration).style("opacity", 1);
 
       // Reset end markers
-      endEvents.transition().duration(duration).attr("opacity", 0.25);
+      endEvents
+        .transition()
+        .duration(duration)
+        .attr("opacity", OPACITIES.eventEndDotFill);
 
       // Reset text labels
       eventsGroup
         .selectAll("text.event-label")
         .transition()
         .duration(duration)
-        .style("font-weight", "500")
-        .style("font-size", "12px");
+        .style("font-weight", FONTS.eventLabel.weight)
+        .style("font-size", FONTS.eventLabel.size);
     };
 
     // Function to handle clicking on timeline elements
@@ -665,11 +831,10 @@ function drawTimeline(
       .attr("y1", (d) => d.position * 1) // Start slightly away from center
       .attr("x2", 0)
       .attr("y2", (d) => d.position * yearMarkerYOffset) // Extend up or down based on position
-      .attr("stroke", "#adb5bd")
+      .attr("stroke", COLORS.yearLine)
       .attr("stroke-width", 1)
-      .attr("stroke-opacity", 0.8) // Slightly transparent
-      .attr("stroke-dasharray", "2,2")
-      .attr("z-index", 0);
+      .attr("stroke-opacity", OPACITIES.yearLine)
+      .attr("stroke-dasharray", "2,2");
 
     // Add year labels with alternating positions above or below the timeline
     yearMarkersGroup
@@ -681,9 +846,11 @@ function drawTimeline(
       ) // Position above or below based on alternating pattern
       .attr("text-anchor", "middle")
       .style("font-weight", "500")
-      .style("opacity", 0.4)
+      .style("opacity", OPACITIES.yearText)
       .style("font-family", "Arial, sans-serif")
       .style("font-size", "12px")
+      .style("stoke", COLORS.yearText)
+      .style("fill", COLORS.yearText)
       .text((d) => d.year);
 
     // Add current year indicator at the end with clearer positioning
@@ -696,12 +863,12 @@ function drawTimeline(
       .attr("y1", y1CurrentYearIndicator) // Position above the timeline
       .attr("x2", todayX)
       .attr("y2", baselineY) // Position at the timeline
-      .attr("stroke", "#e74c3c")
+      .attr("stroke", COLORS.currentYear)
+      .attr("fill", COLORS.currentYear)
       .attr("stroke-width", 1)
       .attr("stroke-dasharray", "5,5") // Dashed line
-      .attr("stroke-opacity", 0.8) // Slightly transparent
-      .style("opacity", 0) // Start hidden
-      .attr("z-index", 0);
+      .attr("stroke-opacity", 1) // Slightly transparent
+      .style("opacity", 0); // Start hidden
 
     // Add a label for the current year indicator to the top of the line
     const currentYearLabel = bottomLayer
@@ -712,10 +879,10 @@ function drawTimeline(
       .attr("text-anchor", "middle")
       .attr("dy", "-0.35em") // Adjust vertical alignment
       .attr("fill", "#e74c3c")
-      .style("font-family", "Arial, sans-serif")
+      .style("font-family", FONT.family)
       .style("font-size", "12px")
       .style("font-weight", "bold")
-      .style("opacity", 0.0)
+      .style("opacity", 0) // Start hidden
       .text("Today"); // Label for the current year indicator
 
     // Add a flying year indicator that moves with the baseline
@@ -726,8 +893,8 @@ function drawTimeline(
       .attr("x", 0)
       .attr("y", baselineY + 6) // Position above the timeline
       .attr("text-anchor", "middle")
-      .attr("fill", "steelblue")
-      .style("font-family", "Arial, sans-serif")
+      .attr("fill", COLORS.currentYear)
+      .style("font-family", FONT.family)
       .style("font-size", "18px")
       .style("font-weight", "bold")
       .style("opacity", 0) // Start hidden
@@ -826,7 +993,7 @@ function drawTimeline(
                   : 1 - Math.pow(-2 * fadeProgress + 2, 3) / 2;
 
               // Apply a more gradual fade rate
-              const textOpacity = Math.min(1, easedFade);
+              const textOpacity = Math.min(OPACITIES.eventLabel, easedFade);
 
               // Get or create the text element
               let textLabel: any = eventElm.select("text.event-label");
@@ -849,11 +1016,15 @@ function drawTimeline(
                     d.direction * (lineLength + (d.direction === -1 ? 5 : 15))
                   )
                   .attr("text-anchor", "middle")
-                  .style("font-size", "12px")
-                  .style("font-weight", "500")
+                  .style("font-size", FONTS.eventLabel.size)
+                  .style("font-weight", FONTS.eventLabel.weight)
+                  .style("font-family", FONTS.eventLabel.family)
+                  .style("fill", COLORS.eventLabelText)
+                  .style("stroke", COLORS.eventLabelText)
+                  .style("line-height", "1.5")
                   .style("opacity", 0) // Start invisible
                   .transition() // Add transition for smoother opacity changes
-                  .duration(200)
+                  .duration(300)
                   .style("opacity", textOpacity)
                   .text(labelText);
               } else {
@@ -958,10 +1129,12 @@ function drawTimeline(
           // At the end of the animation, zoom out to show the full timeline
           const fullTimelineBounds = mainGroup.node()?.getBBox();
           if (fullTimelineBounds) {
-            const viewportZoom = Math.min(
-              width / fullTimelineBounds.width,
-              height / fullTimelineBounds.height
-            );
+            // Calculate the zoom level to fit the full timeline bounds into the viewport
+            const timelineZoom =
+              Math.min(
+                width / fullTimelineBounds.width,
+                height / fullTimelineBounds.height
+              ) * 0.9; // 90% of the available space
 
             // Center the zoom on the full timeline bounds
             svg
@@ -972,7 +1145,7 @@ function drawTimeline(
                 zoom.transform as any,
                 d3.zoomIdentity
                   .translate(width / 2, height / 2)
-                  .scale(viewportZoom)
+                  .scale(timelineZoom)
                   .translate(
                     -fullTimelineBounds.x - fullTimelineBounds.width / 2,
                     -fullTimelineBounds.y - fullTimelineBounds.height / 2

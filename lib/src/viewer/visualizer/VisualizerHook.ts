@@ -36,6 +36,7 @@ export interface VisualizerD3State {
   containerRef: React.RefObject<HTMLDivElement | null>;
   svgRef: React.RefObject<SVGSVGElement | null>;
   rootRef: React.RefObject<SVGGraphicsElement | null>;
+  defsRef: React.RefObject<SVGDefsElement | null>;
   dispatch: d3.Dispatch<VisualizerDispatchAction>;
   zoom: d3.ZoomBehavior<Element, unknown>;
   width: number;
@@ -50,7 +51,10 @@ export type VisualizerDispatchAction =
   | {
       type: "DRAW_TIMELINE";
       origin: VisualizerAnimationStartPosition;
-      data: TimelineData;
+      data: {
+        timeline: TimelineData;
+        gravatarUrl: string | null | undefined;
+      };
     }
   | {
       type: "DRAW_PROFILE";
@@ -81,28 +85,33 @@ const defaultState: Omit<VisualizerState, "d3State"> = {
 
 const defaultD3State: Omit<
   VisualizerD3State,
-  "svgRef" | "containerRef" | "rootRef" | "dispatch" | "zoom"
+  "svgRef" | "defsRef" | "containerRef" | "rootRef" | "dispatch" | "zoom"
 > = {
-  minZoom: 1,
-  maxZoom: 40,
-  width: 1024,
-  height: 768,
+  minZoom: 0.1,
+  maxZoom: 10,
+  width: 1920,
+  height: 1080,
 };
 
 export const createInitialState = ({
   svgRef,
   containerRef,
   rootRef,
+  defsRef,
+  isFullscreen,
 }: {
   svgRef: React.RefObject<SVGSVGElement | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
+  defsRef: React.RefObject<SVGDefsElement | null>;
   rootRef: React.RefObject<SVGGraphicsElement | null>;
+  isFullscreen: boolean | null;
 }): VisualizerState => ({
   ...defaultState,
   d3State: {
     ...defaultD3State,
     svgRef,
     containerRef,
+    defsRef,
     rootRef,
     dispatch: d3.dispatch<VisualizerDispatchAction>(
       "DRAW_TIMELINE",
@@ -121,6 +130,7 @@ export const createInitialState = ({
         d3.select(rootRef.current).attr("transform", event.transform);
       }),
   },
+  isFullscreen: isFullscreen,
 });
 
 type VisualizerAction =
@@ -131,8 +141,6 @@ type VisualizerAction =
     }
   | { type: "RESTART" }
   | { type: "SELECT_EVENT"; eventId: string | null }
-  | { type: "TOGGLE_FULLSCREEN" }
-  | { type: "SET_FULLSCREEN"; isFullscreen: boolean }
   | { type: "SET_DATA"; data: VisualizerData | null }
   | { type: "START" }
   | { type: "STARTED" }
@@ -140,11 +148,7 @@ type VisualizerAction =
   | { type: "STOPPED" };
 
 export const VisualizerContext = createContext<
-  | {
-      state: VisualizerState;
-      dispatch: React.Dispatch<VisualizerAction>;
-    }
-  | undefined
+  [VisualizerState, React.Dispatch<VisualizerAction>] | undefined
 >(undefined);
 
 // This is a debug version of the reducer that logs the state and action to the console
@@ -189,10 +193,6 @@ const visualizerReducerProd = (
       };
     case "SELECT_EVENT":
       return { ...state, selectedEvent: action.eventId };
-    case "TOGGLE_FULLSCREEN":
-      return { ...state, isFullscreen: !state.isFullscreen };
-    case "SET_FULLSCREEN":
-      return { ...state, isFullscreen: action.isFullscreen };
     case "SET_DATA":
       if (state.data === action.data) {
         console.warn("Data is the same, no need to update visualizer data.");

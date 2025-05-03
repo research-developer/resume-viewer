@@ -1,4 +1,9 @@
-import React, { useReducer, useMemo, useEffect } from "react";
+import React, {
+  useReducer,
+  useMemo,
+  useEffect,
+  PropsWithChildren,
+} from "react";
 import { Resume } from "../../ResumeModel";
 import {
   visualizerReducer,
@@ -10,23 +15,32 @@ import {
 import { VisualizerData } from "./VisualizerModel";
 import { useVisualizerData } from "./VisualizerDataHook";
 
-export const VisualizerProvider: React.FC<{
+interface VisualizerProviderProps {
   resume: Resume;
-  children: React.ReactNode;
-}> = ({ resume: initialResume, children }) => {
+  isFullscreen: boolean | null;
+}
+
+export const VisualizerProvider: React.FC<
+  PropsWithChildren<VisualizerProviderProps>
+> = ({ resume: initialResume, children, isFullscreen }) => {
   const svgRef = React.useRef<SVGSVGElement | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const defsRef = React.useRef<SVGDefsElement | null>(null);
   const rootRef = React.useRef<SVGGraphicsElement | null>(null);
-  const { data: initialData } = useVisualizerData(initialResume);
-  const initializeState = useMemo(
-    () => ({ svgRef, containerRef, rootRef }),
-    [svgRef, containerRef, rootRef]
-  );
-  const [state, dispatch] = useReducer(
+  const visualizerData = useVisualizerData(initialResume);
+  const { data: initialData } = visualizerData;
+  const visualizer = useReducer(
     visualizerReducer,
-    initializeState,
+    {
+      svgRef,
+      containerRef,
+      rootRef,
+      defsRef,
+      isFullscreen,
+    },
     createInitialState
   );
+  const [state, dispatch] = visualizer;
   const { data } = state;
   const dataRef = React.useRef<VisualizerData | null>(initialData);
   const statusRef = React.useRef<VisualizerStatus | null>(state.status);
@@ -63,17 +77,8 @@ export const VisualizerProvider: React.FC<{
     }
   }, [state.status, state.transition, statusRef, dispatch]);
 
-  // Memoize the context value to avoid unnecessary re-renders
-  const contextValue = useMemo(
-    () => ({
-      state,
-      dispatch,
-    }),
-    [state, dispatch]
-  );
-
   return (
-    <VisualizerContext.Provider value={contextValue}>
+    <VisualizerContext.Provider value={visualizer}>
       {children}
     </VisualizerContext.Provider>
   );

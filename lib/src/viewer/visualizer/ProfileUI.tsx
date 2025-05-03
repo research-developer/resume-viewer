@@ -9,7 +9,7 @@ import {
 import { VisualizerData } from "./VisualizerModel";
 
 export const ProfileUI: FC = () => {
-  const { state } = useVisualizerContext();
+  const [state] = useVisualizerContext();
   const { d3State } = state;
 
   // Trigger replay animation when isAnimating changes

@@ -1,28 +1,13 @@
-import React, { FC, useCallback, useEffect } from "react";
+import React, { FC, useEffect } from "react";
 import { useVisualizerContext } from "./VisualizerHook";
-import { useFullscreen } from "../FullScreenHook";
 import { useResize } from "../ResizeHook";
 import * as d3 from "d3";
 
 export const VisualizerContainerUI: FC<React.PropsWithChildren> = ({
   children,
 }) => {
-  const { state, dispatch } = useVisualizerContext();
+  const [state, dispatch] = useVisualizerContext();
   const { isFullscreen, d3State } = state;
-
-  // Custom hook to handle fullscreen functionality
-  useFullscreen(
-    d3State.containerRef,
-    isFullscreen,
-    useCallback(
-      (change: boolean) => {
-        if (change !== isFullscreen) {
-          dispatch({ type: "SET_FULLSCREEN", isFullscreen: change });
-        }
-      },
-      [isFullscreen]
-    )
-  );
 
   // Custom hook to handle resize functionality
   useResize(d3State.containerRef);
@@ -38,8 +23,8 @@ export const VisualizerContainerUI: FC<React.PropsWithChildren> = ({
       type: "DRAW_PROFILE",
       data: state.data,
       origin: {
-        x: d3State.width / 2,
-        y: d3State.height / 2,
+        x: 0,
+        y: 0,
         angle: 0,
       },
     });
@@ -52,10 +37,13 @@ export const VisualizerContainerUI: FC<React.PropsWithChildren> = ({
         width: "100%",
         height: "100%",
         position: "relative",
-        backgroundColor: "#ffffff",
         display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
+        flexDirection: "column",
+        flex: "1 0 auto",
+        maxWidth: "100%",
+        maxHeight: "100%",
+        minWidth: "100%",
+        minHeight: "100%",
         aspectRatio: "16/9",
         overflow: "hidden",
         ...(isFullscreen && {
@@ -66,18 +54,20 @@ export const VisualizerContainerUI: FC<React.PropsWithChildren> = ({
       }}
     >
       <svg
-        className="container"
         ref={d3State.svgRef}
         style={{
           width: isFullscreen ? "100vw" : "100%",
           height: isFullscreen ? "100vh" : "auto",
           maxWidth: "100%",
           maxHeight: "100%",
+          flex: "1 0 auto",
+          overflow: "hidden",
         }}
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="xMidYMid meet"
         viewBox={`0 0 ${d3State.width} ${d3State.height}`}
       >
+        <defs ref={d3State.defsRef}></defs>
         <g ref={d3State.rootRef}></g>
       </svg>
       {children}

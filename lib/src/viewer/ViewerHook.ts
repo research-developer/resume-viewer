@@ -26,6 +26,8 @@ export const initialState: ViewerState = {
   resume: null,
 };
 
+const initialResumeView = ViewerView.Visualizer;
+
 type ViewerAction =
   | {
       type: "SET_VIEW";
@@ -86,7 +88,7 @@ const viewerReducerProd = (
       }
       let currentView = state.currentView;
       if (action.resume.data !== null) {
-        currentView = ViewerView.Infographic;
+        currentView = initialResumeView;
       } else {
         currentView = ViewerView.Welcome;
       }

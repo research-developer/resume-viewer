@@ -61,11 +61,7 @@ const ViewerUI: FC<ViewerUIProps> = () => {
   }
 
   if (error) {
-    return (
-      <div className="fill-screen flex items-center justify-center p-4">
-        <ErrorViewUI error={error} onRetry={refresh} />
-      </div>
-    );
+    return <ErrorViewUI error={error} onRetry={refresh} />;
   }
 
   const renderView = () => {
@@ -91,10 +87,7 @@ const ViewerUI: FC<ViewerUIProps> = () => {
   };
 
   return (
-    <div
-      ref={viewerRef}
-      className="fill-screen bg-background flex flex-col items-center justify-start"
-    >
+    <div ref={viewerRef} className="flex-auto h-full bg-background flex">
       {renderView()}
       {showNav && <ViewerNavUI />}
     </div>

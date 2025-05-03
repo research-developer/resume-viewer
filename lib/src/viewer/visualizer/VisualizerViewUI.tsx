@@ -10,7 +10,7 @@ interface VisualizerViewUIProps {}
 
 export const VisualizerViewUI: FC<VisualizerViewUIProps> = ({}) => {
   const [state] = useViewerContext();
-  const { resume: viewerData } = state;
+  const { resume: viewerData, isFullscreen } = state;
   const { data, isPending: resumeIsPending } = viewerData || {};
 
   if (resumeIsPending) {
@@ -28,7 +28,7 @@ export const VisualizerViewUI: FC<VisualizerViewUIProps> = ({}) => {
   }
 
   return (
-    <VisualizerProvider resume={data.resume}>
+    <VisualizerProvider resume={data.resume} isFullscreen={isFullscreen}>
       <VisualizerContainerUI>
         <TimelineUI />
         <VisualizerControlsUI />
