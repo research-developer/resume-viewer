@@ -64,8 +64,8 @@ export const ViewerNavUI: FC = () => {
     window.print();
   };
 
-  const handleStartOver = () => {
-    dispatch({ type: "SET_VIEW", view: ViewerView.Welcome });
+  const handleGoToHome = () => {
+    dispatch({ type: "SET_VIEW", view: ViewerView.ProfileCard });
   };
 
   return (
@@ -221,9 +221,9 @@ export const ViewerNavUI: FC = () => {
                 <div className="h-4 border-r border-border mx-1"></div>
 
                 <button
-                  onClick={handleStartOver}
+                  onClick={handleGoToHome}
                   className="btn p-1.5 rounded-full"
-                  title="Start over"
+                  title="Return to Home"
                 >
                   <HomeIcon className="w-4 h-4" />
                 </button>

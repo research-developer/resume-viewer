@@ -9,6 +9,7 @@ import { JsonViewUI } from "./json/JsonViewUI";
 import { ViewerNavUI } from "./ViewerNavUI";
 import { VisualizerViewUI } from "./visualizer/VisualizerViewUI";
 import { useFullscreen } from "./FullScreenHook";
+import { ProfileCardViewUI } from "./ProfileCardViewUI";
 
 type ResumeViewerUIProps = {
   jsonResumeUrl?: string | null;
@@ -38,7 +39,7 @@ const ViewerUI: FC<ViewerUIProps> = () => {
   const { resume, currentView, isFullscreen } = state;
   const { isPending, error, refresh } = resume || {};
   const viewerRef = useRef<HTMLDivElement>(null);
-  const showNav = currentView !== "welcome";
+  const showNav = currentView !== "welcome" && currentView !== "profileCard";
 
   // Custom hook to handle fullscreen functionality
   useFullscreen(
@@ -68,6 +69,8 @@ const ViewerUI: FC<ViewerUIProps> = () => {
     switch (currentView) {
       case "welcome":
         return <WelcomeViewUI />;
+      case "profileCard":
+        return <ProfileCardViewUI />;
       case "infographic":
         return <InfographicViewUI />;
       case "text":
