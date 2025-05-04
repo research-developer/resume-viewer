@@ -6,7 +6,7 @@ import * as d3 from "d3";
 export const VisualizerContainerUI: FC<React.PropsWithChildren> = ({
   children,
 }) => {
-  const [state, dispatch] = useVisualizerContext();
+  const [state] = useVisualizerContext();
   const { isFullscreen, d3State } = state;
 
   // Custom hook to handle resize functionality

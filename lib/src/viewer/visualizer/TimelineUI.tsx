@@ -7,7 +7,7 @@ import {
   VisualizerDispatchAction,
   VisualizerStatus,
 } from "./VisualizerHook";
-import { TimelineData, TimelineEvent } from "./TimelineModel";
+import { TimelineEvent } from "./TimelineModel";
 import { destoryVisualization as destroyVisualization } from "./VisualizationUtil";
 import "./TimelineUI.css";
 
@@ -59,12 +59,11 @@ function drawTimeline(
   data: VisualizerDispatchAction["data"],
   origin: VisualizerAnimationStartPosition
 ) {
-  const { svgRef, defsRef, rootRef, zoom, width, height, minZoom, maxZoom } =
-    d3State;
+  const { svgRef, defsRef, rootRef, zoom, width, height } = d3State;
   if (!svgRef.current || !rootRef.current || !defsRef.current) return; // Ensure the SVG reference is available
   if (!data.timeline) return; // Ensure timeline data is available
 
-  const { timeline, gravatarUrl } = data;
+  const { timeline } = data;
   const { events, now } = timeline;
 
   // Always clear the previous timeline before drawing a new one
@@ -686,7 +685,7 @@ function drawTimeline(
         .duration(duration)
         .attr("stroke-width", 2)
         .attr("opacity", OPACITIES.jobArc)
-        .attr("stroke", (d, i) => `url(#comet-gradient-${i})`);
+        .attr("stroke", (_, i) => `url(#comet-gradient-${i})`);
 
       // Reset event groups
       eventsGroup.transition().duration(duration).style("opacity", 1);

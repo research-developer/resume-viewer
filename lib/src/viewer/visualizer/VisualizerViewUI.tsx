@@ -1,9 +1,8 @@
-import { FC, useEffect } from "react";
+import { FC } from "react";
 import { VisualizerProvider } from "./VisualizerProvider";
 import { VisualizerControlsUI } from "./VisualizerControlsUI";
 import { VisualizerContainerUI } from "./VisualizerContainerUI";
 import { TimelineUI } from "./TimelineUI";
-import { ProfileUI } from "./ProfileUI";
 import { useViewerContext } from "../ViewerHook";
 
 interface VisualizerViewUIProps {}

@@ -249,7 +249,7 @@ async function drawProfileVisualization(
       if (selectedSegment?.view === VisualizerView.Work) {
         dispatch.call("DRAW_TIMELINE", {
           type: "DRAW_TIMELINE",
-          data: data.timeline,
+          data: data,
           origin: {
             x: originX,
             y: originY,

@@ -2,11 +2,15 @@ import React from "react";
 import { ResumeLocation } from "../../ResumeModel";
 
 interface LocationUIProps {
-  location: ResumeLocation;
+  location: string | ResumeLocation;
 }
 
 export const LocationUI: React.FC<LocationUIProps> = ({ location }) => {
   if (!location) return null;
+
+  if (typeof location === "string") {
+    return <div className="text-sm text-muted my-2">{location}</div>;
+  }
 
   return (
     <div className="flex flex-col text-sm text-muted my-2">

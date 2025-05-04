@@ -46,15 +46,17 @@ export const WorkUI: React.FC<WorkUIProps> = ({ work }) => {
             />
           </svg>
           <span className="inline-block hover:text-secondary transition-colors">
-            {[
-              work.location.address,
-              work.location.city,
-              work.location.region,
-              work.location.countryCode,
-              work.location.postalCode,
-            ]
-              .filter(Boolean)
-              .join(", ")}
+            {typeof work.location === "string"
+              ? work.location
+              : [
+                  work.location.address,
+                  work.location.city,
+                  work.location.region,
+                  work.location.countryCode,
+                  work.location.postalCode,
+                ]
+                  .filter(Boolean)
+                  .join(", ")}
           </span>
         </div>
       )}

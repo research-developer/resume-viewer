@@ -1,9 +1,4 @@
-import React, {
-  ActionDispatch,
-  createContext,
-  useContext,
-  useReducer,
-} from "react";
+import React, { createContext, useContext } from "react";
 import { ResumeHook } from "../ResumeHook";
 
 export enum ViewerView {

@@ -1,9 +1,4 @@
-import React, {
-  useReducer,
-  useMemo,
-  useEffect,
-  PropsWithChildren,
-} from "react";
+import React, { useReducer, useEffect, PropsWithChildren } from "react";
 import { Resume } from "../../ResumeModel";
 import {
   visualizerReducer,
