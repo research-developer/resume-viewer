@@ -13,15 +13,30 @@ if [ ! -d "lib" ]; then
   exit 1
 fi
 
-# Build the library and package it
-echo "Building the library..."
+# Switch to lib directory
 cd lib
-npm pack
+
+# Clean up previous builds
+echo "Cleaning up previous packages..."
+rm *.tgz
+
+# Installing dependencies for the library
+echo "Installing library dependencies..."
+npm ci
 if [ $? -ne 0 ]; then
-  echo "Failed to build the library."
+  echo "Failed to install library dependencies."
   exit 1
 fi
-echo "Library built successfully."
+echo "Library dependencies installed successfully."
+
+# Build the library
+echo "Building and packing the library..."
+npm pack
+if [ $? -ne 0 ]; then
+  echo "Failed to build and pack the library."
+  exit 1
+fi
+echo "Library built and packaged successfully."
 
 # Find the latest version of the library as a tarball
 LIB_TARBALL=$(ls -t *.tgz | head -n 1)
