@@ -27,7 +27,11 @@ export const VisualizerViewUI: FC<VisualizerViewUIProps> = ({}) => {
   }
 
   return (
-    <VisualizerProvider resume={data.resume} isFullscreen={isFullscreen}>
+    <VisualizerProvider
+      resume={data.resume}
+      gravatarUrl={data.gravatarUrl}
+      isFullscreen={isFullscreen}
+    >
       <VisualizerContainerUI>
         <TimelineUI />
         <VisualizerControlsUI />

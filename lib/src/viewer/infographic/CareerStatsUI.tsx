@@ -3,7 +3,6 @@ import { CardUI } from "./common/CardUI";
 import { useViewerContext } from "../ViewerHook";
 import { KPIStatUI } from "./common/KPIStatUI";
 import { convertMonthsToYears, formatYears } from "./DisplayUtil";
-import { CardTitleUI } from "./common/CardTitleUI";
 
 type CareerStatsUIProps = {};
 

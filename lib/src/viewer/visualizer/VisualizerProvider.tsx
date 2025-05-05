@@ -7,23 +7,26 @@ import {
   VisualizerStatus,
   VisualizerTransition,
 } from "./VisualizerHook";
-import { VisualizerData } from "./VisualizerModel";
-import { useVisualizerData } from "./VisualizerDataHook";
+import { buildTimeline } from "./TimelineModel";
 
 interface VisualizerProviderProps {
   resume: Resume;
+  gravatarUrl: string | null;
   isFullscreen: boolean | null;
 }
 
 export const VisualizerProvider: React.FC<
   PropsWithChildren<VisualizerProviderProps>
-> = ({ resume: initialResume, children, isFullscreen }) => {
+> = ({
+  resume: initialResume,
+  gravatarUrl: initialGravatar,
+  children,
+  isFullscreen,
+}) => {
   const svgRef = React.useRef<SVGSVGElement | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const defsRef = React.useRef<SVGDefsElement | null>(null);
   const rootRef = React.useRef<SVGGraphicsElement | null>(null);
-  const visualizerData = useVisualizerData(initialResume);
-  const { data: initialData } = visualizerData;
   const visualizer = useReducer(
     visualizerReducer,
     {
@@ -37,17 +40,24 @@ export const VisualizerProvider: React.FC<
   );
   const [state, dispatch] = visualizer;
   const { data } = state;
-  const dataRef = React.useRef<VisualizerData | null>(initialData);
   const statusRef = React.useRef<VisualizerStatus | null>(state.status);
 
   // Set the data in the state
   useEffect(() => {
-    // We only want to dispatch if the data has changed
-    if (dataRef.current === initialData) return;
-    dataRef.current = initialData;
-
-    dispatch({ type: "SET_DATA", data: initialData });
-  }, [initialData, data, dataRef, dispatch]);
+    if (!initialResume) {
+      console.warn("No resume data provided, skipping data dispatch.");
+      return;
+    } else if (initialResume !== data?.resume) {
+      dispatch({
+        type: "SET_DATA",
+        data: {
+          resume: initialResume,
+          gravatarUrl: initialGravatar,
+          timeline: buildTimeline(initialResume.work || []),
+        },
+      });
+    }
+  }, [initialResume, initialGravatar]);
 
   // When the status changes, dispatch the next action
   useEffect(() => {

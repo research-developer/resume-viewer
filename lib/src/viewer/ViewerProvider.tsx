@@ -26,7 +26,6 @@ export const ViewerProvider: React.FC<ViewerProviderProps> = ({
   // Notify the viewer when the resume data changes
   useEffect(() => {
     if (!!resume) {
-      console.log("Resume data changed:", resume);
       dispatch({ type: "SET_RESUME", resume });
     }
   }, [resume, dispatch]);

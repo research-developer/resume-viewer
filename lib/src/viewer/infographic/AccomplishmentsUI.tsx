@@ -2,7 +2,6 @@ import { FC, useMemo } from "react";
 import { CardUI } from "./common/CardUI";
 import { useViewerContext } from "../ViewerHook";
 import { KPIStatUI } from "./common/KPIStatUI";
-import { CardTitleUI } from "./common/CardTitleUI";
 
 type AccomplishmentsUIProps = {};
 

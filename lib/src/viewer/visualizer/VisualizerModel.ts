@@ -1,5 +1,4 @@
 import { Resume } from "../../ResumeModel";
-import { getGravatarUrl } from "../../GravatarUtil";
 import { buildTimeline, TimelineData } from "./TimelineModel";
 
 export interface VisualizerData {
@@ -9,7 +8,8 @@ export interface VisualizerData {
 }
 
 export async function buildVisualizerData(
-  resume: Resume | null
+  resume: Resume | null,
+  gravatarUrl: string | null
 ): Promise<VisualizerData | null> {
   console.time("buildVisualizerData");
   try {
@@ -18,7 +18,6 @@ export async function buildVisualizerData(
       return null;
     }
     const timeline = buildTimeline(resume.work || []);
-    const gravatarUrl = await getGravatarUrl(resume.basics?.email || "", 200);
     return { resume, timeline, gravatarUrl };
   } finally {
     console.timeEnd("buildVisualizerData");
