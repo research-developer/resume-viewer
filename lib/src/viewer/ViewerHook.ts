@@ -3,7 +3,7 @@ import { ResumeHook } from "../ResumeHook";
 
 export enum ViewerView {
   Welcome = "welcome",
-  ProfileCard = "profileCard",
+  Home = "home",
   Infographic = "infographic",
   Text = "text",
   Json = "json",
@@ -22,7 +22,7 @@ export const initialState: ViewerState = {
   resume: null,
 };
 
-const initialResumeView = ViewerView.ProfileCard;
+const initialResumeView = ViewerView.Home;
 
 type ViewerAction =
   | {

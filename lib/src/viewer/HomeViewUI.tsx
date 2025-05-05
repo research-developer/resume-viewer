@@ -9,7 +9,7 @@ import {
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 
-export const ProfileCardViewUI: FC = () => {
+export const HomeViewUI: FC = () => {
   const [state, dispatch] = useViewerContext();
   const { resume } = state;
   const { data: resumeData } = resume || {};
@@ -52,13 +52,13 @@ export const ProfileCardViewUI: FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-full w-full p-4">
-      <div className="w-full max-w-4xl rounded-[var(--radius-card)] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] shadow-[var(--shadow-card)] p-8">
+    <div className="flex flex-col items-center justify-center min-h-full w-full">
+      <div className="pt-6 w-full max-w-4xl rounded-[var(--radius-card)] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] shadow-[var(--shadow-card)] gap-6 flex flex-col">
         {/* Profile Section */}
         <ProfileUI resume={resumeData.resume} />
 
         {/* Navigation Section */}
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {navItems.map((item, idx) => (
             <button
               key={idx}
@@ -77,26 +77,30 @@ export const ProfileCardViewUI: FC = () => {
         </div>
 
         {/* Footer Note */}
-        <div className="mt-10 flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-muted border-t border-border pt-4">
-          <button
-            onClick={handleReturnToWelcome}
-            className="flex items-center gap-2 text-muted hover:text-primary transition"
-          >
-            <ArrowPathIcon className="w-4 h-4" />
-            <span>Choose a different resume</span>
-          </button>
-
-          <p className="mt-4 sm:mt-0 text-center sm:text-right">
-            Hand-crafted with ❤️ by{" "}
-            <a
-              href="https://www.richardadleta.com"
-              className="text-accent-cyan"
-              target="_blank"
-              title="Richard Adleta"
+        <div className="p-4 flex flex-col sm:flex-row gap-2 sm:items-center  text-xs text-muted border-t border-border pt-4">
+          <div className="flex-auto flex items-center justify-center sm:justify-start gap-2">
+            <button
+              onClick={handleReturnToWelcome}
+              className="flex-none flex items-center gap-2 text-muted hover:text-primary transition"
             >
-              Richard Adleta
-            </a>
-          </p>
+              <ArrowPathIcon className="w-4 h-4" />
+              <span>Choose a different resume</span>
+            </button>
+          </div>
+
+          <div className="flex-none flex flex-col gap-2 items-center justify-center">
+            <div className="flex-none text-muted text-xs">
+              Hand-crafted with ❤️ by{" "}
+              <a
+                href="https://www.richardadleta.com"
+                className="text-accent-cyan"
+                target="_blank"
+                title="Richard Adleta"
+              >
+                Richard Adleta
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>

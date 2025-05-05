@@ -65,7 +65,7 @@ export const ViewerNavUI: FC = () => {
   };
 
   const handleGoToHome = () => {
-    dispatch({ type: "SET_VIEW", view: ViewerView.ProfileCard });
+    dispatch({ type: "SET_VIEW", view: ViewerView.Home });
   };
 
   return (

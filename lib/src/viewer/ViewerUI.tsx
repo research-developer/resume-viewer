@@ -1,6 +1,6 @@
 import { FC, useCallback, useRef } from "react";
 import { TextViewUI } from "./text/TextViewUI";
-import { useViewerContext } from "./ViewerHook";
+import { useViewerContext, ViewerView } from "./ViewerHook";
 import { InfographicViewUI } from "./infographic/InfographicViewUI";
 import { ViewerProvider } from "./ViewerProvider";
 import { WelcomeViewUI } from "./WelcomeViewUI";
@@ -9,7 +9,7 @@ import { JsonViewUI } from "./json/JsonViewUI";
 import { ViewerNavUI } from "./ViewerNavUI";
 import { VisualizerViewUI } from "./visualizer/VisualizerViewUI";
 import { useFullscreen } from "./FullScreenHook";
-import { ProfileCardViewUI } from "./ProfileCardViewUI";
+import { HomeViewUI } from "./HomeViewUI";
 
 type ResumeViewerUIProps = {
   jsonResumeUrl?: string | null;
@@ -39,7 +39,8 @@ const ViewerUI: FC<ViewerUIProps> = () => {
   const { resume, currentView, isFullscreen } = state;
   const { isPending, error, refresh } = resume || {};
   const viewerRef = useRef<HTMLDivElement>(null);
-  const showNav = currentView !== "welcome" && currentView !== "profileCard";
+  const showNav =
+    currentView !== ViewerView.Welcome && currentView !== ViewerView.Home;
 
   // Custom hook to handle fullscreen functionality
   useFullscreen(
@@ -67,17 +68,17 @@ const ViewerUI: FC<ViewerUIProps> = () => {
 
   const renderView = () => {
     switch (currentView) {
-      case "welcome":
+      case ViewerView.Welcome:
         return <WelcomeViewUI />;
-      case "profileCard":
-        return <ProfileCardViewUI />;
-      case "infographic":
+      case ViewerView.Home:
+        return <HomeViewUI />;
+      case ViewerView.Infographic:
         return <InfographicViewUI />;
-      case "text":
+      case ViewerView.Text:
         return <TextViewUI />;
-      case "json":
+      case ViewerView.Json:
         return <JsonViewUI />;
-      case "visualizer":
+      case ViewerView.Visualizer:
         return <VisualizerViewUI />;
       default:
         // Show an error message if the view is not recognized
