@@ -7,5 +7,7 @@ type CardTitleUIProps = {
 export const CardTitleUI: FC<CardTitleUIProps> = ({
   title,
 }: CardTitleUIProps) => (
-  <h2 className="text-[var(--color-primary)] text-2xl font-bold">{title}</h2>
+  <h2 className="text-[var(--color-accent-light)] text-2xl font-bold">
+    {title}
+  </h2>
 );

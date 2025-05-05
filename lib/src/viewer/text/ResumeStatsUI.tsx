@@ -8,7 +8,7 @@ interface ResumeStatsUIProps {
 }
 
 export const ResumeStatsUI: React.FC<ResumeStatsUIProps> = ({ analyzer }) => {
-  if (!analyzer?.stats) {
+  if (!analyzer?.skillStats) {
     return (
       <div className="text-muted py-4 text-center">No statistics available</div>
     );
@@ -21,7 +21,7 @@ export const ResumeStatsUI: React.FC<ResumeStatsUIProps> = ({ analyzer }) => {
     topCategorySkills,
     topSkills,
   } = useMemo(() => {
-    const careerStats = analyzer.stats.career.fluentValues();
+    const careerStats = analyzer.skillStats.career.fluentValues();
     const categorySkills = careerStats
       .filter((skill) => skill.skill.isCategory)
       .toArray();
@@ -30,7 +30,7 @@ export const ResumeStatsUI: React.FC<ResumeStatsUIProps> = ({ analyzer }) => {
       .filter((skill) => !skill.skill.isCategory)
       .take(10)
       .toArray();
-    const careerMonths = analyzer.stats.career.root.months;
+    const careerMonths = analyzer.skillStats.career.root.months;
     const careerYears = careerMonths / 12;
     return {
       careerStats,
@@ -40,7 +40,7 @@ export const ResumeStatsUI: React.FC<ResumeStatsUIProps> = ({ analyzer }) => {
       careerYears,
       careerMonths,
     };
-  }, [analyzer.stats]);
+  }, [analyzer.skillStats]);
 
   return (
     <div className="space-y-6 p-4 bg-surface rounded-lg shadow border border-border">
@@ -62,7 +62,7 @@ export const ResumeStatsUI: React.FC<ResumeStatsUIProps> = ({ analyzer }) => {
         <div className="p-4 bg-accent rounded-lg shadow border border-border">
           <h3 className="text-lg font-semibold text-primary">Skills Count</h3>
           <div className="text-2xl font-bold text-accent-blue">
-            {analyzer.stats.career.root.occurrences.size}
+            {analyzer.skillStats.career.root.occurrences.size}
             <span className="ml-2 text-sm font-normal text-muted">
               ({categorySkills.length} categories)
             </span>
@@ -78,7 +78,7 @@ export const ResumeStatsUI: React.FC<ResumeStatsUIProps> = ({ analyzer }) => {
       <SkillRadarChartUI skills={categorySkills} />
       <TopSkillsChart skills={topSkills} />
       <SkillHierarchyTree categories={categorySkills} />
-      <KeywordConnections tree={analyzer.stats.tree} />
+      <KeywordConnections tree={analyzer.skillStats.tree} />
     </div>
   );
 };

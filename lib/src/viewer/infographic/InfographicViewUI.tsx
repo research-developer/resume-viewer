@@ -4,27 +4,29 @@ import { LineChartDataPoint, LineChartUI } from "./common/LineChartUI";
 import { useViewerContext } from "../ViewerHook";
 import { ProfileUI } from "./ProfileUI";
 import { PieChartCardUI } from "./common/PieChartUI";
-import { KPIStatUI } from "./common/KPIStatUI";
 import { ProgressRingUI } from "./common/ProgressRingUI";
 import { BarChartUI } from "./common/BarChartUI";
 import { ScoreRingGroupUI } from "./common/ScoreRingGroupUI";
 import { MetricListUI } from "./common/MetricListUI";
 import { TrendComparisonUI } from "./common/TrendComparisonUI";
 import { GroupedStatsUI } from "./common/GroupedStatsUI";
-import { RadarChartUI } from "./common/RadarChartUI"; // Add this import
+import { RadarChartUI } from "./common/RadarChartUI";
 import { useChartColors } from "../../ColorUtils";
+import { convertMonthsToYears, formatYears } from "./DisplayUtil";
+import { CareerStatsUI } from "./CareerStatsUI";
+import { AccomplishmentsUI } from "./AccomplishmentsUI";
 
 type InfographicViewUIProps = {};
 
 export const InfographicViewUI: FC<
   InfographicViewUIProps
 > = ({}: InfographicViewUIProps) => {
-  const [state, dispatch] = useViewerContext();
+  const [state] = useViewerContext();
   const { resume: viewerData } = state;
   const { data: resumeData, isPending: resumeIsPending } = viewerData || {};
-  const { resume, stats } = resumeData || {
+  const { resume, skillStats: stats } = resumeData || {
     resume: null,
-    stats: null,
+    skillStats: null,
   };
 
   const categories = useMemo(
@@ -102,9 +104,11 @@ export const InfographicViewUI: FC<
       <CardUI size="max-w-md" title="Profile">
         <ProfileUI resume={resume} />
       </CardUI>
-      <CardUI title="Years of Experience" size="flex-none">
-        <KPIStatUI value={formatYears(totalYears)} />
-      </CardUI>
+
+      {/* Replace the single KeyStatsUI with our new specialized components */}
+      <CareerStatsUI />
+      <AccomplishmentsUI />
+
       <CardUI title="Skills Radar">
         <RadarChartUI
           data={radarData}
@@ -210,15 +214,3 @@ export const InfographicViewUI: FC<
     </div>
   );
 };
-
-function convertMonthsToYears(months: number): number {
-  return rountToOneDecimalPlace(months / 12);
-}
-
-function formatYears(value: number): string {
-  return `${value.toLocaleString()} yrs`;
-}
-
-function rountToOneDecimalPlace(value: number): number {
-  return Math.round(value * 10) / 10; // Round the value to one decimal place
-}

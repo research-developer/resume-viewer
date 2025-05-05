@@ -1,6 +1,7 @@
 import { FC } from "react";
 
 type KPIStatUIProps = {
+  label?: string; // E.g. "Users" or "Revenue"
   value: string; // E.g. "$1.2M"
   trend?: {
     value: string; // E.g. "+4.9%" or "-2.1%"
@@ -16,7 +17,7 @@ type KPIStatUIProps = {
  * - `value` is the large stat to emphasize (e.g. "$1.2M")
  * - `trend` is optional and shows an arrow + change percentage (e.g. "▲ +4.9%")
  */
-export const KPIStatUI: FC<KPIStatUIProps> = ({ value, trend }) => {
+export const KPIStatUI: FC<KPIStatUIProps> = ({ label, value, trend }) => {
   const trendColor =
     trend?.direction === "up"
       ? "text-[var(--color-accent-green)]"
@@ -31,6 +32,11 @@ export const KPIStatUI: FC<KPIStatUIProps> = ({ value, trend }) => {
       {trend && (
         <span className={`mt-2 text-sm font-medium ${trendColor}`}>
           {trendArrow} {trend.value}
+        </span>
+      )}
+      {label && (
+        <span className="text-sm text-[var(--color-accent-light)] mt-1">
+          {label}
         </span>
       )}
     </div>
