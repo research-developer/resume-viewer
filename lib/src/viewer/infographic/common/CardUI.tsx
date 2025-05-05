@@ -20,7 +20,7 @@ export const CardUI: FC<PropsWithChildren<InfographicCardProps>> = ({
 }) => (
   <div
     className={`flex flex-col rounded-[var(--radius-card)] shadow-[var(--shadow-card)] bg-[var(--color-surface)] border border-[var(--color-border)] transition-transform duration-300 hover:scale-[1.01] gap-4 ${className} ${
-      size || "min-w-md max-w-md"
+      size || "flex-auto"
     }`}
   >
     <div className="flex-auto flex flex-col gap-4 p-[var(--spacing-card)] text-[var(--color-secondary)]">

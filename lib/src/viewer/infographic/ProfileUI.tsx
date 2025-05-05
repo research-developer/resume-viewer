@@ -74,16 +74,6 @@ export const ProfileUI: React.FC<ProfileUIProps> = ({
           ))}
         </div>
       )}
-
-      {/* Email */}
-      <div className="mt-6">
-        <a
-          href={`mailto:${email}`}
-          className="text-primary text-sm hover:underline transition"
-        >
-          {email}
-        </a>
-      </div>
     </div>
   );
 };

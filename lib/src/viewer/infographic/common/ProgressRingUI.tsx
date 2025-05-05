@@ -1,6 +1,6 @@
 import { FC, useCallback } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import { AccentColor, getAccentColor } from "../../ColorUtils";
+import { AccentColor, getAccentColor } from "../../../ColorUtils";
 
 export type ProgressRingProps = {
   label: string; // What this ring represents (e.g. "Storage Used")

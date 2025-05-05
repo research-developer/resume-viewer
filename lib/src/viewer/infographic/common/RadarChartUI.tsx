@@ -9,7 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useChartColors } from "../../ColorUtils";
+import { useChartColors } from "../../../ColorUtils";
 
 type RadarDataPoint = {
   subject: string; // Axis label (e.g., "JavaScript", "Python", etc.)

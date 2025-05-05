@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { useChartColors } from "../../ColorUtils";
+import { useChartColors } from "../../../ColorUtils";
 
 type MetricItem = {
   label: string;

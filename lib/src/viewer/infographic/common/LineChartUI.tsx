@@ -13,7 +13,7 @@ import {
   createChartGradient,
   getAccentColor,
   useChartColors,
-} from "../../ColorUtils";
+} from "../../../ColorUtils";
 
 export type LineChartDataPoint = {
   name: string; // X-axis label (e.g., "Jan", "Feb", etc.)

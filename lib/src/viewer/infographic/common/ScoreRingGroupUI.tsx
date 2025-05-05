@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { ProgressRingUI, ProgressRingProps } from "./ProgressRingUI";
-import { useChartColors } from "../../ColorUtils";
+import { useChartColors } from "../../../ColorUtils";
 
 type ScoreRingGroupProps = {
   scores: ProgressRingProps[];

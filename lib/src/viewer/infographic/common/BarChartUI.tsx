@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { getAccentColor, AccentColor } from "../../ColorUtils";
+import { getAccentColor, AccentColor } from "../../../ColorUtils";
 
 type BarChartUIProps = {
   title: string; // Card title (e.g., "Team Output")

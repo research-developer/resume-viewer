@@ -130,7 +130,7 @@ button.active {
 }
 
 .fill-screen {
-  @apply w-full h-full;
+  @apply min-w-full min-h-full;
   @apply flex-auto;
 }
 
@@ -139,14 +139,9 @@ body.fill-screen {
 }
 
 .resume-viewer {
-  @apply w-full;
-  @apply h-full;
+  @apply flex flex-col;
+  @apply min-w-full;
+  @apply min-h-full;
   @apply bg-background;
   @apply text-primary;
-  @apply overflow-hidden;
-  @apply flex-auto;
-  @apply flex;
-  @apply flex-col;
-  @apply items-center;
-  @apply justify-center;
 }

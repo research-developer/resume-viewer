@@ -59,7 +59,7 @@ export const HomeViewUI: FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-full w-full">
+    <div className="p-6 flex flex-col items-center justify-center m-auto">
       <div className="pt-6 w-full max-w-4xl rounded-[var(--radius-card)] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] shadow-[var(--shadow-card)] gap-6 flex flex-col">
         {/* Profile Section */}
         <div className="flex flex-col items-center p-spacing-card text-secondary">

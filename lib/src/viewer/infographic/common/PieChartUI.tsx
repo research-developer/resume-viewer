@@ -7,7 +7,7 @@ import {
   Legend,
 } from "recharts";
 import { FC } from "react";
-import { useChartColors } from "../../ColorUtils";
+import { useChartColors } from "../../../ColorUtils";
 
 // Define type for pie chart data items
 export type PieChartDataItem = {

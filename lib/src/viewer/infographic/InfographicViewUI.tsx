@@ -1,17 +1,17 @@
 import { FC, useMemo } from "react";
-import { CardUI } from "./CardUI";
-import { LineChartDataPoint, LineChartUI } from "./LineChartUI";
-import { useViewerContext, ViewerView } from "../ViewerHook";
+import { CardUI } from "./common/CardUI";
+import { LineChartDataPoint, LineChartUI } from "./common/LineChartUI";
+import { useViewerContext } from "../ViewerHook";
 import { ProfileUI } from "./ProfileUI";
-import { PieChartCardUI } from "./PieChartUI";
-import { KPIStatUI } from "./KPIStatUI";
-import { ProgressRingUI } from "./ProgressRingUI";
-import { BarChartUI } from "./BarChartUI";
-import { ScoreRingGroupUI } from "./ScoreRingGroupUI";
-import { MetricListUI } from "./MetricListUI";
-import { TrendComparisonUI } from "./TrendComparisonUI";
-import { GroupedStatsUI } from "./GroupedStatsUI";
-import { RadarChartUI } from "./RadarChartUI"; // Add this import
+import { PieChartCardUI } from "./common/PieChartUI";
+import { KPIStatUI } from "./common/KPIStatUI";
+import { ProgressRingUI } from "./common/ProgressRingUI";
+import { BarChartUI } from "./common/BarChartUI";
+import { ScoreRingGroupUI } from "./common/ScoreRingGroupUI";
+import { MetricListUI } from "./common/MetricListUI";
+import { TrendComparisonUI } from "./common/TrendComparisonUI";
+import { GroupedStatsUI } from "./common/GroupedStatsUI";
+import { RadarChartUI } from "./common/RadarChartUI"; // Add this import
 import { useChartColors } from "../../ColorUtils";
 
 type InfographicViewUIProps = {};
@@ -98,25 +98,26 @@ export const InfographicViewUI: FC<
   const totalYears = convertMonthsToYears(stats.career.root.months || 0);
 
   return (
-    <div className="fill-screen bg-background flex flex-row flex-wrap gap-4 justify-start items-start p-4">
-      <CardUI className="max-w-md" title="Profile">
-        <ProfileUI
-          resume={resume}
-          buttons={[
+    <div className="flex flex-grid flex-wrap gap-4 p-6 max-w-7xl mx-auto">
+      <CardUI size="max-w-md" title="Profile">
+        <ProfileUI resume={resume} />
+      </CardUI>
+      <CardUI title="Years of Experience" size="flex-none">
+        <KPIStatUI value={formatYears(totalYears)} />
+      </CardUI>
+      <CardUI title="Skills Radar">
+        <RadarChartUI
+          data={radarData}
+          series={[
             {
-              label: "Text",
-              onClick: () =>
-                dispatch({ type: "SET_VIEW", view: ViewerView.Text }),
-            },
-            {
-              label: "Json",
-              onClick: () =>
-                dispatch({ type: "SET_VIEW", view: ViewerView.Json }),
+              key: "value",
+              label: "Experience (years)",
+              color: chartColors[0],
             },
           ]}
         />
       </CardUI>
-      <CardUI title="Skills" size="max-w-md">
+      <CardUI title="Skills" size="flex-auto">
         <ScoreRingGroupUI
           scores={categories.map((c) => ({
             label: c.skill.name,
@@ -153,9 +154,6 @@ export const InfographicViewUI: FC<
           }))}
           colors={chartColors}
         />
-      </CardUI>
-      <CardUI title="Years of Experience">
-        <KPIStatUI value={formatYears(totalYears)} />
       </CardUI>
       {categories.slice(0, 1).map((skill) => (
         <CardUI key={skill.skill.name} title={skill.skill.name}>
@@ -207,18 +205,6 @@ export const InfographicViewUI: FC<
             label: c.skill.name,
             value: convertMonthsToYears(c.months),
           }))}
-        />
-      </CardUI>
-      <CardUI title="Skills Radar">
-        <RadarChartUI
-          data={radarData}
-          series={[
-            {
-              key: "value",
-              label: "Experience (years)",
-              color: chartColors[0],
-            },
-          ]}
         />
       </CardUI>
     </div>

@@ -91,7 +91,10 @@ const ViewerUI: FC<ViewerUIProps> = () => {
   };
 
   return (
-    <div ref={viewerRef} className="flex-auto h-full bg-background flex">
+    <div
+      ref={viewerRef}
+      className="fill-screen flex flex-col gap-4 p-4 overflow-auto"
+    >
       {renderView()}
       {showNav && <ViewerNavUI />}
     </div>
