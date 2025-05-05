@@ -1,6 +1,5 @@
 import { FC } from "react";
 import { useViewerContext, ViewerView } from "./ViewerHook";
-import { ProfileUI } from "./infographic/ProfileUI";
 import {
   ChartBarIcon,
   EyeIcon,
@@ -8,13 +7,21 @@ import {
   CodeBracketIcon,
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
+import { GravatarUI } from "../GravatarUI";
 
 export const HomeViewUI: FC = () => {
   const [state, dispatch] = useViewerContext();
-  const { resume } = state;
-  const { data: resumeData } = resume || {};
+  const { resume: resumeState } = state;
+  const { data: analyzer } = resumeState || {};
 
-  if (!resumeData) return null;
+  if (!analyzer) return null;
+
+  const { resume, gravatarUrl } = analyzer;
+  const { basics } = resume;
+  const summary = basics.summary || "No summary available.";
+  const name = basics.name || "Unknown";
+  const label = basics.label || "Unknown";
+  const email = basics.email || "Unknown";
 
   const handleNavigate = (view: ViewerView) => {
     dispatch({ type: "SET_VIEW", view });
@@ -55,7 +62,33 @@ export const HomeViewUI: FC = () => {
     <div className="flex flex-col items-center justify-center min-h-full w-full">
       <div className="pt-6 w-full max-w-4xl rounded-[var(--radius-card)] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] shadow-[var(--shadow-card)] gap-6 flex flex-col">
         {/* Profile Section */}
-        <ProfileUI resume={resumeData.resume} />
+        <div className="flex flex-col items-center p-spacing-card text-secondary">
+          {/* Avatar */}
+          <div className="w-28 h-28 mb-4">
+            <GravatarUI
+              email={email}
+              name={name}
+              size={128}
+              className="rounded-avatar border border-border shadow-md"
+              style={{
+                width: "100%",
+                height: "100%",
+              }}
+              defaultImage={gravatarUrl || undefined}
+            />
+          </div>
+
+          {/* Name & Title */}
+          <h2 className="text-primary text-2xl font-bold text-center">
+            {name}
+          </h2>
+          <p className="text-secondary text-sm text-center mt-1">{label}</p>
+
+          {/* Summary */}
+          <p className="text-secondary text-sm text-center mt-3 px-4 leading-relaxed">
+            {summary}
+          </p>
+        </div>
 
         {/* Navigation Section */}
         <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
