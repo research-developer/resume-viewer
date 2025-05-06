@@ -57,14 +57,6 @@ const ViewerUI: FC<ViewerUIProps> = () => {
     )
   );
 
-  if (isPending) {
-    return (
-      <div className="mx-auto my-auto flex flex-col items-center justify-center h-full">
-        <LoadingUI />
-      </div>
-    );
-  }
-
   if (error) {
     return <ErrorViewUI error={error} onRetry={refresh} />;
   }
@@ -95,8 +87,16 @@ const ViewerUI: FC<ViewerUIProps> = () => {
 
   return (
     <div ref={viewerRef} className="fill-screen flex flex-col gap-4">
-      {renderView()}
-      {showNav && <ViewerNavUI />}
+      <LoadingUI
+        isLoading={isPending}
+        minDisplayTime={1000}
+        fadeTransitionDuration={800}
+        initialEaseInDuration={800}
+        exitDuration={800}
+      >
+        {renderView()}
+        {showNav && <ViewerNavUI />}
+      </LoadingUI>
     </div>
   );
 };
