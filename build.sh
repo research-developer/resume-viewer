@@ -64,7 +64,7 @@ echo "Library tarball installed successfully."
 
 # Install other dependencies
 echo "Installing other dependencies..."
-npm install
+npm ci
 if [ $? -ne 0 ]; then
   echo "Failed to install other dependencies."
   exit 1
@@ -73,7 +73,7 @@ echo "All dependencies installed successfully."
 
 # Build the application
 echo "Building the application..."
-npm run build
+BASE_URL=${BASE_URL:-/} npm run build
 if [ $? -ne 0 ]; then
   echo "Failed to build the application."
   exit 1
