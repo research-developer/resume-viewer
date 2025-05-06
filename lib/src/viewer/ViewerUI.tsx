@@ -10,6 +10,7 @@ import { ViewerNavUI } from "./ViewerNavUI";
 import { VisualizerViewUI } from "./visualizer/VisualizerViewUI";
 import { useFullscreen } from "./FullScreenHook";
 import { HomeViewUI } from "./HomeViewUI";
+import { LoadingUI } from "./LoadingUI";
 
 type ResumeViewerUIProps = {
   jsonResumeUrl?: string | null;
@@ -58,7 +59,9 @@ const ViewerUI: FC<ViewerUIProps> = () => {
 
   if (isPending) {
     return (
-      <div className="p-4 text-center text-secondary">Loading resume...</div>
+      <div className="mx-auto my-auto flex flex-col items-center justify-center h-full">
+        <LoadingUI />
+      </div>
     );
   }
 
@@ -93,7 +96,7 @@ const ViewerUI: FC<ViewerUIProps> = () => {
   return (
     <div
       ref={viewerRef}
-      className="fill-screen flex flex-col gap-4 p-4 overflow-auto"
+      className="fill-screen flex flex-col gap-4 overflow-auto"
     >
       {renderView()}
       {showNav && <ViewerNavUI />}
