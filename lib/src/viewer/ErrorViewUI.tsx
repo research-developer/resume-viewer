@@ -23,7 +23,7 @@ export const ErrorViewUI: FC<ErrorViewUIProps> = ({ error, onRetry }) => {
   const errorMessage = standardError?.message || "An unknown error occurred";
 
   return (
-    <div className="max-w-2xl w-full mx-auto">
+    <div className="mx-auto max-w-2xl w-full min-h-full flex flex-col items-center justify-center">
       <div className="rounded-[var(--radius-card)] shadow-[var(--shadow-card)] bg-surface border border-border overflow-hidden">
         {/* Error header with gradient background */}
         <div className="bg-gradient-to-r from-accent-red to-accent-orange p-6 text-center">
@@ -136,14 +136,14 @@ export const ErrorViewUI: FC<ErrorViewUIProps> = ({ error, onRetry }) => {
             {onRetry && (
               <button
                 onClick={onRetry}
-                className="bg-accent-blue hover:bg-accent-blue-dark text-white"
+                className="btn hover:bg-accent-blue-dark text-white"
               >
                 Try Again
               </button>
             )}
             <button
               onClick={() => window.location.reload()}
-              className="bg-accent hover:bg-primary hover:text-accent"
+              className="btn bg-accent hover:bg-primary hover:text-accent"
             >
               Reload Page
             </button>
