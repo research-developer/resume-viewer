@@ -10,6 +10,7 @@ import { ViewerNavUI } from "./ViewerNavUI";
 import { VisualizerViewUI } from "./visualizer/VisualizerViewUI";
 import { useFullscreen } from "./FullScreenHook";
 import { HomeViewUI } from "./HomeViewUI";
+import { LoadingUI } from "./LoadingUI";
 
 type ResumeViewerUIProps = {
   jsonResumeUrl?: string | null;
@@ -56,12 +57,6 @@ const ViewerUI: FC<ViewerUIProps> = () => {
     )
   );
 
-  if (isPending) {
-    return (
-      <div className="p-4 text-center text-secondary">Loading resume...</div>
-    );
-  }
-
   if (error) {
     return <ErrorViewUI error={error} onRetry={refresh} />;
   }
@@ -91,12 +86,17 @@ const ViewerUI: FC<ViewerUIProps> = () => {
   };
 
   return (
-    <div
-      ref={viewerRef}
-      className="fill-screen flex flex-col gap-4 p-4 overflow-auto"
-    >
-      {renderView()}
-      {showNav && <ViewerNavUI />}
+    <div ref={viewerRef} className="fill-screen flex flex-col gap-4">
+      <LoadingUI
+        isLoading={isPending}
+        minDisplayTime={1000}
+        fadeTransitionDuration={800}
+        initialEaseInDuration={800}
+        exitDuration={800}
+      >
+        {renderView()}
+        {showNav && <ViewerNavUI />}
+      </LoadingUI>
     </div>
   );
 };

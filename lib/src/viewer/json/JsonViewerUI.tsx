@@ -23,6 +23,26 @@ const createPath = (parentPath: string, key: string | number) => {
  * with Tailwind color classes, including handling multiline strings.
  */
 const PrimitiveValue: React.FC<{ value: unknown }> = ({ value }) => {
+  if (value instanceof Date) {
+    return (
+      <span className="text-accent-green">
+        {isNaN(value.getTime()) ? "Invalid Date" : value.toISOString()}
+      </span>
+    );
+  }
+
+  if (typeof value === "bigint") {
+    return <span className="text-accent-purple">{value.toString()}n</span>;
+  }
+
+  if (typeof value === "symbol") {
+    return <span className="text-accent-orange">{value.toString()}</span>;
+  }
+
+  if (typeof value === "undefined") {
+    return <span className="text-muted">undefined</span>;
+  }
+
   if (typeof value === "string") {
     // Split on newlines to preserve line breaks in multiline strings
     const lines = value.split("\n");
@@ -89,9 +109,9 @@ const JsonNode: React.FC<JsonNodeProps> = ({
   };
 
   // ---------------------------------------
-  // PRIMITIVE VALUES
+  // PRIMITIVE VALUES OR DATES
   // ---------------------------------------
-  if (typeof value !== "object" || value === null) {
+  if (typeof value !== "object" || value === null || value instanceof Date) {
     return (
       <>
         {nodeKey !== undefined && (
@@ -110,7 +130,6 @@ const JsonNode: React.FC<JsonNodeProps> = ({
   if (Array.isArray(value)) {
     const length = value.length;
     if (length === 0) {
-      // Empty array
       return (
         <div>
           {nodeKey !== undefined && (
@@ -142,16 +161,12 @@ const JsonNode: React.FC<JsonNodeProps> = ({
           )}
         </button>{" "}
         {isCollapsed ? (
-          // Collapsed, non-empty array
           <span className="text-accent-blue-dark">
             [<span className="text-accent-blue-light">{length}</span>]
           </span>
         ) : (
-          // Expanded array
-          <span className="text-accent-blue-dark">[</span>
-        )}
-        {!isCollapsed && (
           <>
+            <span className="text-accent-blue-dark">[</span>
             <div className="ml-6 border-l-2 border-border pl-2 mt-1">
               {value.map((item, index) => {
                 const childPath = createPath(path, index);
@@ -183,7 +198,6 @@ const JsonNode: React.FC<JsonNodeProps> = ({
   // ---------------------------------------
   const entries = Object.entries(value);
   if (entries.length === 0) {
-    // Empty object
     return (
       <div>
         {nodeKey !== undefined && (
@@ -215,14 +229,10 @@ const JsonNode: React.FC<JsonNodeProps> = ({
         )}
       </button>{" "}
       {isCollapsed ? (
-        // Collapsed, non-empty object
         <span className="text-accent-blue">{`{...}`}</span>
       ) : (
-        // Expanded object
-        <span className="text-accent-blue">{"{"}</span>
-      )}
-      {!isCollapsed && (
         <>
+          <span className="text-accent-blue">{"{"}</span>
           <div className="ml-6 border-l-2 border-border pl-2 mt-1">
             {entries.map(([childKey, val]) => {
               const childPath = createPath(path, childKey);
@@ -301,17 +311,21 @@ const JsonViewerUI: React.FC<JsonViewerUIProps> = ({
   depth = 0,
   defaultExpandDepth = 2, // Default to expanding first 2 levels
 }) => {
-  const [collapsedState, setCollapsedState] = useState<CollapsedState>({});
+  // Precompute the initial collapsed state
+  const initialCollapsedState = React.useMemo(
+    () => initializeCollapsedState(data, "", 0, defaultExpandDepth),
+    [data, defaultExpandDepth]
+  );
 
-  // Initialize collapsed state on component mount or when data/expandDepth changes
+  const [collapsedState, setCollapsedState] = useState<CollapsedState>(
+    initialCollapsedState
+  );
+
+  // Update collapsed state if data or defaultExpandDepth changes
   useEffect(() => {
-    const initialState = initializeCollapsedState(
-      data,
-      "",
-      0,
-      defaultExpandDepth
+    setCollapsedState(
+      initializeCollapsedState(data, "", 0, defaultExpandDepth)
     );
-    setCollapsedState(initialState);
   }, [data, defaultExpandDepth]);
 
   return (

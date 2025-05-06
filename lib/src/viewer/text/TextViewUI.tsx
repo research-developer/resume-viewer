@@ -12,7 +12,7 @@ import { InterestListUI } from "./InterestUI";
 import { ReferenceListUI } from "./ReferenceUI";
 import { ProjectListUI } from "./ProjectUI";
 import { useViewerContext } from "../ViewerHook";
-import { ResumeStatsUI } from "./ResumeStatsUI";
+import { ResumeStatsUI } from "./StatsUI";
 
 interface TextViewUIProps {}
 
@@ -36,8 +36,8 @@ export const TextViewUI: React.FC<TextViewUIProps> = () => {
   const { resume } = resumeData;
 
   return (
-    <div className="flex flex-row gap-6 justify-between items-start max-w-7xl mx-auto p-6">
-      <div className="rounded-lg bg-surface text-primary shadow-md border border-border mx-auto flex flex-col gap-6 p-6 max-w-6xl">
+    <div className="flex-auto flex flex-col md:flex-row p-2 sm:p-4 gap-2 md:gap-4">
+      <div className="flex flex-wrap sm:max-w-2/3 gap-2 p-4 card">
         <BasicsUI basics={resume.basics} />
         {resume.work && <WorkListUI workList={resume.work} />}
         {resume.volunteer && (
@@ -61,7 +61,7 @@ export const TextViewUI: React.FC<TextViewUIProps> = () => {
         )}
         {resume.projects && <ProjectListUI projectList={resume.projects} />}
       </div>
-      <div>
+      <div className="flex-none md:max-w-1/3 flex p-2 card">
         <ResumeStatsUI analyzer={resumeData} />
       </div>
     </div>

@@ -26,6 +26,7 @@ export interface SkillOccurrence extends ResumeSkill {
 
 // The meta about the skill tree structure but not used to track any data about it
 export interface Skill {
+  id: string; // Unique identifier for the skill (e.g., skill name)
   name: string; // Name of the skill
   children: FluentSet<string>; // Children skills (derived from keywords) by keyword
   occurrences: FluentSet<SkillOccurrence>; // Skills that directly reference this node
@@ -198,6 +199,7 @@ export class SkillTree extends FluentMap<string, Skill> {
     for (const keyword of keywords) {
       if (!this.has(keyword)) {
         this.set(keyword, {
+          id: generateRandomId("skill-"),
           name: keyword,
           children: new FluentSet(),
           occurrences: new FluentSet(),
@@ -300,6 +302,7 @@ export class SkillTree extends FluentMap<string, Skill> {
         // If the skill doesn't exist, create a new node
         const isCategory = !!(origin.keywords && origin.keywords.length > 0); // Check if the skill is a category
         const newNode: Skill = {
+          id: generateRandomId("skill-"), // Generate a unique ID for the skill
           name: origin.name,
           children: new FluentSet(origin.keywords || []),
           occurrences: new FluentSet([origin]), // Initialize skills to an empty array
@@ -407,6 +410,14 @@ export class SkillStatsIndex extends FluentMap<string, SkillStats> {
     super(root.children.fluent().map((c) => [c.skill.name, c]));
   }
 
+  all = (): FluentIterable<SkillStats> => {
+    const self = this; // Reference to the SkillStatsIndex instance
+    function* generator(): Generator<SkillStats> {
+      yield* SkillStatsIndex.depthFirst(self.root); // Yield the skill stats from the root
+    }
+    return new FluentIterable(generator); // Return the generator function
+  };
+
   occurrences = (): FluentIterable<SkillOccurrence> => {
     // use generator to yield the occurrences of the root skill stats
     const self = this; // Reference to the SkillStatsIndex instance
@@ -436,6 +447,17 @@ export class SkillStatsIndex extends FluentMap<string, SkillStats> {
       months: 0, // Initialize months to 0
       children: new FluentSet(), // Initialize children to an empty array
     };
+  };
+
+  static depthFirst = (stats: SkillStats): FluentIterable<SkillStats> => {
+    // Create a generator function to yield the skill stats
+    function* generator(): Generator<SkillStats> {
+      for (const child of stats.children) {
+        yield* SkillStatsIndex.depthFirst(child); // Recursively yield the child stats
+      }
+      yield stats; // Yield the current skill stats
+    }
+    return new FluentIterable(generator); // Return the generator function
   };
 
   static depthFirstOccurances = (
@@ -480,6 +502,7 @@ export class SkillStatsIndex extends FluentMap<string, SkillStats> {
 
     // Process each skill in the index
     const root = recursiveAnalyze({
+      id: generateRandomId("skill-"),
       name: name,
       children: new FluentSet(skills),
       occurrences: new FluentSet(),

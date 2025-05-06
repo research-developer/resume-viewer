@@ -64,9 +64,9 @@ export const InfographicViewUI: FC<
         ?.fluentValues()
         .reduce(
           (acc, topLevel) => {
-            const category = topLevel.skill.name;
+            const dataKey = topLevel.skill.id;
             const years = convertMonthsToYears(topLevel.months);
-            (acc as unknown as any)[category] = years;
+            (acc as unknown as any)[dataKey] = years;
             return acc;
           },
           { name: year.toString() }
@@ -79,7 +79,7 @@ export const InfographicViewUI: FC<
   // Create series configuration for the line chart
   const skillsLineSeries = useMemo(() => {
     return categories.map((category, index) => ({
-      key: category.skill.name,
+      key: category.skill.id,
       label: category.skill.name,
       color: chartColors[index % chartColors.length],
     }));
@@ -100,7 +100,7 @@ export const InfographicViewUI: FC<
   const totalYears = convertMonthsToYears(stats.career.root.months || 0);
 
   return (
-    <div className="flex flex-grid flex-wrap gap-4 p-6 max-w-7xl mx-auto">
+    <div className="flex flex-grid flex-wrap gap-4 p-2 sm:p-4 max-w-7xl sm:mx-auto">
       <CardUI size="max-w-md" title="Profile">
         <ProfileUI resume={resume} />
       </CardUI>
@@ -188,15 +188,15 @@ export const InfographicViewUI: FC<
           }))}
         />
       </CardUI>
-      <CardUI title="Skills Over Time" size="min-w-200">
+      <CardUI title="Skills Over Time">
         <TrendComparisonUI
           title="Skills Over Time"
           data={categories.map((c) => ({
             name: c.skill.name,
-            [c.skill.name]: convertMonthsToYears(c.months),
+            [c.skill.id]: convertMonthsToYears(c.months),
           }))}
           series={categories.map((c, index) => ({
-            key: c.skill.name,
+            key: c.skill.id,
             label: c.skill.name,
             color: chartColors[index % chartColors.length],
           }))}

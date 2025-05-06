@@ -8,26 +8,31 @@ export const WelcomeViewUI: FC<WelcomeViewUIProps> = ({}) => {
   const { resume } = state;
   const [urlState, setUrlState] = useState<string>("");
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (urlState?.length > 0) {
-      if (resume?.setUrl) {
-        resume.setUrl(urlState);
-      } else {
-        console.error("setUrl function is not available in viewerData");
-      }
-    } else {
-      console.warn("URL state is empty");
+  const submit = (newUrl: string) => {
+    if (!resume) {
+      console.error("Resume object is not available in viewerData");
+      return;
     }
+    if (resume.url === newUrl) {
+      resume.refresh();
+      return;
+    }
+    resume.setUrl(newUrl);
   };
 
-  const handleExampleClick = (exampleUrl: string) => {
-    resume?.setUrl?.(exampleUrl);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    submit(urlState);
+  };
+
+  const handleExampleClick = (url: string) => {
+    setUrlState(url);
+    submit(url);
   };
 
   return (
     <div className="min-h-full max-w-2xl m-auto p-6 flex flex-col items-center justify-center">
-      <div className="rounded-[var(--radius-card)] shadow-[var(--shadow-card)] bg-surface border border-border overflow-hidden">
+      <div className="rounded-[var(--radius-card)] shadow-[var(--shadow-card)] bg-surface border border-border">
         {/* Header with gradient background */}
         <div className="bg-gradient-to-r from-accent-blue-dark to-accent-purple-dark p-6 text-center">
           <h1 className="text-3xl font-bold text-white">Resume Viewer</h1>

@@ -194,19 +194,25 @@ export const getColorByIndex = (
  */
 export const createChartGradient = (
   id: string,
-  color: AccentColor,
-  opacity: { start?: number; end?: number } = { start: 0.8, end: 0 }
+  color: string,
+  opacity: { start?: number; end?: number } = { start: 0.3, end: 0.2 }
 ): JSX.Element => (
   <linearGradient key={id} id={id} x1="0" y1="0" x2="0" y2="1">
-    <stop
-      offset="5%"
-      stopColor={getAccentColor(color)}
-      stopOpacity={opacity.start}
-    />
-    <stop
-      offset="95%"
-      stopColor={getAccentColor(color)}
-      stopOpacity={opacity.end}
-    />
+    <stop offset="5%" stopColor={color} stopOpacity={opacity.start} />
+    <stop offset="95%" stopColor={color} stopOpacity={opacity.end} />
   </linearGradient>
 );
+
+/**
+ * Resolves the underlying CSS color value from a CSS variable.
+ * If the input is not a CSS variable, it returns the input directly.
+ */
+export const getCssColor = (token: string): string => {
+  if (!token.startsWith("var(")) return token;
+  const cssVarName = token.slice(4, -1).trim();
+  return typeof window === "undefined"
+    ? ""
+    : getComputedStyle(document.documentElement)
+        .getPropertyValue(cssVarName)
+        .trim();
+};

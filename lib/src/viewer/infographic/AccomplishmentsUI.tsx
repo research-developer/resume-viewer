@@ -40,7 +40,7 @@ export const AccomplishmentsUI: FC<
   }
 
   return (
-    <CardUI size="flex-none" title={"Accomplishments"}>
+    <CardUI title={"Accomplishments"}>
       <div className="flex flex-col gap-6 w-full min-h-full justify-around justify-items-center">
         <KPIStatUI
           label="Skills"

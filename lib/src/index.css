@@ -144,4 +144,48 @@ body.fill-screen {
   @apply min-h-full;
   @apply bg-background;
   @apply text-primary;
+  @apply overflow-auto;
+}
+
+@keyframes spin-fast {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-slow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-spin-fast {
+  animation: spin-fast 0.8s linear infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 1.6s linear infinite;
+}
+
+.card {
+  @apply rounded-[var(--radius-card)];
+  @apply shadow-[var(--shadow-card)];
+  @apply bg-[var(--color-surface)];
 }

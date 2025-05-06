@@ -61,7 +61,7 @@ export const CareerStatsUI: FC<
   }
 
   return (
-    <CardUI size="flex-none" title="Career">
+    <CardUI title="Career">
       <div className="flex flex-col gap-6 w-full min-h-full justify-around justify-items-center">
         <KPIStatUI
           label="Years of Experience"

@@ -32,7 +32,7 @@ export const PieChartCardUI: FC<PieChartCardUIProps> = ({ data, colors }) => {
       width="100%"
       height="100%"
       minWidth={250}
-      minHeight={250}
+      minHeight={150 + data.length * 45}
     >
       <PieChart>
         <Pie
