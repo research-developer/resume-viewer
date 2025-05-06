@@ -1,10 +1,4 @@
-import {
-  startTransition,
-  useActionState,
-  useCallback,
-  useEffect,
-  useMemo,
-} from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { ResumeSchema } from "./ResumeModel";
 import { ResumeAnalyzer } from "./analyzer/ResumeAnalyzer";
 
@@ -12,108 +6,93 @@ export interface ResumeState {
   url: string | null;
   data: ResumeAnalyzer | null;
   error: Error | null;
+  isPending: boolean;
 }
-
-const initialState: ResumeState = {
-  url: null,
-  data: null,
-  error: null,
-};
 
 /**
  * Custom hook to fetch and manage resume data.
- * @param url - The URL of the resume JSON file.
+ * @param initialUrl - The initial URL of the resume JSON file.
  * @returns An object containing the resume state, loading status, and a function to set the URL.
  */
-export function useResume(url?: string | null) {
-  const [state, dispatch, isPending] = useActionState(
-    fetchResume,
-    initialState
-  );
+export function useResume(initialUrl?: string | null) {
+  const [url, setUrl] = useState<string | null>(initialUrl || null);
+  const [state, setState] = useState<ResumeState>({
+    url: null,
+    data: null,
+    error: null,
+    isPending: url ? true : false,
+  });
 
-  const setUrl = useCallback(
-    (url: string | null) => {
-      startTransition(() => {
-        dispatch(url);
+  const fetchResume = useCallback(async (url: string | null) => {
+    if (!url) {
+      setState((prev) => ({
+        ...prev,
+        url: null,
+        data: null,
+        error: null,
+        isPending: false,
+      }));
+      return;
+    }
+
+    setState((prev) => ({ ...prev, isPending: true, error: null }));
+
+    try {
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error("Resume not found. Please check the URL.");
+        } else if (response.status === 500) {
+          throw new Error("Server error. Please try again later.");
+        } else if (response.status === 403) {
+          throw new Error("Access denied. Please check your permissions.");
+        }
+        throw new Error(
+          `Failed to fetch resume: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const jsonData = await response.json();
+      const parsedData = await ResumeSchema.parseAsync(jsonData);
+      const data = await ResumeAnalyzer.analyzeAsync(parsedData);
+
+      setState({
+        url,
+        data,
+        error: null,
+        isPending: false,
       });
-    },
-    [dispatch]
-  );
+    } catch (err) {
+      console.error("Error fetching resume:", err);
+      setState({
+        url,
+        data: null,
+        error: err as Error,
+        isPending: false,
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (url !== state.url) {
+      fetchResume(url);
+    }
+  }, [url, state.url, fetchResume]);
 
   const refresh = useCallback(() => {
-    startTransition(() => {
-      dispatch(state.url);
-    });
-  }, [dispatch, state.url]);
+    if (state.url) {
+      fetchResume(state.url);
+    }
+  }, [state.url, fetchResume]);
 
-  const newState = useMemo(() => {
-    const n = {
+  return useMemo(() => {
+    return {
       ...state,
       setUrl,
       refresh,
-      isPending,
     };
-    return n;
-  }, [state.data, state.error, state.url, isPending, setUrl, refresh]);
-
-  useEffect(() => {
-    if (url !== undefined) setUrl(url);
-  }, [url]);
-
-  return newState;
+  }, [state, setUrl, refresh]);
 }
 
 export type ResumeHook = ReturnType<typeof useResume>;
-
-async function fetchResume(
-  prevState: ResumeState,
-  url: string | null
-): Promise<ResumeState> {
-  // If the URL is empty, reset the state
-  if (!url) {
-    return {
-      ...prevState,
-      url: null,
-      data: null,
-      error: null,
-    };
-  }
-
-  try {
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      // Do some friendly error handling for common HTTP errors
-      if (response.status === 404) {
-        throw new Error("Resume not found. Please check the URL.");
-      } else if (response.status === 500) {
-        throw new Error("Server error. Please try again later.");
-      } else if (response.status === 403) {
-        throw new Error("Access denied. Please check your permissions.");
-      }
-
-      // For other errors, just throw a generic error
-      throw new Error(
-        `Failed to fetch resume: ${response.status} ${response.statusText}`
-      );
-    }
-    const jsonData = await response.json();
-    const parsedData = await ResumeSchema.parseAsync(jsonData);
-    const data = await ResumeAnalyzer.analyzeAsync(parsedData);
-
-    return {
-      ...prevState,
-      url,
-      data,
-      error: null,
-    };
-  } catch (err) {
-    console.error("Error fetching resume:", err);
-    return {
-      ...prevState,
-      url,
-      data: null,
-      error: err as Error,
-    };
-  }
-}
