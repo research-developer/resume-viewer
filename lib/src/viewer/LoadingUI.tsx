@@ -6,7 +6,7 @@ interface LoadingUIProps {
   minDisplayTime?: number;
   fadeTransitionDuration?: number;
   initialEaseInDuration?: number;
-  exitDuration?: number; // Added new prop for exit animation
+  exitDuration?: number;
 }
 
 export const LoadingUI: FC<LoadingUIProps> = ({
@@ -15,13 +15,15 @@ export const LoadingUI: FC<LoadingUIProps> = ({
   minDisplayTime = 1000,
   fadeTransitionDuration = 500,
   initialEaseInDuration = 500,
-  exitDuration = 800, // Longer exit duration
+  exitDuration = 800,
 }) => {
-  const [showSpinner, setShowSpinner] = useState(true);
-  const [showContent, setShowContent] = useState(false);
-  const [loadStartTime, setLoadStartTime] = useState<number | null>(null);
+  const [showSpinner, setShowSpinner] = useState(isLoading);
+  const [showContent, setShowContent] = useState(!isLoading);
+  const [loadStartTime, setLoadStartTime] = useState<number | null>(
+    isLoading ? Date.now() : null
+  );
   const [initialMount, setInitialMount] = useState(true);
-  const [isExiting, setIsExiting] = useState(false); // New state to control exit animation
+  const [isExiting, setIsExiting] = useState(false);
 
   // Handle initial animation on mount
   useEffect(() => {
@@ -42,25 +44,32 @@ export const LoadingUI: FC<LoadingUIProps> = ({
       setShowContent(false);
       setIsExiting(false);
       setLoadStartTime(Date.now());
-    } else if (loadStartTime) {
-      // Loading has finished - ensure minimum display time
-      const elapsedTime = Date.now() - loadStartTime;
-      const remainingTime = Math.max(0, minDisplayTime - elapsedTime);
+    } else {
+      // Loading has finished
+      if (loadStartTime) {
+        // If we had a loading state before, ensure minimum display time
+        const elapsedTime = Date.now() - loadStartTime;
+        const remainingTime = Math.max(0, minDisplayTime - elapsedTime);
 
-      spinnerTimer = setTimeout(() => {
-        // Start exit animation
-        setIsExiting(true);
+        spinnerTimer = setTimeout(() => {
+          // Start exit animation
+          setIsExiting(true);
 
-        // After exit animation completes, hide spinner and show content
-        exitingTimer = setTimeout(() => {
-          setShowSpinner(false);
+          // After exit animation completes, hide spinner and show content
+          exitingTimer = setTimeout(() => {
+            setShowSpinner(false);
 
-          // Add slight delay before showing content for smoother transition
-          contentTimer = setTimeout(() => {
-            setShowContent(true);
-          }, fadeTransitionDuration / 2);
-        }, exitDuration);
-      }, remainingTime);
+            // Add slight delay before showing content for smoother transition
+            contentTimer = setTimeout(() => {
+              setShowContent(true);
+            }, fadeTransitionDuration / 2);
+          }, exitDuration);
+        }, remainingTime);
+      } else {
+        // Initial state is already loaded - show content immediately
+        setShowSpinner(false);
+        setShowContent(true);
+      }
     }
 
     return () => {
@@ -76,20 +85,12 @@ export const LoadingUI: FC<LoadingUIProps> = ({
     exitDuration,
   ]);
 
+  if (showContent) {
+    return children;
+  }
+
   return (
     <div className="relative w-full h-full min-h-screen">
-      {/* Content layer */}
-      <div
-        className="w-full h-full"
-        style={{
-          opacity: showContent ? 1 : 0,
-          transition: `opacity ${fadeTransitionDuration}ms ease-in-out`,
-          visibility: showContent ? "visible" : "hidden",
-        }}
-      >
-        {children}
-      </div>
-
       {/* Loading spinner layer */}
       <div
         className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50"

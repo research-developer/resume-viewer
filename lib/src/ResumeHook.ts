@@ -20,7 +20,7 @@ export function useResume(initialUrl?: string | null) {
     url: null,
     data: null,
     error: null,
-    isPending: url ? true : false,
+    isPending: !!url ? true : false,
   });
 
   const fetchResume = useCallback(async (url: string | null) => {
@@ -85,6 +85,7 @@ export function useResume(initialUrl?: string | null) {
       fetchResume(state.url);
     }
   }, [state.url, fetchResume]);
+  console.log("Resume state:", state);
 
   return useMemo(() => {
     return {

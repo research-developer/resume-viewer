@@ -34,7 +34,7 @@ export const WelcomeViewUI: FC<WelcomeViewUIProps> = ({}) => {
     <div className="min-h-full max-w-2xl m-auto p-6 flex flex-col items-center justify-center">
       <div className="rounded-[var(--radius-card)] shadow-[var(--shadow-card)] bg-surface border border-border">
         {/* Header with gradient background */}
-        <div className="bg-gradient-to-r from-accent-blue-dark to-accent-purple-dark p-6 text-center">
+        <div className="bg-gradient-to-r from-accent-blue-dark to-accent-purple-dark p-6 text-center rounded-t-[var(--radius-card)]">
           <h1 className="text-3xl font-bold text-white">Resume Viewer</h1>
           <p className="text-base mt-2 text-secondary opacity-90">
             Interactive visualization for JSON Resume data
