@@ -8,21 +8,26 @@ export const WelcomeViewUI: FC<WelcomeViewUIProps> = ({}) => {
   const { resume } = state;
   const [urlState, setUrlState] = useState<string>("");
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (urlState?.length > 0) {
-      if (resume?.setUrl) {
-        resume.setUrl(urlState);
-      } else {
-        console.error("setUrl function is not available in viewerData");
-      }
-    } else {
-      console.warn("URL state is empty");
+  const submit = (newUrl: string) => {
+    if (!resume) {
+      console.error("Resume object is not available in viewerData");
+      return;
     }
+    if (resume.url === newUrl) {
+      resume.refresh();
+      return;
+    }
+    resume.setUrl(newUrl);
   };
 
-  const handleExampleClick = (exampleUrl: string) => {
-    resume?.setUrl?.(exampleUrl);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    submit(urlState);
+  };
+
+  const handleExampleClick = (url: string) => {
+    setUrlState(url);
+    submit(url);
   };
 
   return (
