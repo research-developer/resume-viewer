@@ -4,7 +4,6 @@ import { ResumeAnalyzer } from "../../analyzer/ResumeAnalyzer";
 import { SkillCategoriesChartUI } from "./SkillCategoriesChartUI";
 import { TopSkillsChartUI } from "./TopSkillsChartUI";
 import { SkillHierarchyTreeUI } from "./SkillHierarchyTreeUI";
-import { KeywordConnectionsUI } from "./KeywordConnectionsUI";
 
 interface StatsUIProps {
   analyzer: ResumeAnalyzer | null;

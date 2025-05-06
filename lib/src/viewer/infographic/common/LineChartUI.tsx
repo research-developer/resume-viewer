@@ -12,7 +12,6 @@ import {
 import {
   createChartGradient,
   getAccentColor,
-  getCssColor,
   useChartColors,
 } from "../../../ColorUtils";
 
