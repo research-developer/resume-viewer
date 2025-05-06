@@ -38,8 +38,6 @@ jobs:
           cache: "npm"
           cache-dependency-path: "**/package-lock.json"
       - name: Run build script
-        env:
-          BASE_URL: /resume-viewer/
         run: bash build.sh
       - name: Setup Pages
         uses: actions/configure-pages@v5
