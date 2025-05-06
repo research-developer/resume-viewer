@@ -29,7 +29,7 @@ export const MetricListUI: FC<MetricListUIProps> = ({ items }) => {
               <span>{item.label}</span>
               <span>{item.value}%</span>
             </div>
-            <div className="w-full h-2 bg-[var(--color-border)] rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-[var(--color-border)] rounded-full">
               <div
                 className="h-full rounded-full transition-all duration-300"
                 style={{

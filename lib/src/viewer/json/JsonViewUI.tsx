@@ -24,7 +24,7 @@ export const JsonViewUI: FC<JsonViewUIProps> = ({}: JsonViewUIProps) => {
   }
 
   return (
-    <div className="min-h-screen w-full h-full overflow-hidden gap-4 p-6 self-start">
+    <div className="min-h-screen w-full h-full gap-4 p-6 self-start">
       <div className="text-lg font-semibold text-primary">JSON</div>
       <div className="text-sm text-secondary mb-4">
         The below is the JSON representation of the resume.

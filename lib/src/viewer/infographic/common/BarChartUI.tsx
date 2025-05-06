@@ -35,8 +35,8 @@ export const BarChartUI: FC<BarChartUIProps> = ({ data, color = "purple" }) => {
     <ResponsiveContainer
       width="100%"
       height="100%"
-      minWidth={data.length * 50}
-      minHeight={data.length * 50}
+      minWidth={200}
+      minHeight={200}
     >
       <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />

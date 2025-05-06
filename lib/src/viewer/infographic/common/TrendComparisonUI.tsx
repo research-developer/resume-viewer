@@ -12,7 +12,7 @@ import {
 
 type TrendDataPoint = {
   name: string; // X-axis label (e.g. "Week 1", "Jan", etc.)
-  [seriesName: string]: string | number;
+  [seriesKey: string]: string | number;
 };
 
 type TrendComparisonUIProps = {
@@ -50,19 +50,17 @@ export const TrendComparisonUI: FC<TrendComparisonUIProps> = ({
         <YAxis stroke="var(--color-secondary)" />
         <Tooltip />
         <Legend />
-        {series.map(
-          ({ key, label, color = "var(--color-accent-cyan)" }, index) => (
-            <Line
-              key={index}
-              type="monotone"
-              dataKey={key}
-              name={label}
-              stroke={color}
-              strokeWidth={2}
-              dot={{ r: 2 }}
-            />
-          )
-        )}
+        {series.map(({ key, label, color = "var(--color-accent-cyan)" }) => (
+          <Line
+            key={key}
+            type="monotone"
+            dataKey={key}
+            name={label}
+            stroke={color}
+            strokeWidth={2}
+            dot={{ r: 2 }}
+          />
+        ))}
       </LineChart>
     </ResponsiveContainer>
   );

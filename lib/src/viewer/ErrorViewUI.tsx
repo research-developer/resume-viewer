@@ -24,7 +24,7 @@ export const ErrorViewUI: FC<ErrorViewUIProps> = ({ error, onRetry }) => {
 
   return (
     <div className="mx-auto max-w-2xl w-full min-h-full flex flex-col items-center justify-center">
-      <div className="rounded-[var(--radius-card)] shadow-[var(--shadow-card)] bg-surface border border-border overflow-hidden">
+      <div className="rounded-[var(--radius-card)] shadow-[var(--shadow-card)] bg-surface border border-border">
         {/* Error header with gradient background */}
         <div className="bg-gradient-to-r from-accent-red to-accent-orange p-6 text-center">
           <div className="flex justify-center mb-3">

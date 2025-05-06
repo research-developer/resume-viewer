@@ -12,6 +12,7 @@ import {
 import {
   createChartGradient,
   getAccentColor,
+  getCssColor,
   useChartColors,
 } from "../../../ColorUtils";
 
@@ -56,10 +57,7 @@ export const LineChartUI: FC<LineChartUIProps> = ({
         <defs>
           {series.map((s, index) => {
             const color = s.color || chartColors[index % chartColors.length];
-            const colorName = color
-              .replace("var(--color-accent-", "")
-              .replace(")", "");
-            return createChartGradient(`color${s.key}`, colorName);
+            return createChartGradient(`color${s.key}`, color);
           })}
         </defs>
         <XAxis dataKey="name" stroke="#cbd5e1" />

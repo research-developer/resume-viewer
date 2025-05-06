@@ -144,6 +144,7 @@ body.fill-screen {
   @apply min-h-full;
   @apply bg-background;
   @apply text-primary;
+  @apply overflow-auto;
 }
 
 @keyframes spin-fast {
@@ -170,4 +171,10 @@ body.fill-screen {
 
 .animate-spin-slow {
   animation: spin-slow 1.6s linear infinite;
+}
+
+.card {
+  @apply rounded-[var(--radius-card)];
+  @apply shadow-[var(--shadow-card)];
+  @apply bg-[var(--color-surface)];
 }

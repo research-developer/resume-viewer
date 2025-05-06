@@ -84,9 +84,9 @@ export const ViewerNavUI: FC = () => {
         } bottom-2 left-4 right-4 transition-all duration-500 ease-in-out z-40 max-w-[800px]`}
       >
         <div
-          className={`p-2 rounded-full bg-accent-blue/25 backdrop-blur-sm border border-border shadow-lg flex items-center ${
+          className={`p-2 rounded-full bg-accent-blue/25 backdrop-blur-sm border border-border shadow-lg flex ${
             isCollapsed
-              ? "items-start justify-start"
+              ? "items-center justify-center"
               : "items-center justify-between"
           } transition-all duration-2000 ease-in-out`}
           style={{
@@ -95,34 +95,41 @@ export const ViewerNavUI: FC = () => {
               : "expand 0.5s ease backwards",
           }}
         >
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="bg-accent-blue/75 active:bg-accent-blue text-accent-blue-light hover:text-primary hover:border-primary p-1 rounded-full focus:outline-none focus:ring-1 focus:ring-accent"
-            title={isCollapsed ? "Expand toolbar" : "Collapse toolbar"}
-          >
-            <ChevronRightIcon
-              className={`w-5 h-5 transition-transform duration-300 ${
-                isCollapsed ? "rotate-180" : "rotate-0"
-              }`}
-            />
-          </button>
+          <div className="flex items-start justify-start">
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="bg-accent-blue/75 active:bg-accent-blue text-accent-blue-light hover:text-primary hover:border-primary p-1 rounded-full focus:outline-none focus:ring-1 focus:ring-accent"
+              title={isCollapsed ? "Expand toolbar" : "Collapse toolbar"}
+            >
+              <ChevronRightIcon
+                className={`w-5 h-5 transition-transform duration-300 ${
+                  isCollapsed ? "rotate-180" : "rotate-0"
+                }`}
+              />
+            </button>
+            <div className="flex-auto"></div>
+          </div>
 
           <div
-            className={`overflow-hidden transition-all duration-500 ease-in-out ${
+            className={`flex-auto overflow-hidden transition-all duration-500 ease-in-out ${
               isCollapsed ? "w-0 opacity-0" : "w-full opacity-100"
             }`}
           >
             <div
-              className="flex flex-grow justify-between transition-transform duration-500 ease-in-out"
+              className={`flex flex-col gap-2 sm:flex-row sm:flex-none flex-grow justify-between transition-transform duration-500 ease-in-out ${
+                isCollapsed ? "opacity-0" : "opacity-100"
+              }`}
               style={{
                 transform: isCollapsed ? "translateX(50px)" : "translateX(0px)",
               }}
             >
               {/* View Switcher */}
               <div className="flex-auto flex justify-center gap-2">
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs text-muted mr-2">View:</span>
-                  <div className="flex overflow-hidden gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted mr-2 hidden sm:block">
+                    View:
+                  </span>
+                  <div className="flex gap-2">
                     <button
                       onClick={() => handleViewChange(ViewerView.Infographic)}
                       className={`btn px-3 py-1 text-xs font-medium ${
@@ -176,7 +183,7 @@ export const ViewerNavUI: FC = () => {
               </div>
 
               {/* Right Side Actions */}
-              <div className="flex items-center gap-2">
+              <div className="flex justify-center gap-2">
                 {/* Dynamic actions based on current view */}
                 {currentView === ViewerView.Text && (
                   <button

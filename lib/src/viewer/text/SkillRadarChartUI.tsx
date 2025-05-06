@@ -35,10 +35,10 @@ export const SkillRadarChartUI: React.FC<SkillRadarChartUIProps> = ({
 
   return (
     <div className="bg-accent p-4 rounded-lg shadow border border-border">
-      <h3 className="text-lg font-semibold text-primary mb-4">
+      <h3 className="text-lg font-semibold text-primary">
         Skill Experience Radar
       </h3>
-      <div className="w-full h-80">
+      <div className="min-w-full">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart cx="50%" cy="50%" outerRadius="80%" data={formattedData}>
             <PolarGrid stroke="#3c3c3c" />
@@ -75,9 +75,6 @@ export const SkillRadarChartUI: React.FC<SkillRadarChartUIProps> = ({
             <Legend wrapperStyle={{ paddingTop: "10px", color: "#cbd5e1" }} />
           </RadarChart>
         </ResponsiveContainer>
-      </div>
-      <div className="mt-2 text-sm text-muted text-center">
-        Visualizes relative experience levels across different skills
       </div>
     </div>
   );
