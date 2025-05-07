@@ -36,7 +36,7 @@ export const TextViewUI: React.FC<TextViewUIProps> = () => {
   const { resume } = resumeData;
 
   return (
-    <div className="flex-auto flex flex-col md:flex-row p-2 sm:p-4 gap-2 md:gap-4">
+    <div className="flex-auto flex flex-col md:flex-row p-2 sm:p-4 gap-2 md:gap-4 max-w-7xl sm:mx-auto">
       <div className="flex flex-wrap sm:max-w-2/3 gap-2 p-4 card">
         <BasicsUI basics={resume.basics} />
         {resume.work && <WorkListUI workList={resume.work} />}
