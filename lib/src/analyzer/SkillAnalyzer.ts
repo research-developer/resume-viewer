@@ -1,4 +1,4 @@
-import { Resume, ResumeSkill } from "../ResumeModel";
+import { Resume, ResumeSkill } from "@schema/ResumeSchema";
 import { differenceInMonths } from "../Time";
 import { generateRandomId } from "../Identity";
 import { FluentSet } from "../FluentSet";

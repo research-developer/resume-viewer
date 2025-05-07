@@ -1,4 +1,4 @@
-import { Resume, ResumeWork } from "../ResumeModel";
+import { Resume, ResumeWork } from "@schema/ResumeSchema";
 import { differenceInMonths } from "../Time";
 
 /**

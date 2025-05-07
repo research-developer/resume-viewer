@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumeLocation } from "../../ResumeModel";
+import { ResumeLocation } from "@schema/ResumeSchema";
 import { MapPinIcon } from "@heroicons/react/24/solid";
 
 interface WorkLocationUIProps {

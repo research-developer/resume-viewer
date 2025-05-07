@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumeCertificate } from "../../ResumeModel";
+import { ResumeCertificate } from "@schema/ResumeSchema";
 import DateUI from "./DateUI";
 
 interface CertificateUIProps {

@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect, PropsWithChildren } from "react";
-import { Resume } from "../../ResumeModel";
+import { Resume } from "@schema/ResumeSchema";
 import {
   visualizerReducer,
   createInitialState,

@@ -19,6 +19,10 @@ The project can be viewed live at: [https://resume-viewer.richardadleta.com](htt
 - **Public Showcase**: Demonstrates coding, UX, and data analysis skills for hiring purposes.
 - **Restrictive Licensing**: Available for personal use with limitations on commercial use.
 
+## Schema Documentation
+
+This project includes a Zod-based schema system to define and extend the [JSON Resume schema](https://jsonresume.org/schema/). The schema is organized into base schemas (matching the JSON Resume v1.0.0 spec) and extended schemas (customized for this project). For detailed information, see the [Schema Documentation](./lib/src/schema/README.md).
+
 ## Related Projects
 
 This repository has inspired the creation of a thin template repository designed to host JSON resumes as static sites. The template dynamically references the output of the latest version of Resume Viewer to display resumes. It can be cloned or used to create new repositories for hosting personal resumes on GitHub Pages.

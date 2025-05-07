@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumeBasics } from "../../ResumeModel";
+import { ResumeBasics } from "@schema/ResumeSchema";
 import { LocationUI } from "./LocationUI";
 import { ProfileUI } from "./ProfileUI";
 import { EnvelopeIcon, PhoneIcon, LinkIcon } from "@heroicons/react/24/outline";

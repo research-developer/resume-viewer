@@ -1,5 +1,5 @@
 import React from "react";
-import { Resume } from "../../ResumeModel";
+import { Resume } from "@schema/ResumeSchema";
 import { GravatarUI } from "../../GravatarUI";
 
 interface ProfileUIProps {

@@ -37,4 +37,12 @@ export default defineConfig({
       typescript: true,
     }),
   ],
+  resolve: {
+    alias: {
+      "@schema": "/src/schema",
+      "@analyzer": "/src/analyzer",
+      "@viewer": "/src/viewer",
+    },
+    extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
+  },
 });

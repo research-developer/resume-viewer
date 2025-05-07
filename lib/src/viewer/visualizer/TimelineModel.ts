@@ -1,4 +1,4 @@
-import { ResumeWork } from "../../ResumeModel";
+import { ResumeWork } from "@schema/ResumeSchema";
 
 export interface TimelineEvent {
   name: string;
@@ -16,23 +16,26 @@ export function buildTimeline(workExperience: ResumeWork[]): TimelineData {
   if (!workExperience || workExperience.length === 0)
     return { events: [], now };
 
-  // clone the work experience array to avoid mutating the original data
-  const workItems = [...workExperience];
+  // clone/filter the work experience array to avoid mutating the original data
+  const workItems = workExperience.filter((w) => w.startDate);
 
   // order the work experience by start date
   workItems.sort((a, b) => {
-    const startA = new Date(a.startDate).getTime();
-    const startB = new Date(b.startDate).getTime();
+    const startA = a.startDate?.getTime() || 0;
+    const startB = b.startDate?.getTime() || 0;
     return startA - startB;
   });
 
   // create a timeline event for each work experience however we want to combine them when its a role change at the same company (name)
   const events: TimelineEvent[] = workItems.reduce(
     (acc: TimelineEvent[], work) => {
-      const startDate = new Date(work.startDate).getTime();
-      const endDate = work.endDate
-        ? new Date(work.endDate).getTime()
-        : Date.now();
+      if (!work.startDate) {
+        // If start date is not available, skip this work experience
+        return acc;
+      }
+
+      let startDate = work.startDate.getTime();
+      let endDate = work.endDate?.getTime() || now.getTime();
 
       // Look backward for any events matching the same company name and see if the time overlaps
       const sameWorkNameEvent = acc.find((event) => {

@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumeWork } from "../../ResumeModel";
+import { ResumeWork } from "@schema/ResumeSchema";
 import { WorkHeaderUI } from "./WorkHeaderUI";
 import { WorkLocationUI } from "./WorkLocationUI";
 import { WorkSummaryUI } from "./WorkSummaryUI";
