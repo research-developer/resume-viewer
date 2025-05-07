@@ -1,5 +1,4 @@
 import { FC, useMemo } from "react";
-import { SkillRadarChartUI } from "./SkillRadarChartUI";
 import { ResumeAnalyzer } from "../../analyzer/ResumeAnalyzer";
 import { SkillCategoriesChartUI } from "./SkillCategoriesChartUI";
 import { TopSkillsChartUI } from "./TopSkillsChartUI";
@@ -80,9 +79,6 @@ export const ResumeStatsUI: FC<StatsUIProps> = ({ analyzer }) => {
         <SkillCategoriesChartUI skills={topCategorySkills} />
       )}
 
-      {categorySkills.length > 0 && (
-        <SkillRadarChartUI skills={categorySkills} />
-      )}
       <TopSkillsChartUI skills={topSkills} />
       <SkillHierarchyTreeUI categories={categorySkills} />
     </div>
