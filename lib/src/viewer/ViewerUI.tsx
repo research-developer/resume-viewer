@@ -1,4 +1,4 @@
-import { FC, useCallback, useRef } from "react";
+import { FC, useCallback, useEffect, useRef } from "react";
 import { TextViewUI } from "./text/TextViewUI";
 import { useViewerContext, ViewerView } from "./ViewerHook";
 import { InfographicViewUI } from "./infographic/InfographicViewUI";
@@ -43,6 +43,11 @@ const ViewerUI: FC<ViewerUIProps> = () => {
   const viewerRef = useRef<HTMLDivElement>(null);
   const showNav =
     currentView !== ViewerView.Welcome && currentView !== ViewerView.Home;
+
+  // Reset scroll position to top of the body when the current view changes
+  useEffect(() => {
+    document.documentElement.scrollTo(0, 0);
+  }, [currentView]);
 
   // Custom hook to handle fullscreen functionality
   useFullscreen(
