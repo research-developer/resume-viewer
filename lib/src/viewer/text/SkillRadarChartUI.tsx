@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   RadarChart,
   PolarGrid,
@@ -10,6 +10,7 @@ import {
   Legend,
 } from "recharts";
 import { SkillStats } from "../../analyzer/SkillAnalyzer";
+import { convertMonthsToYears } from "@viewer/infographic/DisplayUtil";
 
 interface SkillRadarChartUIProps {
   skills: SkillStats[];
@@ -27,20 +28,28 @@ export const SkillRadarChartUI: React.FC<SkillRadarChartUIProps> = ({
   }
 
   // Transform the skills data for the radar chart
-  const formattedData = skills.map((skill) => ({
-    subject: skill.skill.name,
-    value: skill.months / 12, // Convert months to years
-    fullMark: Math.ceil(Math.max(...skills.map((s) => s.months / 12))),
-  }));
+  const formattedData = useMemo(
+    () =>
+      skills.map((skill) => ({
+        subject: skill.skill.name,
+        value: convertMonthsToYears(skill.months),
+        fullMark: Math.ceil(
+          Math.max(...skills.map((s) => convertMonthsToYears(s.months)))
+        ),
+      })),
+    [skills]
+  );
+
+  console.log("Formatted Data for Radar Chart:", formattedData);
 
   return (
-    <div className="bg-accent p-4 rounded-lg shadow border border-border">
+    <div className="bg-accent p-4 rounded-lg shadow border border-border flex flex-col gap-4">
       <h3 className="text-lg font-semibold text-primary">
         Skill Experience Radar
       </h3>
-      <div className="min-w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <RadarChart cx="50%" cy="50%" outerRadius="80%" data={formattedData}>
+      <div className="flex-auto">
+        <ResponsiveContainer width="100%" height="100%" aspect={1}>
+          <RadarChart cx="50%" cy="50%" outerRadius="75%" data={formattedData}>
             <PolarGrid stroke="#3c3c3c" />
             <PolarAngleAxis
               dataKey="subject"
@@ -58,6 +67,7 @@ export const SkillRadarChartUI: React.FC<SkillRadarChartUIProps> = ({
               stroke="#3B82F6"
               fill="#3B82F6"
               fillOpacity={0.6}
+              label={false}
             />
             <Tooltip
               formatter={(value: number) => [

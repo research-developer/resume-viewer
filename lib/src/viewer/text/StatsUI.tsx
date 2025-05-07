@@ -4,6 +4,7 @@ import { ResumeAnalyzer } from "../../analyzer/ResumeAnalyzer";
 import { SkillCategoriesChartUI } from "./SkillCategoriesChartUI";
 import { TopSkillsChartUI } from "./TopSkillsChartUI";
 import { SkillHierarchyTreeUI } from "./SkillHierarchyTreeUI";
+import { convertMonthsToYears } from "@viewer/infographic/DisplayUtil";
 
 interface StatsUIProps {
   analyzer: ResumeAnalyzer | null;
@@ -36,7 +37,7 @@ export const ResumeStatsUI: FC<StatsUIProps> = ({ analyzer }) => {
       .take(10)
       .toArray();
     const careerMonths = analyzer.keyStats.stats.careerDuration;
-    const careerYears = careerMonths / 12;
+    const careerYears = convertMonthsToYears(careerMonths);
     return {
       careerStats,
       categorySkills,
@@ -79,7 +80,9 @@ export const ResumeStatsUI: FC<StatsUIProps> = ({ analyzer }) => {
         <SkillCategoriesChartUI skills={topCategorySkills} />
       )}
 
-      <SkillRadarChartUI skills={categorySkills} />
+      {categorySkills.length > 0 && (
+        <SkillRadarChartUI skills={categorySkills} />
+      )}
       <TopSkillsChartUI skills={topSkills} />
       <SkillHierarchyTreeUI categories={categorySkills} />
     </div>
