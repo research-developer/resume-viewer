@@ -11,6 +11,7 @@ import { VisualizerViewUI } from "./visualizer/VisualizerViewUI";
 import { useFullscreen } from "./FullScreenHook";
 import { HomeViewUI } from "./HomeViewUI";
 import { LoadingUI } from "./LoadingUI";
+import { PrototypeUI } from "./PrototypeUI";
 
 type ResumeViewerUIProps = {
   jsonResumeUrl?: string | null;
@@ -86,7 +87,8 @@ const ViewerUI: FC<ViewerUIProps> = () => {
   };
 
   return (
-    <div ref={viewerRef} className="fill-screen flex flex-col gap-4">
+    <div ref={viewerRef} className="fill-screen flex flex-col gap-4 relative">
+      <PrototypeUI />
       <LoadingUI
         isLoading={isPending}
         minDisplayTime={1000}
