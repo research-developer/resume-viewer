@@ -32,15 +32,15 @@ The extended schemas build upon the base schemas to add functionality specific t
 
 | **Schema**       | **Key Changes**                                                                 |
 |-------------------|--------------------------------------------------------------------------------|
-| **Work**          | Adds `id` (internal ID), `skills`, `references`, and `location` as objects.    |
-| **Volunteer**     | Adds `id` (internal ID) and makes `summary` required.                          |
-| **Skill**         | Adds `id` (internal ID) and `startDate`/`endDate` for date range.              |
-| **Reference**     | Adds `id` (internal ID) and `date` as a coerced date.                          |
-| **Basics**        | Adds `id` (internal ID) and extends `location` and `profiles` with custom schemas. |
-| **Award**         | Adds `id` (internal ID).                                                       |
-| **Certificate**   | Adds `id` (internal ID).                                                       |
-| **Project**       | Adds `id` (internal ID) and coerces `startDate`/`endDate` to dates.            |
-| **Location**      | Adds `id` (internal ID) and allows `location` to be a string or object.        |
+| **Work**          | Adds `id` (Internal ID), `skills`, `references`, and `location` as objects.    |
+| **Volunteer**     | Adds `id` (Internal ID) and makes `summary` required.                          |
+| **Skill**         | Adds `id` (Internal ID) and `startDate`/`endDate` for date range.              |
+| **Reference**     | Adds `id` (Internal ID) and `date` as a coerced date.                          |
+| **Basics**        | Adds `id` (Internal ID) and extends `location` and `profiles` with custom schemas. |
+| **Award**         | Adds `id` (Internal ID).                                                       |
+| **Certificate**   | Adds `id` (Internal ID).                                                       |
+| **Project**       | Adds `id` (Internal ID) and coerces `startDate`/`endDate` to dates.            |
+| **Location**      | Adds `id` (Internal ID) and allows `location` to be a string or object.        |
 
 ### Why Extend the Schemas?
 
@@ -103,7 +103,20 @@ The following example demonstrates how the `Work` schema is extended:
     countryCode: "US"
   },
   position: "Software Engineer",
-  skills: ["React", "TypeScript"], // Extended: Skills array
+  skills: [
+    {
+      id: "skill-001",
+      name: "React",
+      startDate: "2020-01",
+      endDate: "2022-12"
+    },
+    {
+      id: "skill-002",
+      name: "TypeScript",
+      startDate: "2020-06",
+      endDate: "2022-12"
+    }
+  ], // Extended: Skills array as objects
   references: [
     {
       id: "ref-11111", // Extended: Reference with internal ID
@@ -114,7 +127,11 @@ The following example demonstrates how the `Work` schema is extended:
 }
 ```
 
-For the full implementation, see the [Work Schema](./extensions/work.ts).
+For the full implementation, see the [Work Schema](./extensions/WorkSchema.ts).
+
+### Utility: `generateRandomId`
+
+The `generateRandomId` utility is used to create unique internal IDs for various schema objects. It is defined in [`/lib/src/Identity.ts`](../../Identity.ts) and ensures consistent ID generation across the application.
 
 ## Adding a New Field
 
