@@ -8,7 +8,7 @@ export const BasicsSchema = BaseBasicsSchema.extend({
   id: z
     .string()
     .optional()
-    .default(() => generateRandomId("basic-")), // xtended: Internal ID for UI behavior
+    .default(() => generateRandomId("basic-")), // Extended: Internal ID for UI behavior
   location: LocationSchema.optional(),
   profiles: z.array(ProfileSchema).optional(),
 });

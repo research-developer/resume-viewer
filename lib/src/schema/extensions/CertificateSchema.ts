@@ -6,5 +6,5 @@ export const CertificateSchema = BaseCertificateSchema.extend({
   id: z
     .string()
     .optional()
-    .default(() => generateRandomId("cert-")), // xtended: Internal ID for UI behavior
+    .default(() => generateRandomId("cert-")), // Extended: Internal ID for UI behavior
 });

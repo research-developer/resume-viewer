@@ -9,7 +9,7 @@ export const WorkSchema = BaseWorkSchema.extend({
   id: z
     .string()
     .optional()
-    .default(() => generateRandomId("work-")), // xtended: Internal ID for UI behavior
+    .default(() => generateRandomId("work-")), // Extended: Internal ID for UI behavior
   skills: z.array(SkillSchema).optional(),
   references: z.array(ReferenceSchema).optional(),
   location: LocationSchema.optional(),

@@ -6,5 +6,5 @@ export const PublicationSchema = BasePublicationSchema.extend({
   id: z
     .string()
     .optional()
-    .default(() => generateRandomId("pub-")), // xtended: Internal ID for UI behavior
+    .default(() => generateRandomId("pub-")), // Extended: Internal ID for UI behavior
 });

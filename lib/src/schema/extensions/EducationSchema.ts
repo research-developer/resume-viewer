@@ -6,5 +6,5 @@ export const EducationSchema = BaseEducationSchema.extend({
   id: z
     .string()
     .optional()
-    .default(() => generateRandomId("edu-")), // xtended: Internal ID for UI behavior
+    .default(() => generateRandomId("edu-")), // Extended: Internal ID for UI behavior
 });

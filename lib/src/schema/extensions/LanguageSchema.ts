@@ -6,5 +6,5 @@ export const LanguageSchema = BaseLanguageSchema.extend({
   id: z
     .string()
     .optional()
-    .default(() => generateRandomId("lang-")), // xtended: Internal ID for UI behavior
+    .default(() => generateRandomId("lang-")), // Extended: Internal ID for UI behavior
 });

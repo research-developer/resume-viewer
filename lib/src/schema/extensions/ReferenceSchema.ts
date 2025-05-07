@@ -6,6 +6,6 @@ export const ReferenceSchema = BaseReferenceSchema.extend({
   id: z
     .string()
     .optional()
-    .default(() => generateRandomId("ref-")), // xtended: Internal ID for UI behavior
+    .default(() => generateRandomId("ref-")), // Extended: Internal ID for UI behavior
   date: z.coerce.date().optional(),
 });

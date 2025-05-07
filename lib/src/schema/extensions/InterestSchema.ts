@@ -6,5 +6,5 @@ export const InterestSchema = BaseInterestSchema.extend({
   id: z
     .string()
     .optional()
-    .default(() => generateRandomId("int-")), // xtended: Internal ID for UI behavior
+    .default(() => generateRandomId("int-")), // Extended: Internal ID for UI behavior
 });

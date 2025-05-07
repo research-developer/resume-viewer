@@ -6,5 +6,5 @@ export const AwardSchema = BaseAwardSchema.extend({
   id: z
     .string()
     .optional()
-    .default(() => generateRandomId("award-")), // xtended: Internal ID for UI behavior
+    .default(() => generateRandomId("award-")), // Extended: Internal ID for UI behavior
 });

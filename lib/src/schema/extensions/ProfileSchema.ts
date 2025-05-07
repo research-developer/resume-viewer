@@ -5,7 +5,7 @@ export const ProfileSchema = z.object({
   id: z
     .string()
     .optional()
-    .default(() => generateRandomId("prof-")), // xtended: Internal ID for UI behavior
+    .default(() => generateRandomId("prof-")), // Extended: Internal ID for UI behavior
   network: z.string(),
   username: z.string(),
   url: z.string().url().optional(),

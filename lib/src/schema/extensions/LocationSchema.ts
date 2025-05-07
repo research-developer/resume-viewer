@@ -6,7 +6,7 @@ export const LocationSchema = z.union([
     id: z
       .string()
       .optional()
-      .default(() => generateRandomId("loc-")), // xtended: Internal ID for UI behavior
+      .default(() => generateRandomId("loc-")), // Extended: Internal ID for UI behavior
     address: z.string().optional(),
     postalCode: z.string().optional(),
     city: z.string().optional(),
