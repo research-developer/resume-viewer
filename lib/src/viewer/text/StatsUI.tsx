@@ -35,7 +35,7 @@ export const ResumeStatsUI: FC<StatsUIProps> = ({ analyzer }) => {
       .sortBy((skill) => skill.months, true)
       .take(10)
       .toArray();
-    const careerMonths = analyzer.skillStats.career.root.months;
+    const careerMonths = analyzer.keyStats.stats.careerDuration;
     const careerYears = careerMonths / 12;
     return {
       careerStats,

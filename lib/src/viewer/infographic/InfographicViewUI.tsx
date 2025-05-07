@@ -104,11 +104,8 @@ export const InfographicViewUI: FC<
       <CardUI size="max-w-md" title="Profile">
         <ProfileUI resume={resume} />
       </CardUI>
-
-      {/* Replace the single KeyStatsUI with our new specialized components */}
       <CareerStatsUI />
       <AccomplishmentsUI />
-
       <CardUI title="Skills Radar" size="flex-auto">
         <RadarChartUI
           data={radarData}
