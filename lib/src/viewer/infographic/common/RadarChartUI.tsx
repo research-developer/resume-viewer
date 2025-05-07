@@ -41,9 +41,8 @@ export const RadarChartUI: FC<RadarChartUIProps> = ({ data, series }) => {
     <ResponsiveContainer
       width="100%"
       height="100%"
-      minWidth={250}
-      minHeight={250}
-      className="flex-auto"
+      minWidth={350}
+      minHeight={350}
     >
       <RadarChart outerRadius={90} data={data}>
         <PolarGrid stroke="var(--color-border)" />

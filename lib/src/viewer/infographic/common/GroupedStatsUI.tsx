@@ -22,22 +22,19 @@ export const GroupedStatsUI: FC<GroupedStatsUIProps> = ({ stats }) => {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 w-full text-center">
       {stats.map((stat, index) => (
-        <div
-          key={index}
-          className="flex flex-col items-center p-2 rounded-[var(--radius-card)] bg-[var(--color-surface)] shadow-sm"
-        >
+        <div key={index} className="flex flex-col items-center p-2 ">
           {stat.icon && (
             <div
-              className="mb-2 text-xl"
+              className="mb-2 text-4xl"
               style={{ color: stat.color ?? "var(--color-accent-blue)" }}
             >
               {stat.icon}
             </div>
           )}
-          <div className="text-[var(--color-primary)] text-lg font-bold">
+          <div className="text-[var(--color-primary)] text-4xl font-bold">
             {stat.value}
           </div>
-          <div className="text-[var(--color-muted)] text-xs mt-1">
+          <div className="text-[var(--color-accent-light)] text-xs mt-1">
             {stat.label}
           </div>
         </div>

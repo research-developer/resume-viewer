@@ -109,7 +109,7 @@ export const InfographicViewUI: FC<
       <CareerStatsUI />
       <AccomplishmentsUI />
 
-      <CardUI title="Skills Radar">
+      <CardUI title="Skills Radar" size="flex-auto">
         <RadarChartUI
           data={radarData}
           series={[
