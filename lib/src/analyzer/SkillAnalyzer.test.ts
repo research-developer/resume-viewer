@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { SkillAnalyzer, SkillTree, SkillSource } from "./SkillAnalyzer";
-import { Resume, ResumeSkill } from "../ResumeModel";
+import { Resume, ResumeSkill } from "@schema/ResumeSchema";
 import { FluentIterable } from "../FluentIterable";
 
 describe("SkillAnalyzer", () => {

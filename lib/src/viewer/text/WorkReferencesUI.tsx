@@ -1,6 +1,6 @@
 import React from "react";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
-import { ResumeReference } from "../../ResumeModel";
+import { ResumeReference } from "@schema/ResumeSchema";
 
 interface WorkReferencesUIProps {
   references?: ResumeReference[];

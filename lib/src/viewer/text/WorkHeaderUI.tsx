@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumeWork } from "../../ResumeModel";
+import { ResumeWork } from "@schema/ResumeSchema";
 import { DateRangeUI } from "./DateRangeUI";
 import { BriefcaseIcon } from "@heroicons/react/24/outline";
 

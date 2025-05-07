@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { ResumeSchema } from "./ResumeModel";
+import { ResumeSchema } from "@schema/ResumeSchema";
 import { ResumeAnalyzer } from "./analyzer/ResumeAnalyzer";
 
 export interface ResumeState {

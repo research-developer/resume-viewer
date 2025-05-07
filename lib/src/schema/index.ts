@@ -1,0 +1,12 @@
+export { BasicsSchema } from "./extensions/BasicsSchema";
+export { WorkSchema } from "./extensions/WorkSchema";
+export { EducationSchema } from "./extensions/EducationSchema";
+export { SkillSchema } from "./extensions/SkillSchema";
+export { VolunteerSchema } from "./extensions/VolunteerSchema";
+export { AwardSchema } from "./extensions/AwardSchema";
+export { CertificateSchema } from "./extensions/CertificateSchema";
+export { PublicationSchema } from "./extensions/PublicationSchema";
+export { LanguageSchema } from "./extensions/LanguageSchema";
+export { InterestSchema } from "./extensions/InterestSchema";
+export { ReferenceSchema } from "./extensions/ReferenceSchema";
+export { ProjectSchema } from "./extensions/ProjectSchema";

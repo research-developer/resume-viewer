@@ -1,4 +1,4 @@
-import { Resume } from "../../ResumeModel";
+import { Resume } from "@schema/ResumeSchema";
 import { buildTimeline, TimelineData } from "./TimelineModel";
 
 export interface VisualizerData {

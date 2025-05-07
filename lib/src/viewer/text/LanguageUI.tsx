@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumeLanguage } from "../../ResumeModel";
+import { ResumeLanguage } from "@schema/ResumeSchema";
 
 interface LanguageUIProps {
   language: ResumeLanguage;

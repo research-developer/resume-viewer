@@ -1,5 +1,5 @@
 import { getGravatarUrl } from "../GravatarUtil";
-import { Resume } from "../ResumeModel";
+import { Resume } from "@schema/ResumeSchema";
 import { SkillAnalyzer } from "./SkillAnalyzer";
 import { KeyStatsAnalyzer } from "./KeyStatsAnalyzer";
 

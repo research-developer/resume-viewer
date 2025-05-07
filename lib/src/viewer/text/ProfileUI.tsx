@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumeProfile } from "../../ResumeModel";
+import { ResumeProfile } from "@schema/ResumeSchema";
 
 interface ProfileUIProps {
   profile: ResumeProfile;

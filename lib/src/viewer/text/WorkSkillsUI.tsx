@@ -1,6 +1,6 @@
 import React from "react";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
-import { ResumeSkill } from "../../ResumeModel";
+import { ResumeSkill } from "@schema/ResumeSchema";
 
 interface WorkSkillsUIProps {
   skills?: ResumeSkill[];

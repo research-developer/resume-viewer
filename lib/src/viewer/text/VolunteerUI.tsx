@@ -1,5 +1,5 @@
 import React from "react";
-import { ResumeVolunteer } from "../../ResumeModel";
+import { ResumeVolunteer } from "@schema/ResumeSchema";
 import { DateRangeUI } from "./DateRangeUI";
 
 interface VolunteerUIProps {
