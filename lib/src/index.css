@@ -144,7 +144,6 @@ body.fill-screen {
   @apply min-h-full;
   @apply bg-background;
   @apply text-primary;
-  @apply overflow-auto;
 }
 
 @keyframes spin-fast {
