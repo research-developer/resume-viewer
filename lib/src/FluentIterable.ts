@@ -206,19 +206,12 @@ export class FluentIterable<T> implements Iterable<T> {
     return map;
   }
 
-  flatMap<U>(
-    fn: (item: T) => Iterable<U> | FluentIterable<U>
-  ): FluentIterable<U> {
+  flatMap<U>(fn: (item: T) => Iterable<U>): FluentIterable<U> {
     return new FluentIterable(() => {
       const self = this;
       function* generator(): Generator<U> {
         for (const item of self) {
-          const innerIterable = fn(item);
-          if (innerIterable instanceof FluentIterable) {
-            yield* innerIterable;
-          } else {
-            yield* innerIterable;
-          }
+          yield* fn(item); // No need to check for FluentIterable explicitly.
         }
       }
       return generator();
