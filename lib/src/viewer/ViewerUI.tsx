@@ -59,6 +59,8 @@ const ViewerUI: FC<ViewerUIProps> = () => {
           dispatch({ type: "SET_FULLSCREEN", isFullscreen: change });
         }
       },
+      // 'dispatch' is stable and does not change, so we omit it intentionally.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [isFullscreen]
     )
   );
