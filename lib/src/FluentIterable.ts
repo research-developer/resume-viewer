@@ -250,6 +250,16 @@ export class FluentIterable<T> implements Iterable<T> {
     });
   }
 
+  find(predicate: (item: T, index: number) => boolean): T | undefined {
+    let index = 0;
+    for (const item of this) {
+      if (predicate(item, index++)) {
+        return item;
+      }
+    }
+    return undefined;
+  }
+
   json(): T[] {
     return this.toArray();
   }
