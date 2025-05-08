@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Resume Viewer is a prototype web application designed to showcase my professional web development skills. It highlights my expertise in:
+Resume Viewer is a prototype web application designed to showcase my professional web development skills. It consists of a core component library (`lib/`) and a lightweight application (`app/`) for demonstration and deployment. It highlights my expertise in:
 
 - **Coding**: Proficient in React, Tailwind CSS, HTML, and CSS.
 - **UX Design**: Focused on creating intuitive user experiences with thoughtful information flow and interaction design.
@@ -15,6 +15,9 @@ The project can be viewed live at: [https://resume-viewer.richardadleta.com](htt
 ## Features
 
 - **Modern Web Technologies**: Built with React and Tailwind CSS for a responsive and dynamic user experience.
+- **Core Component Library**: The `lib/` directory contains a shareable and packagable web component.
+- **Showcase Application**: The `app/` directory provides a thin wrapper to demonstrate the component and deploy it to GitHub Pages.
+- **Reference Implementation**: The deployed `app` serves as a reference, allowing other projects to consume the Resume component via its Vite manifest.
 - **Customizable Deployment**: Parameterized builds for deployment to different environments, including GitHub Pages.
 - **Public Showcase**: Demonstrates coding, UX, and data analysis skills for hiring purposes.
 - **Restrictive Licensing**: Available for personal use with limitations on commercial use.
@@ -25,7 +28,7 @@ This project includes a Zod-based schema system to define and extend the [JSON R
 
 ## Related Projects
 
-This repository has inspired the creation of a thin template repository designed to host JSON resumes as static sites. The template dynamically references the output of the latest version of Resume Viewer to display resumes. It can be cloned or used to create new repositories for hosting personal resumes on GitHub Pages.
+This repository has inspired the creation of a thin template repository designed to host JSON resumes as static sites. The template dynamically references the output of the latest version of Resume Viewer to display resumes, by fetching its Vite manifest (`manifest.json`) and loading the necessary assets at runtime. This allows for a decoupled way to use the Resume Viewer component.
 
 - Live Example: [https://resume.richardadleta.com](https://resume.richardadleta.com)
 - Repository: [https://github.com/radleta/resume](https://github.com/radleta/resume)
@@ -55,7 +58,7 @@ This repository has inspired the creation of a thin template repository designed
 
 ### Development
 
-To start the development server:
+The primary development server for the showcase application is run from the `app` directory:
 
 ```bash
 cd app
@@ -63,6 +66,8 @@ npm run dev
 ```
 
 The application will be available at `http://localhost:3000`.
+
+The core component library in `lib/` has its own independent development server and build process for focused component development and packaging. See `lib/README.md` for more details.
 
 ### Building for Production
 
@@ -82,8 +87,8 @@ This project is configured to deploy to GitHub Pages using a GitHub Actions work
 
 ```text
 resume-viewer/
-├── app/                # Frontend application
-├── lib/                # Shared library
+├── app/                # Frontend application (see app/README.md for details)
+├── lib/                # Shared library/core component (see lib/README.md for details)
 ├── build.sh            # Build script
 ├── .github/workflows/  # GitHub Actions workflows
 ├── README.md           # Project documentation
@@ -100,4 +105,4 @@ This project is available for personal use with restrictive licensing to limit c
 
 ## Contact
 
-For questions or feedback, please reach out via [radleta@gmail.com].
+For questions or feedback, please reach out via [radleta@gmail.com](mailto:radleta@gmail.com).
