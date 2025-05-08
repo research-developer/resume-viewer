@@ -45,14 +45,17 @@ export const WelcomeViewUI: FC<WelcomeViewUIProps> = ({}) => {
           {/* Description */}
           <div className="text-secondary max-w-xl text-center">
             <p className="mb-3">
-              Transform your standard JSON Resume into an interactive, visually
-              engaging presentation that highlights your professional
-              experience.
-            </p>
-            <p>
-              Built with React and Tailwind CSS by{" "}
-              <span className="text-accent-cyan">Richard Adleta</span> to
-              showcase modern web development practices.
+              Transform your standard{" "}
+              <a
+                href="https://jsonresume.org/getting-started"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent-blue hover:underline"
+              >
+                JSON Resume
+              </a>{" "}
+              into an interactive, visually engaging presentation that
+              highlights your professional experience.
             </p>
           </div>
 
@@ -85,10 +88,13 @@ export const WelcomeViewUI: FC<WelcomeViewUIProps> = ({}) => {
             </div>
           </form>
 
+          {/* OR */}
+          <div className="text-muted text-md mt-4">OR</div>
+
           {/* Examples Section */}
           <div className="w-full">
             <h3 className="text-lg font-semibold text-primary mb-3 text-center">
-              Example Resumes
+              Try an Example Resume
             </h3>
             <div className="flex flex-wrap gap-3 justify-center">
               <button
@@ -111,6 +117,18 @@ export const WelcomeViewUI: FC<WelcomeViewUIProps> = ({}) => {
               >
                 Thomas Davis
               </button>
+            </div>
+            {/* Search other JSON Resumes via jsonresume.org */}
+            <div className="text-muted text-sm mt-4 text-center">
+              Search other JSON Resumes via{" "}
+              <a
+                href="https://registry.jsonresume.org/explore"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent-blue hover:underline"
+              >
+                jsonresume.org/explore
+              </a>
             </div>
           </div>
 
@@ -141,20 +159,17 @@ export const WelcomeViewUI: FC<WelcomeViewUIProps> = ({}) => {
 
           {/* Footer */}
           <div className="mt-4 text-xs text-muted text-center border-t border-border pt-4 w-full">
-            <p>
-              Based on the{" "}
+            <p className="mt-1">
+              © 2025{" "}
               <a
-                href="https://jsonresume.org/schema/"
+                href="https://github.com/radleta/resume-viewer"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-accent-blue hover:underline"
               >
-                JSON Resume schema
-              </a>
-            </p>
-            <p className="mt-1">
-              © 2025 Resume Viewer by{" "}
-              <span className="text-accent-cyan">Richard Adleta</span>
+                Resume Viewer
+              </a>{" "}
+              by <span className="text-accent-cyan">Richard Adleta</span>
             </p>
           </div>
         </div>

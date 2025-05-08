@@ -1,9 +1,9 @@
 import { FC, useMemo } from "react";
-import { SkillRadarChartUI } from "./SkillRadarChartUI";
 import { ResumeAnalyzer } from "../../analyzer/ResumeAnalyzer";
 import { SkillCategoriesChartUI } from "./SkillCategoriesChartUI";
 import { TopSkillsChartUI } from "./TopSkillsChartUI";
 import { SkillHierarchyTreeUI } from "./SkillHierarchyTreeUI";
+import { convertMonthsToYears } from "@viewer/infographic/DisplayUtil";
 
 interface StatsUIProps {
   analyzer: ResumeAnalyzer | null;
@@ -35,8 +35,8 @@ export const ResumeStatsUI: FC<StatsUIProps> = ({ analyzer }) => {
       .sortBy((skill) => skill.months, true)
       .take(10)
       .toArray();
-    const careerMonths = analyzer.skillStats.career.root.months;
-    const careerYears = careerMonths / 12;
+    const careerMonths = analyzer.keyStats.stats.careerDuration;
+    const careerYears = convertMonthsToYears(careerMonths);
     return {
       careerStats,
       categorySkills,
@@ -79,7 +79,6 @@ export const ResumeStatsUI: FC<StatsUIProps> = ({ analyzer }) => {
         <SkillCategoriesChartUI skills={topCategorySkills} />
       )}
 
-      <SkillRadarChartUI skills={categorySkills} />
       <TopSkillsChartUI skills={topSkills} />
       <SkillHierarchyTreeUI categories={categorySkills} />
     </div>
