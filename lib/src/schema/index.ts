@@ -11,3 +11,4 @@ export * from "./extensions/InterestSchema";
 export * from "./extensions/ReferenceSchema";
 export * from "./extensions/ProjectSchema";
 export * from "./ResumeSchema";
+export * from "./IdeaGraph";

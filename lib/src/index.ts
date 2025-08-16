@@ -12,3 +12,4 @@ export * from "./analyzer";
 export * from "./FluentIterable";
 export * from "./FluentSet";
 export * from "./FluentMap";
+export * from "./graph";

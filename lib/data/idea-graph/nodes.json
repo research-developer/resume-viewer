@@ -1,0 +1,12 @@
+[
+  {"id": "person.preston", "type": "Person", "label": "Preston", "summary": "Human of many plots", "tags": ["founder","developer","parent"]},
+  {"id": "musing.social_media_time_bomb", "type": "Musing", "label": "Ticking Time Bomb: Social Media & Corporations", "summary": "Speculation that current incentive structures make both social platforms and large corporations brittle and societally hazardous.", "tags": ["incentives","fragility","society"]},
+  {"id": "story.cats_infected_mouse", "type": "Experience", "label": "Cats: Infected Mouse Origin", "summary": "A formative story: love for cats and meme-chaos traced back to an infected mouse encounter.", "tags": ["cats","origin","memes"]},
+  {"id": "work.psychedelics_patent", "type": "Experience", "label": "Patented Psychedelic Formula", "summary": "Co-developed a patented formulation; industry path blocked by $$$ scale to approval.", "tags": ["psychedelics","patent"]},
+  {"id": "theory.psychedelic_modulation", "type": "Theory", "label": "Psychedelic Modulation Theory", "summary": "Therapeutic action via modulation of predictive coding/priors and interoceptive precision; state-dependent plasticity.", "tags": ["predictive-processing","interoception"]},
+  {"id": "edu.design_degree", "type": "Education", "label": "Graphic/Web Design Degree", "summary": "Formal education in graphic & web design; later adjunct instructor.", "tags": ["design","web"]},
+  {"id": "skill.early_programming", "type": "Skill", "label": "Self-Taught Programming (childhood)", "summary": "Learned programming very young (circa ages 6–8), from AppleSoft BASIC onward.", "tags": ["programming","early"]},
+  {"id": "role.semi_pro_photographer", "type": "Experience", "label": "Semi-Pro Photographer", "summary": "Paid and portfolio-grade work; visual systems sense honed.", "tags": ["photography"]},
+  {"id": "role.amateur_racer_mechanic", "type": "Experience", "label": "Regional Amateur Racer & Makeshift Mechanic", "summary": "Competitive regional racing; hands-on wrenching and tuning.", "tags": ["motorsport","mechanic"]},
+  {"id": "project.branching_agentic_chat", "type": "Project", "label": "Branching Agentic AI Chat Tool", "summary": "DAG of thoughts with agent roles; exports reproducible playbooks; MCP-aware.", "tags": ["agentic","graph","MCP"]}
+]

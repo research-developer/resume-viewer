@@ -1,0 +1,9 @@
+{"s": "person.preston", "p": "authored", "o": "musing.social_media_time_bomb", "meta": {"weight": 1.3}}
+{"s": "person.preston", "p": "inspired_by", "o": "story.cats_infected_mouse"}
+{"s": "person.preston", "p": "worked_on", "o": "work.psychedelics_patent", "meta": {"weight": 1.5}}
+{"s": "person.preston", "p": "proposes", "o": "theory.psychedelic_modulation", "meta": {"weight": 1.2}}
+{"s": "person.preston", "p": "holds_degree_in", "o": "edu.design_degree"}
+{"s": "person.preston", "p": "learned_at_age", "o": "skill.early_programming", "meta": {"notes": "ages 6–8"}}
+{"s": "person.preston", "p": "role", "o": "role.semi_pro_photographer"}
+{"s": "person.preston", "p": "role", "o": "role.amateur_racer_mechanic"}
+{"s": "person.preston", "p": "worked_on", "o": "project.branching_agentic_chat", "meta": {"weight": 1.5}}
