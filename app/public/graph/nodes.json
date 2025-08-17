@@ -1,5 +1,10 @@
 [
-  {"id": "person.preston", "type": "Person", "label": "Preston", "summary": "Human of many plots", "tags": ["founder","developer","parent"]},
+  {"id": "person.preston", "type": "Person", "label": "Preston", "summary": "Human of many plots", "tags": ["founder","developer","parent"],
+   "assets": [
+     {"icon": "🌐", "url": "https://researchdeveloper.com", "label": "Website"},
+     {"icon": "🐙", "url": "https://github.com/research-developer", "label": "GitHub"}
+   ]
+  },
   {"id": "musing.social_media_time_bomb", "type": "Musing", "label": "Ticking Time Bomb: Social Media & Corporations", "summary": "Speculation that current incentive structures make both social platforms and large corporations brittle and societally hazardous.", "tags": ["incentives","fragility","society"]},
   {"id": "story.cats_infected_mouse", "type": "Experience", "label": "Cats: Infected Mouse Origin", "summary": "A formative story: love for cats and meme-chaos traced back to an infected mouse encounter.", "tags": ["cats","origin","memes"]},
   {"id": "work.psychedelics_patent", "type": "Experience", "label": "Patented Psychedelic Formula", "summary": "Co-developed a patented formulation; industry path blocked by $$$ scale to approval.", "tags": ["psychedelics","patent"]},
@@ -8,24 +13,41 @@
   {"id": "skill.early_programming", "type": "Skill", "label": "Self-Taught Programming (childhood)", "summary": "Learned programming very young (circa ages 6–8), from AppleSoft BASIC onward.", "tags": ["programming","early"]},
   {"id": "role.semi_pro_photographer", "type": "Experience", "label": "Semi-Pro Photographer", "summary": "Paid and portfolio-grade work; visual systems sense honed.", "tags": ["photography"]},
   {"id": "role.amateur_racer_mechanic", "type": "Experience", "label": "Regional Amateur Racer & Makeshift Mechanic", "summary": "Competitive regional racing; hands-on wrenching and tuning.", "tags": ["motorsport","mechanic"]},
-  {"id": "project.branching_agentic_chat", "type": "Project", "label": "Branching Agentic AI Chat Tool", "summary": "DAG of thoughts with agent roles; exports reproducible playbooks; MCP-aware.", "tags": ["agentic","graph","MCP"]},
+  {"id": "project.branching_agentic_chat", "type": "Project", "label": "Branching Agentic AI Chat Tool", "summary": "DAG of thoughts with agent roles; exports reproducible playbooks; MCP-aware.", "tags": ["agentic","graph","MCP"],
+   "assets": [
+     {"icon": "🐙", "url": "https://github.com/research-developer/branching-agentic-chat", "label": "GitHub"}
+   ]
+  },
 
   {"id": "project.digital_cannabis_vaporizer", "type": "Project", "label": "Digital Cannabis Vaporizer", "summary": "‘iPod Touch of vaporizers’ with microfluidic terpene/cannabinoid delivery, multi-zone heating, precision control.", "tags": ["hardware","health"]},
   {"id": "project.language_tutor_translator", "type": "Project", "label": "Language Tutor Translator", "summary": "Real-time translation widget with contextual micro-lessons for expats and immersion learners.", "tags": ["language","translation"]},
   {"id": "project.witness_platform", "type": "Project", "label": "Witness Platform", "summary": "Emotional safety-based sharing with FOAF visibility, selective responses, CPTSD-friendly gradual disclosure.", "tags": ["social","mental-health"]},
   {"id": "project.branching_llm_tree_of_thought", "type": "Project", "label": "Branching LLM Tree of Thought", "summary": "Structured object tree with event-driven inference.", "tags": ["LLM","reasoning"]},
 
-  {"id": "website.witness_full", "type": "Website", "label": "Witness (Full)", "summary": "Full build-out of Witness platform.", "tags": ["social","platform"]},
+  {"id": "website.witness_full", "type": "Website", "label": "Witness (Full)", "summary": "Full build-out of Witness platform.", "tags": ["social","platform"],
+   "assets": [
+     {"icon": "🌐", "url": "https://witness.example.com", "label": "Live Site"}
+   ]
+  },
   {"id": "website.trump_archive_timeline", "type": "Website", "label": "Trump Archive Timeline", "summary": "Timeline site for Trump archive and media bias.", "tags": ["politics","media"]},
 
   {"id": "blog.economics_tariffs", "type": "Idea", "label": "Economics: Tariffs & Trade", "summary": "Trade deficit elimination attempts, extreme tariffs, ripple effects.", "tags": ["economics","trade"]},
-  {"id": "blog.media_polarization_series", "type": "Idea", "label": "Media Polarization Series", "summary": "Historical + neurochemical analysis of U.S. media polarization.", "tags": ["media","history"]},
+  {"id": "blog.media_polarization_series", "type": "Idea", "label": "Media Polarization Series", "summary": "Historical + neurochemical analysis of U.S. media polarization.", "tags": ["media","history"],
+   "assets": [
+     {"icon": "📝", "url": "https://blog.example.com/media-polarization-series", "label": "Blog Post"}
+   ]
+  },
 
   {"id": "video.ai_vs_human_framing", "type": "Media", "label": "AI vs Human Framing", "summary": "Identical data framed in opposing narratives; reveal truth.", "tags": ["narratives","education"]},
 
   {"id": "project.trading_algorithm", "type": "Project", "label": "Trading Algorithm", "summary": "Detects upstream geopolitical signals for downstream investment moves.", "tags": ["trading","signals"]},
   {"id": "project.family_constellation_simulator", "type": "Project", "label": "Family Constellation Simulator", "summary": "Game-engine visualized AI representatives with gestures and emotion tools.", "tags": ["ai","game-engine"]},
-  {"id": "project.trump_archive", "type": "Project", "label": "Trump Archive", "summary": "Searchable video transcripts, chronological timeline, political bias heatmap.", "tags": ["politics","media"]},
+  {"id": "project.trump_archive", "type": "Project", "label": "Trump Archive", "summary": "Searchable video transcripts, chronological timeline, political bias heatmap.", "tags": ["politics","media"],
+   "assets": [
+     {"icon": "🐙", "url": "https://github.com/research-developer/trump-archive", "label": "GitHub"},
+     {"icon": "🌐", "url": "https://trump-archive.example.com", "label": "Timeline"}
+   ]
+  },
   {"id": "project.media_bias_dual_site", "type": "Project", "label": "Media Bias Dual Site", "summary": "Two opposing narrative sites using identical Trump legal data + neutral third mode.", "tags": ["media","bias"]},
   {"id": "project.youtube_transcript_heatmap", "type": "Project", "label": "YouTube Transcript Heatmap", "summary": "Cross-reference YouTube transcripts with outlet bias maps.", "tags": ["youtube","nlp"]},
   {"id": "project.music_reinterpretation", "type": "Project", "label": "Music Reinterpretation", "summary": "Strip rap verses and layer new harmonies/melodies via DAW + DJ decks.", "tags": ["music","creative"]},

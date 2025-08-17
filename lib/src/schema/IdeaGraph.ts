@@ -24,6 +24,15 @@ export const NodeSchema = z.object({
   label: z.string().min(1),
   summary: z.string().min(1),
   tags: z.array(z.string()).default([]),
+  assets: z
+    .array(
+      z.object({
+        icon: z.string().min(1), // emoji or short icon name
+        url: z.string().url(),
+        label: z.string().optional(),
+      })
+    )
+    .optional(),
 });
 export type IdeaNode = z.infer<typeof NodeSchema>;
 

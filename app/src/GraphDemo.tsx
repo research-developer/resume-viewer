@@ -12,6 +12,7 @@ export function GraphDemo() {
   const [selectedPreds, setSelectedPreds] = useState<Set<Predicate>>(new Set());
   const [subjectId, setSubjectId] = useState<string>("person.preston");
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"vertical" | "horizontal">("horizontal");
 
   // Read initial state from URL (subject, preds, selected node)
   useEffect(() => {
@@ -337,6 +338,22 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
                 </div>
               </div>
             ) : null}
+
+            {node.assets?.length ? (
+              <div style={{ marginTop: 10 }}>
+                <div style={{ fontSize: 14, color: "#666" }}>Assets</div>
+                <ul style={{ margin: 0, paddingLeft: 18, marginTop: 4 }}>
+                  {node.assets.map((a, i) => (
+                    <li key={`${a.url}|${i}`}>
+                      <a href={a.url} target="_blank" rel="noreferrer" style={{ color: "#2563eb" }}>
+                        <span style={{ marginRight: 6 }}>{a.icon}</span>
+                        {a.label ?? a.url}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </div>
         ) : (
           <div style={{ color: "#666", marginTop: 8 }}>No node metadata found</div>
@@ -509,6 +526,18 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
             );
           })}
         </div>
+
+        {/* View mode */}
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <label style={{ fontSize: 12, color: "#555" }}>View</label>
+          <button
+            onClick={() => setViewMode(viewMode === "horizontal" ? "vertical" : "horizontal")}
+            style={{ padding: "4px 8px", borderRadius: 6, border: "1px solid #ccc", background: "#fff", cursor: "pointer" }}
+            title="Toggle orientation"
+          >
+            {viewMode === "horizontal" ? "Horizontal" : "Vertical"}
+          </button>
+        </div>
       </div>
 
       {/* Profile view for subject */}
@@ -562,29 +591,67 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
                   {objs.length}
                 </span>
               </div>
-              <ul style={{ margin: 0, paddingLeft: 18 }}>
-                {objs.map((o, i) => {
-                  const title = objectTitle(o);
-                  const node = typeof o === "string" ? nodeById.get(o) : undefined;
-                  return (
-                    <li
-                      key={`${String(o)}|${i}`}
-                      onClick={() => typeof o === "string" && setSelectedNodeId(o)}
-                      style={{ cursor: typeof o === "string" ? "pointer" : "default" }}
-                      title={typeof o === "string" ? "Click for details" : undefined}
-                    >
-                      <span style={{ textDecoration: typeof o === "string" ? "underline" : "none" }}>{title}</span>
-                      {node && (
-                        <div style={{ color: "#666", fontSize: 12 }}>
-                          <em>{node.type}</em>
-                          {node.summary ? ` — ${node.summary}` : ""}
+              {viewMode === "vertical" ? (
+                <ul style={{ margin: 0, paddingLeft: 18 }}>
+                  {objs.map((o, i) => {
+                    const title = objectTitle(o);
+                    const node = typeof o === "string" ? nodeById.get(o) : undefined;
+                    return (
+                      <li
+                        key={`${String(o)}|${i}`}
+                        onClick={() => typeof o === "string" && setSelectedNodeId(o)}
+                        style={{ cursor: typeof o === "string" ? "pointer" : "default" }}
+                        title={typeof o === "string" ? "Click for details" : undefined}
+                      >
+                        <span style={{ textDecoration: typeof o === "string" ? "underline" : "none" }}>{title}</span>
+                        {node && (
+                          <div style={{ color: "#666", fontSize: 12 }}>
+                            <em>{node.type}</em>
+                            {node.summary ? ` — ${node.summary}` : ""}
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                  {!objs.length && <li style={{ color: "#777" }}>No entries</li>}
+                </ul>
+              ) : (
+                <div style={{ overflowX: "auto" }}>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {objs.map((o, i) => {
+                      const title = objectTitle(o);
+                      const node = typeof o === "string" ? nodeById.get(o) : undefined;
+                      return (
+                        <div
+                          key={`${String(o)}|${i}`}
+                          onClick={() => typeof o === "string" && setSelectedNodeId(o)}
+                          style={{
+                            minWidth: 240,
+                            maxWidth: 280,
+                            border: "1px solid #eee",
+                            borderRadius: 8,
+                            padding: 10,
+                            cursor: typeof o === "string" ? "pointer" : "default",
+                            background: "#fafafa",
+                          }}
+                          title={typeof o === "string" ? "Click for details" : undefined}
+                        >
+                          <div style={{ fontWeight: 600 }}>{title}</div>
+                          {node && (
+                            <div style={{ color: "#666", fontSize: 12, marginTop: 4 }}>
+                              <em>{node.type}</em>
+                              {node.summary ? ` — ${node.summary}` : ""}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </li>
-                  );
-                })}
-                {!objs.length && <li style={{ color: "#777" }}>No entries</li>}
-              </ul>
+                      );
+                    })}
+                    {!objs.length && (
+                      <div style={{ color: "#777" }}>No entries</div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           ))}
           {!grouped.size && <div style={{ color: "#777" }}>No subject triples</div>}
