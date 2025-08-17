@@ -24,3 +24,13 @@ export function validateNodes(nodes: unknown): IdeaNode[] {
 export function validateTriples(triples: unknown): IdeaTriple[] {
   return parseTriples(triples);
 }
+
+/** Serialize IdeaTriple[] to NDJSON (one JSON object per line). */
+export function exportTriplesNdjson(triples: IdeaTriple[]): string {
+  return triples.map((t) => JSON.stringify(t)).join("\n") + (triples.length ? "\n" : "");
+}
+
+/** Serialize IdeaNode[] to compact JSON string. */
+export function exportNodesJson(nodes: IdeaNode[]): string {
+  return JSON.stringify(nodes);
+}
