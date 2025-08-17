@@ -446,7 +446,7 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
       case "Idea":
       case "Musing":
       case "Experiment":
-        return "Ideas";
+        return "Concepts";
       case "Tool":
         return "Tools";
       case "Website":
@@ -467,7 +467,7 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
   const workedOnSubgroupOrder = [
     "Projects",
     "Theories",
-    "Ideas",
+    "Concepts",
     "Tools",
     "Media",
     "Websites",
