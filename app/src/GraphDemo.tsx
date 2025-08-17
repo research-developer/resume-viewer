@@ -98,6 +98,8 @@ export function GraphDemo() {
     return opts;
   }, [grouped, preferredOrder]);
 
+  const commonPreds = useMemo<Predicate[]>(() => ["worked_on", "built", "authored"], []);
+
   const subjectOptions = useMemo(() => {
     const subs = new Set<string>();
     for (const t of triples) subs.add(t.s);
@@ -334,6 +336,20 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate }: Detai
         {/* Predicate chips */}
         <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
           <label style={{ fontSize: 12, color: "#555" }}>Predicates</label>
+          <button
+            onClick={() => setSelectedPreds(new Set(commonPreds))}
+            title="Select common predicates"
+            style={{ padding: "4px 8px", borderRadius: 6, border: "1px solid #ccc", background: "#fff", cursor: "pointer" }}
+          >
+            Common
+          </button>
+          <button
+            onClick={() => setSelectedPreds(new Set())}
+            title="Clear predicate filters"
+            style={{ padding: "4px 8px", borderRadius: 6, border: "1px solid #ccc", background: "#fff", cursor: "pointer" }}
+          >
+            Clear
+          </button>
           {/* All chip */}
           <button
             onClick={() => setSelectedPreds(new Set())}
