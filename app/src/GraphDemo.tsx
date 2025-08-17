@@ -15,8 +15,8 @@ export function GraphDemo() {
     // Load seeds from public
     async function load() {
       const [nodesRes, triplesRes] = await Promise.all([
-        fetch("/graph/nodes.json"),
-        fetch("/graph/triples.ndjson"),
+        fetch("graph/nodes.json"),
+        fetch("graph/triples.ndjson"),
       ]);
       const nodesText = await nodesRes.text();
       const triplesText = await triplesRes.text();

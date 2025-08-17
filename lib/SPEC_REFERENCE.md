@@ -21,7 +21,7 @@ This specification represents Preston’s projects, skills, experiences, theorie
 - `Media`
 - `Website`
 - `Tool`
-
+  
 ### Predicates
 
 - `authored` (Person → Idea/Project/Musing)
