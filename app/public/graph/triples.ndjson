@@ -30,3 +30,10 @@
 {"s": "person.preston", "p": "worked_on", "o": "project.vibecoding_shell"}
 {"s": "person.preston", "p": "worked_on", "o": "project.web_browser"}
 {"s": "person.preston", "p": "worked_on", "o": "project.gambling_game_rating"}
+
+{"s": "project.media_bias_dual_site", "p": "relates_to", "o": "project.trump_archive"}
+{"s": "project.youtube_transcript_heatmap", "p": "relates_to", "o": "project.trump_archive"}
+{"s": "project.vibecoding_shell", "p": "relates_to", "o": "project.web_browser"}
+{"s": "project.educational_game_mashups", "p": "relates_to", "o": "project.mlp_homeschool_curriculum"}
+{"s": "project.music_reinterpretation", "p": "relates_to", "o": "project.passive_ambient_sampler"}
+{"s": "project.family_constellation_simulator", "p": "relates_to", "o": "project.children_cancer_book"}

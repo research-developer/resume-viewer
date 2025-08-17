@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { loadNodesFromJson, loadTriplesFromNdjson } from "../../lib/src/graph/Loader";
 import { query, top_nodes } from "../../lib/src/graph/API";
 import type { IdeaTriple, IdeaNode, Predicate } from "../../lib/src/schema/IdeaGraph";
@@ -12,6 +12,54 @@ export function GraphDemo() {
   const [selectedPreds, setSelectedPreds] = useState<Set<Predicate>>(new Set());
   const [subjectId, setSubjectId] = useState<string>("person.preston");
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
+  // Read initial state from URL (subject, preds, selected node)
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    const subject = sp.get("subject");
+    const predsCsv = sp.get("preds");
+    const sel = sp.get("select");
+    if (subject) setSubjectId(subject);
+    if (sel) setSelectedNodeId(sel);
+    if (predsCsv) {
+      const parts = predsCsv.split(",").filter(Boolean);
+      setSelectedPreds(
+        new Set(
+          parts.filter((p): p is Predicate =>
+            [
+              "authored",
+              "proposes",
+              "worked_on",
+              "built",
+              "holds_degree_in",
+              "learned_at_age",
+              "role",
+              "inspired_by",
+              "about",
+              "relates_to",
+              "category",
+              "tag",
+              "status",
+              "evidence",
+            ].includes(p as Predicate)
+          )
+        )
+      );
+    }
+  }, []);
+
+  // Persist state to URL
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    sp.set("subject", subjectId);
+    const preds = Array.from(selectedPreds);
+    if (preds.length) sp.set("preds", preds.join(","));
+    else sp.delete("preds");
+    if (selectedNodeId) sp.set("select", selectedNodeId);
+    else sp.delete("select");
+    const newUrl = `${window.location.pathname}?${sp.toString()}`;
+    window.history.replaceState({}, "", newUrl);
+  }, [subjectId, selectedPreds, selectedNodeId]);
 
   useEffect(() => {
     // Load seeds from public
@@ -162,9 +210,10 @@ type DetailsDrawerProps = {
   nodeById: Map<string, IdeaNode>;
   triples: IdeaTriple[];
   onNavigate?: (nextNodeId: string) => void;
+  onSetSubject?: (id: string) => void;
 };
 
-function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate }: DetailsDrawerProps) {
+function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSubject }: DetailsDrawerProps) {
   const node = nodeById.get(nodeId);
   const outbound = useMemo(() => triples.filter((t) => t.s === nodeId), [triples, nodeId]);
   const inbound = useMemo(
@@ -180,6 +229,40 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate }: Detai
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  // Focus trap within drawer
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    closeBtnRef.current?.focus();
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "Tab") return;
+      const root = drawerRef.current;
+      if (!root) return;
+      const focusables = Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'a,button,textarea,input,select,[tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => !el.hasAttribute("disabled"));
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey) {
+        if (active === first || !root.contains(active)) {
+          last.focus();
+          e.preventDefault();
+        }
+      } else {
+        if (active === last) {
+          first.focus();
+          e.preventDefault();
+        }
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   return (
     <div>
@@ -206,10 +289,19 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate }: Detai
           padding: 16,
           overflowY: "auto",
         }}
+        ref={drawerRef}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
           <div style={{ fontWeight: 700 }}>Details</div>
-          <button onClick={onClose} style={{ border: "1px solid #ccc", borderRadius: 6, padding: "4px 8px", cursor: "pointer" }}>
+          {node && (
+            <button
+              onClick={() => onSetSubject && onSetSubject(node.id)}
+              style={{ border: "1px solid #ccc", borderRadius: 6, padding: "4px 8px", cursor: "pointer", background: "#fff" }}
+            >
+              Set as subject
+            </button>
+          )}
+          <button ref={closeBtnRef} onClick={onClose} style={{ border: "1px solid #ccc", borderRadius: 6, padding: "4px 8px", cursor: "pointer" }}>
             Close
           </button>
         </div>
@@ -255,7 +347,14 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate }: Detai
           <ul style={{ margin: 0, paddingLeft: 18 }}>
             {outbound.map((t, i) => (
               <li key={`out-${i}`}>
-                <strong>{t.p}</strong>:
+                <strong>{t.p}</strong>
+                {t.meta?.weight !== undefined && (
+                  <span style={{ marginLeft: 6, fontSize: 11, background: "#f0f9ff", color: "#0369a1", border: "1px solid #bae6fd", borderRadius: 999, padding: "0 6px" }}>w:{t.meta.weight}</span>
+                )}
+                {t.meta?.created && (
+                  <span style={{ marginLeft: 6, fontSize: 11, background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a", borderRadius: 999, padding: "0 6px" }}>{t.meta.created}</span>
+                )}
+                {":"}
                 {" "}
                 {typeof t.o === "string" ? (
                   <button
@@ -277,7 +376,14 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate }: Detai
           <ul style={{ margin: 0, paddingLeft: 18 }}>
             {inbound.map((t, i) => (
               <li key={`in-${i}`}>
-                <strong>{t.p}</strong>:{" "}
+                <strong>{t.p}</strong>
+                {t.meta?.weight !== undefined && (
+                  <span style={{ marginLeft: 6, fontSize: 11, background: "#f0f9ff", color: "#0369a1", border: "1px solid #bae6fd", borderRadius: 999, padding: "0 6px" }}>w:{t.meta.weight}</span>
+                )}
+                {t.meta?.created && (
+                  <span style={{ marginLeft: 6, fontSize: 11, background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a", borderRadius: 999, padding: "0 6px" }}>{t.meta.created}</span>
+                )}
+                {": "}
                 <button
                   onClick={() => onNavigate && onNavigate(t.s)}
                   style={{ background: "none", border: "none", padding: 0, color: "#2563eb", textDecoration: "underline", cursor: "pointer" }}
@@ -493,6 +599,10 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate }: Detai
           nodeById={nodeById}
           triples={triples}
           onNavigate={(next) => setSelectedNodeId(next)}
+          onSetSubject={(id) => {
+            setSubjectId(id);
+            setSelectedNodeId(null);
+          }}
         />
       )}
 
