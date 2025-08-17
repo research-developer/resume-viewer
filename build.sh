@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Fail fast and treat unset vars as errors; safer word splitting
+set -euo pipefail
+IFS=$'\n\t'
+
 # Bash script to build the application
 # Usage: bash ./build.sh
 
@@ -18,7 +22,7 @@ cd lib
 
 # Clean up previous builds
 echo "Cleaning up previous packages..."
-rm *.tgz
+rm -f ./*.tgz 2>/dev/null || true
 
 # Installing dependencies for the library
 echo "Installing library dependencies..."
@@ -51,7 +55,7 @@ cd ../app
 
 # Clean up previous builds
 echo "Cleaning up previous builds..."
-rm -rf ./node_modules/resume-viewer
+rm -rf ./node_modules/resume-viewer || true
 
 # Install the library tarball
 echo "Installing the library tarball..."
