@@ -9,6 +9,7 @@ export function GraphDemo() {
   const [triples, setTriples] = useState<IdeaTriple[]>([]);
   const [q, setQ] = useState("type:Project linked:preston");
   const [predFilter, setPredFilter] = useState<string>("All");
+  const [subjectId, setSubjectId] = useState<string>("person.preston");
 
   useEffect(() => {
     // Load seeds from public
@@ -31,7 +32,7 @@ export function GraphDemo() {
   const results = useMemo<IdeaTriple[]>(() => (q.trim() ? query(q, triples) : []), [q, triples]);
   const top = useMemo(() => (triples.length ? top_nodes("person.preston", triples, 5) : []), [triples]);
 
-  const SUBJECT_ID = "person.preston";
+  const SUBJECT_ID = subjectId;
 
   // Build id -> node map for readable titles
   const nodeById = useMemo(() => {
@@ -62,12 +63,53 @@ export function GraphDemo() {
       g.set(p, dedup);
     }
     return g;
-  }, [triples]);
+  }, [triples, SUBJECT_ID]);
+
+  const preferredOrder = useMemo<Predicate[]>(
+    () => [
+      "worked_on",
+      "built",
+      "authored",
+      "proposes",
+      "role",
+      "holds_degree_in",
+      "learned_at_age",
+      "inspired_by",
+      "about",
+      "category",
+      "tag",
+      "status",
+      "evidence",
+    ],
+    []
+  );
 
   const predicateOptions = useMemo(() => {
-    const opts = Array.from(grouped.keys()).sort();
+    const opts = Array.from(grouped.keys()).sort((a, b) => {
+      const ai = preferredOrder.indexOf(a as Predicate);
+      const bi = preferredOrder.indexOf(b as Predicate);
+      if (ai === -1 && bi === -1) return a.localeCompare(b);
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+      return ai - bi;
+    });
     return ["All", ...opts];
-  }, [grouped]);
+  }, [grouped, preferredOrder]);
+
+  const subjectOptions = useMemo(() => {
+    const subs = new Set<string>();
+    for (const t of triples) subs.add(t.s);
+    // Prefer to show Persons first if present in nodes
+    const personIds = new Set(nodes.filter((n) => n.type === "Person").map((n) => n.id));
+    const arr = Array.from(subs);
+    arr.sort((a, b) => {
+      const ap = personIds.has(a) ? 0 : 1;
+      const bp = personIds.has(b) ? 0 : 1;
+      if (ap !== bp) return ap - bp;
+      return a.localeCompare(b);
+    });
+    return arr;
+  }, [triples, nodes]);
 
   function friendlyPredicateBase(p: Predicate): string {
     const map: Record<Predicate, string> = {
@@ -116,16 +158,28 @@ export function GraphDemo() {
         Loaded {nodesCount} nodes, {triples.length} triples
       </p>
 
-      {/* Predicate filter */}
-      <div style={{ display: "flex", gap: 8, marginTop: 8, alignItems: "center" }}>
-        <label style={{ fontSize: 12, color: "#555" }}>Predicate</label>
-        <select value={predFilter} onChange={(e) => setPredFilter(e.target.value)} style={{ padding: 6, borderRadius: 6, border: "1px solid #ccc" }}>
-          {predicateOptions.map((opt) => (
-            <option key={opt} value={opt}>
-              {opt}
-            </option>
-          ))}
-        </select>
+      {/* Subject and predicate filters */}
+      <div style={{ display: "flex", gap: 12, marginTop: 8, alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <label style={{ fontSize: 12, color: "#555" }}>Subject</label>
+          <select value={subjectId} onChange={(e) => setSubjectId(e.target.value)} style={{ padding: 6, borderRadius: 6, border: "1px solid #ccc" }}>
+            {subjectOptions.map((opt) => (
+              <option key={opt} value={opt}>
+                {nodeById.get(opt)?.label ?? opt}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <label style={{ fontSize: 12, color: "#555" }}>Predicate</label>
+          <select value={predFilter} onChange={(e) => setPredFilter(e.target.value)} style={{ padding: 6, borderRadius: 6, border: "1px solid #ccc" }}>
+            {predicateOptions.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Profile view for subject */}
@@ -134,15 +188,35 @@ export function GraphDemo() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12, marginTop: 8 }}>
           {Array.from(grouped.entries())
             .filter(([p]) => predFilter === "All" || p === (predFilter as Predicate))
+            .sort(([a], [b]) => {
+              const ai = preferredOrder.indexOf(a as Predicate);
+              const bi = preferredOrder.indexOf(b as Predicate);
+              if (ai === -1 && bi === -1) return a.localeCompare(b);
+              if (ai === -1) return 1;
+              if (bi === -1) return -1;
+              return ai - bi;
+            })
             .map(([p, objs]) => (
             <div key={p} style={{ border: "1px solid #eee", borderRadius: 8, padding: 10 }}>
               <div style={{ fontWeight: 600, marginBottom: 6 }}>
                 {friendlyPredicate(p, objs.length)} {objs.length > 1 ? `(${objs.length})` : ""}
               </div>
               <ul style={{ margin: 0, paddingLeft: 18 }}>
-                {objs.map((o, i) => (
-                  <li key={`${String(o)}|${i}`}>{objectTitle(o)}</li>
-                ))}
+                {objs.map((o, i) => {
+                  const title = objectTitle(o);
+                  const node = typeof o === "string" ? nodeById.get(o) : undefined;
+                  return (
+                    <li key={`${String(o)}|${i}`}>
+                      {title}
+                      {node && (
+                        <div style={{ color: "#666", fontSize: 12 }}>
+                          <em>{node.type}</em>
+                          {node.summary ? ` — ${node.summary}` : ""}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
                 {!objs.length && <li style={{ color: "#777" }}>No entries</li>}
               </ul>
             </div>
