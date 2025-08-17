@@ -7,7 +7,7 @@ on:
       - 'lib/**'
       - '.github/workflows/test.yml'
   push:
-    branches: [dev]
+    branches: [dev, main]
     paths:
       - 'lib/**'
       - '.github/workflows/test.yml'

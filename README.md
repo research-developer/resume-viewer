@@ -83,6 +83,11 @@ The production-ready files will be located in the `app/dist` directory.
 
 This project is configured to deploy to GitHub Pages using a GitHub Actions workflow. Push changes to the `main` branch to trigger the deployment.
 
+### Branching Model
+
+- `main` is the active trunk branch. Feature branches are merged directly into `main`.
+- `dev` is deprecated and mirrors `main` for backwards compatibility; do not target `dev` for new work.
+
 ## Project Structure
 
 ```text
