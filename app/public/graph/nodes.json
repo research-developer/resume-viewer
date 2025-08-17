@@ -21,5 +21,19 @@
   {"id": "blog.economics_tariffs", "type": "Idea", "label": "Economics: Tariffs & Trade", "summary": "Trade deficit elimination attempts, extreme tariffs, ripple effects.", "tags": ["economics","trade"]},
   {"id": "blog.media_polarization_series", "type": "Idea", "label": "Media Polarization Series", "summary": "Historical + neurochemical analysis of U.S. media polarization.", "tags": ["media","history"]},
 
-  {"id": "video.ai_vs_human_framing", "type": "Media", "label": "AI vs Human Framing", "summary": "Identical data framed in opposing narratives; reveal truth.", "tags": ["narratives","education"]}
+  {"id": "video.ai_vs_human_framing", "type": "Media", "label": "AI vs Human Framing", "summary": "Identical data framed in opposing narratives; reveal truth.", "tags": ["narratives","education"]},
+
+  {"id": "project.trading_algorithm", "type": "Project", "label": "Trading Algorithm", "summary": "Detects upstream geopolitical signals for downstream investment moves.", "tags": ["trading","signals"]},
+  {"id": "project.family_constellation_simulator", "type": "Project", "label": "Family Constellation Simulator", "summary": "Game-engine visualized AI representatives with gestures and emotion tools.", "tags": ["ai","game-engine"]},
+  {"id": "project.trump_archive", "type": "Project", "label": "Trump Archive", "summary": "Searchable video transcripts, chronological timeline, political bias heatmap.", "tags": ["politics","media"]},
+  {"id": "project.media_bias_dual_site", "type": "Project", "label": "Media Bias Dual Site", "summary": "Two opposing narrative sites using identical Trump legal data + neutral third mode.", "tags": ["media","bias"]},
+  {"id": "project.youtube_transcript_heatmap", "type": "Project", "label": "YouTube Transcript Heatmap", "summary": "Cross-reference YouTube transcripts with outlet bias maps.", "tags": ["youtube","nlp"]},
+  {"id": "project.music_reinterpretation", "type": "Project", "label": "Music Reinterpretation", "summary": "Strip rap verses and layer new harmonies/melodies via DAW + DJ decks.", "tags": ["music","creative"]},
+  {"id": "project.passive_ambient_sampler", "type": "Project", "label": "Passive Ambient Sampler", "summary": "Automated sampler recording ambient snippets, filtering for silence/speech/music.", "tags": ["audio","automation"]},
+  {"id": "project.children_cancer_book", "type": "Project", "label": "Children’s Cancer Book", "summary": "Pixar-style children’s book about cancer.", "tags": ["children","book"]},
+  {"id": "project.mlp_homeschool_curriculum", "type": "Project", "label": "MLP Homeschool Curriculum", "summary": "Esoteric/archetypal lesson plan based on My Little Pony: Friendship is Magic.", "tags": ["education","curriculum"]},
+  {"id": "project.educational_game_mashups", "type": "Project", "label": "Educational Game Mashups", "summary": "Paper-based lemonade stand game teaching math & entrepreneurship.", "tags": ["education","games"]},
+  {"id": "project.vibecoding_shell", "type": "Project", "label": "Vibecoding Shell", "summary": "Gamified AI software development control using game controller + microphone.", "tags": ["developer-tools","ai"]},
+  {"id": "project.web_browser", "type": "Project", "label": "Experimental Web Browser", "summary": "Experimental modular Chromium fork, composable interfaces.", "tags": ["browser","experimental"]},
+  {"id": "project.gambling_game_rating", "type": "Project", "label": "Gambling Game Rating", "summary": "Website to rate games by their adjacency to gambling mechanics.", "tags": ["games","ethics"]}
 ]

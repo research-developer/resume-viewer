@@ -16,3 +16,17 @@
 {"s": "person.preston", "p": "authored", "o": "video.ai_vs_human_framing"}
 {"s": "person.preston", "p": "built", "o": "website.witness_full"}
 {"s": "person.preston", "p": "built", "o": "website.trump_archive_timeline"}
+
+{"s": "person.preston", "p": "worked_on", "o": "project.trading_algorithm"}
+{"s": "person.preston", "p": "worked_on", "o": "project.family_constellation_simulator"}
+{"s": "person.preston", "p": "worked_on", "o": "project.trump_archive"}
+{"s": "person.preston", "p": "worked_on", "o": "project.media_bias_dual_site"}
+{"s": "person.preston", "p": "worked_on", "o": "project.youtube_transcript_heatmap"}
+{"s": "person.preston", "p": "worked_on", "o": "project.music_reinterpretation"}
+{"s": "person.preston", "p": "worked_on", "o": "project.passive_ambient_sampler"}
+{"s": "person.preston", "p": "worked_on", "o": "project.children_cancer_book"}
+{"s": "person.preston", "p": "worked_on", "o": "project.mlp_homeschool_curriculum"}
+{"s": "person.preston", "p": "worked_on", "o": "project.educational_game_mashups"}
+{"s": "person.preston", "p": "worked_on", "o": "project.vibecoding_shell"}
+{"s": "person.preston", "p": "worked_on", "o": "project.web_browser"}
+{"s": "person.preston", "p": "worked_on", "o": "project.gambling_game_rating"}

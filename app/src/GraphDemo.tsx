@@ -159,15 +159,25 @@ type DetailsDrawerProps = {
   onClose: () => void;
   nodeById: Map<string, IdeaNode>;
   triples: IdeaTriple[];
+  onNavigate?: (nextNodeId: string) => void;
 };
 
-function DetailsDrawer({ nodeId, onClose, nodeById, triples }: DetailsDrawerProps) {
+function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate }: DetailsDrawerProps) {
   const node = nodeById.get(nodeId);
   const outbound = useMemo(() => triples.filter((t) => t.s === nodeId), [triples, nodeId]);
   const inbound = useMemo(
     () => triples.filter((t) => typeof t.o === "string" && t.o === nodeId),
     [triples, nodeId]
   );
+
+  // Esc to close
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   return (
     <div>
@@ -243,7 +253,18 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples }: DetailsDrawerProp
           <ul style={{ margin: 0, paddingLeft: 18 }}>
             {outbound.map((t, i) => (
               <li key={`out-${i}`}>
-                <strong>{t.p}</strong>: {typeof t.o === "string" ? nodeById.get(t.o)?.label ?? t.o : String(t.o)}
+                <strong>{t.p}</strong>:
+                {" "}
+                {typeof t.o === "string" ? (
+                  <button
+                    onClick={() => onNavigate && onNavigate(t.o as string)}
+                    style={{ background: "none", border: "none", padding: 0, color: "#2563eb", textDecoration: "underline", cursor: "pointer" }}
+                  >
+                    {nodeById.get(t.o)?.label ?? (t.o as string)}
+                  </button>
+                ) : (
+                  String(t.o)
+                )}
               </li>
             ))}
             {!outbound.length && <li style={{ color: "#777" }}>None</li>}
@@ -254,7 +275,13 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples }: DetailsDrawerProp
           <ul style={{ margin: 0, paddingLeft: 18 }}>
             {inbound.map((t, i) => (
               <li key={`in-${i}`}>
-                <strong>{t.p}</strong>: {nodeById.get(t.s)?.label ?? t.s}
+                <strong>{t.p}</strong>:{" "}
+                <button
+                  onClick={() => onNavigate && onNavigate(t.s)}
+                  style={{ background: "none", border: "none", padding: 0, color: "#2563eb", textDecoration: "underline", cursor: "pointer" }}
+                >
+                  {nodeById.get(t.s)?.label ?? t.s}
+                </button>
               </li>
             ))}
             {!inbound.length && <li style={{ color: "#777" }}>None</li>}
@@ -449,6 +476,7 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples }: DetailsDrawerProp
           onClose={() => setSelectedNodeId(null)}
           nodeById={nodeById}
           triples={triples}
+          onNavigate={(next) => setSelectedNodeId(next)}
         />
       )}
 
