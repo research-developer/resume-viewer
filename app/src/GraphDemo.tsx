@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { loadNodesFromJson, loadTriplesFromNdjson } from "../../lib/src/graph/Loader";
 import { query, top_nodes } from "../../lib/src/graph/API";
-import type { IdeaTriple } from "../../lib/src/schema/IdeaGraph";
+import type { IdeaTriple, IdeaNode, Predicate } from "../../lib/src/schema/IdeaGraph";
 
 export function GraphDemo() {
   const [nodesCount, setNodesCount] = useState<number>(0);
+  const [nodes, setNodes] = useState<IdeaNode[]>([]);
   const [triples, setTriples] = useState<IdeaTriple[]>([]);
   const [q, setQ] = useState("type:Project linked:preston");
 
@@ -20,6 +21,7 @@ export function GraphDemo() {
       const nodes = loadNodesFromJson(nodesText);
       const t = loadTriplesFromNdjson(triplesText);
       setNodesCount(nodes.length);
+      setNodes(nodes);
       setTriples(t);
     }
     load().catch(console.error);
@@ -28,12 +30,106 @@ export function GraphDemo() {
   const results = useMemo<IdeaTriple[]>(() => (q.trim() ? query(q, triples) : []), [q, triples]);
   const top = useMemo(() => (triples.length ? top_nodes("person.preston", triples, 5) : []), [triples]);
 
+  const SUBJECT_ID = "person.preston";
+
+  // Build id -> node map for readable titles
+  const nodeById = useMemo(() => {
+    const m = new Map<string, IdeaNode>();
+    for (const n of nodes) m.set(n.id, n);
+    return m;
+  }, [nodes]);
+
+  // Group triples for subject by predicate, dedupe per predicate
+  const grouped = useMemo(() => {
+    const g = new Map<Predicate, Array<string | number | boolean>>();
+    for (const t of triples) {
+      if (t.s !== SUBJECT_ID) continue;
+      const arr = g.get(t.p) ?? [];
+      arr.push(t.o);
+      g.set(t.p, arr);
+    }
+    for (const [p, arr] of g) {
+      const seen = new Set<string>();
+      const dedup: Array<string | number | boolean> = [];
+      for (const v of arr) {
+        const key = typeof v === "string" ? v : JSON.stringify(v);
+        if (!seen.has(key)) {
+          seen.add(key);
+          dedup.push(v);
+        }
+      }
+      g.set(p, dedup);
+    }
+    return g;
+  }, [triples]);
+
+  function friendlyPredicateBase(p: Predicate): string {
+    const map: Record<Predicate, string> = {
+      authored: "Wrote",
+      proposes: "Proposes",
+      worked_on: "Worked on",
+      built: "Built",
+      holds_degree_in: "Degree in",
+      learned_at_age: "Learned at age",
+      role: "Role",
+      inspired_by: "Inspired by",
+      about: "About",
+      relates_to: "Related to",
+      category: "Category",
+      tag: "Tag",
+      status: "Status",
+      evidence: "Evidence",
+    };
+    return map[p] ?? p.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
+  }
+
+  function friendlyPredicate(p: Predicate, count: number): string {
+    const base = friendlyPredicateBase(p);
+    // pluralize when appropriate (simple rule)
+    if (count > 1) {
+      if (base.endsWith("y")) return base.slice(0, -1) + "ies";
+      if (/\b(Wrote|Built|Proposes|Worked on|Inspired by|Related to)\b/.test(base)) return base; // phrases
+      return base + "s";
+    }
+    return base;
+  }
+
+  function objectTitle(o: string | number | boolean): string {
+    if (typeof o === "string") {
+      const node = nodeById.get(o);
+      if (node) return node.label;
+      return o;
+    }
+    return String(o);
+  }
+
   return (
     <div style={{ padding: 16, borderTop: "1px solid #eee" }}>
       <h2 style={{ fontSize: 18, fontWeight: 600 }}>Graph Demo</h2>
       <p style={{ color: "#555" }}>
         Loaded {nodesCount} nodes, {triples.length} triples
       </p>
+
+      {/* Profile view for subject */}
+      <section style={{ marginTop: 12 }}>
+        <h3 style={{ fontWeight: 700, fontSize: 16 }}>Profile: {SUBJECT_ID}</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12, marginTop: 8 }}>
+          {Array.from(grouped.entries()).map(([p, objs]) => (
+            <div key={p} style={{ border: "1px solid #eee", borderRadius: 8, padding: 10 }}>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>
+                {friendlyPredicate(p, objs.length)} {objs.length > 1 ? `(${objs.length})` : ""}
+              </div>
+              <ul style={{ margin: 0, paddingLeft: 18 }}>
+                {objs.map((o, i) => (
+                  <li key={`${String(o)}|${i}`}>{objectTitle(o)}</li>
+                ))}
+                {!objs.length && <li style={{ color: "#777" }}>No entries</li>}
+              </ul>
+            </div>
+          ))}
+          {!grouped.size && <div style={{ color: "#777" }}>No subject triples</div>}
+        </div>
+      </section>
 
       <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
         <input
