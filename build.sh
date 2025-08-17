@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Fail fast and treat unset vars as errors; safer word splitting
+set -euo pipefail
+IFS=$'\n\t'
+
 # Bash script to build the application
 # Usage: bash ./build.sh
 
