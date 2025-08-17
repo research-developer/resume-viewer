@@ -8,5 +8,18 @@
   {"id": "skill.early_programming", "type": "Skill", "label": "Self-Taught Programming (childhood)", "summary": "Learned programming very young (circa ages 6–8), from AppleSoft BASIC onward.", "tags": ["programming","early"]},
   {"id": "role.semi_pro_photographer", "type": "Experience", "label": "Semi-Pro Photographer", "summary": "Paid and portfolio-grade work; visual systems sense honed.", "tags": ["photography"]},
   {"id": "role.amateur_racer_mechanic", "type": "Experience", "label": "Regional Amateur Racer & Makeshift Mechanic", "summary": "Competitive regional racing; hands-on wrenching and tuning.", "tags": ["motorsport","mechanic"]},
-  {"id": "project.branching_agentic_chat", "type": "Project", "label": "Branching Agentic AI Chat Tool", "summary": "DAG of thoughts with agent roles; exports reproducible playbooks; MCP-aware.", "tags": ["agentic","graph","MCP"]}
+  {"id": "project.branching_agentic_chat", "type": "Project", "label": "Branching Agentic AI Chat Tool", "summary": "DAG of thoughts with agent roles; exports reproducible playbooks; MCP-aware.", "tags": ["agentic","graph","MCP"]},
+
+  {"id": "project.digital_cannabis_vaporizer", "type": "Project", "label": "Digital Cannabis Vaporizer", "summary": "‘iPod Touch of vaporizers’ with microfluidic terpene/cannabinoid delivery, multi-zone heating, precision control.", "tags": ["hardware","health"]},
+  {"id": "project.language_tutor_translator", "type": "Project", "label": "Language Tutor Translator", "summary": "Real-time translation widget with contextual micro-lessons for expats and immersion learners.", "tags": ["language","translation"]},
+  {"id": "project.witness_platform", "type": "Project", "label": "Witness Platform", "summary": "Emotional safety-based sharing with FOAF visibility, selective responses, CPTSD-friendly gradual disclosure.", "tags": ["social","mental-health"]},
+  {"id": "project.branching_llm_tree_of_thought", "type": "Project", "label": "Branching LLM Tree of Thought", "summary": "Structured object tree with event-driven inference.", "tags": ["LLM","reasoning"]},
+
+  {"id": "website.witness_full", "type": "Website", "label": "Witness (Full)", "summary": "Full build-out of Witness platform.", "tags": ["social","platform"]},
+  {"id": "website.trump_archive_timeline", "type": "Website", "label": "Trump Archive Timeline", "summary": "Timeline site for Trump archive and media bias.", "tags": ["politics","media"]},
+
+  {"id": "blog.economics_tariffs", "type": "Idea", "label": "Economics: Tariffs & Trade", "summary": "Trade deficit elimination attempts, extreme tariffs, ripple effects.", "tags": ["economics","trade"]},
+  {"id": "blog.media_polarization_series", "type": "Idea", "label": "Media Polarization Series", "summary": "Historical + neurochemical analysis of U.S. media polarization.", "tags": ["media","history"]},
+
+  {"id": "video.ai_vs_human_framing", "type": "Media", "label": "AI vs Human Framing", "summary": "Identical data framed in opposing narratives; reveal truth.", "tags": ["narratives","education"]}
 ]

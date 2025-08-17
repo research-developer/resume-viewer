@@ -7,3 +7,12 @@
 {"s": "person.preston", "p": "role", "o": "role.semi_pro_photographer", "meta": {"created": "2015-01-01"}}
 {"s": "person.preston", "p": "role", "o": "role.amateur_racer_mechanic", "meta": {"created": "2013-01-01"}}
 {"s": "person.preston", "p": "worked_on", "o": "project.branching_agentic_chat", "meta": {"weight": 1.5, "created": "2025-08-16"}}
+{"s": "person.preston", "p": "worked_on", "o": "project.digital_cannabis_vaporizer"}
+{"s": "person.preston", "p": "worked_on", "o": "project.language_tutor_translator"}
+{"s": "person.preston", "p": "worked_on", "o": "project.witness_platform"}
+{"s": "person.preston", "p": "worked_on", "o": "project.branching_llm_tree_of_thought"}
+{"s": "person.preston", "p": "authored", "o": "blog.economics_tariffs"}
+{"s": "person.preston", "p": "authored", "o": "blog.media_polarization_series"}
+{"s": "person.preston", "p": "authored", "o": "video.ai_vs_human_framing"}
+{"s": "person.preston", "p": "built", "o": "website.witness_full"}
+{"s": "person.preston", "p": "built", "o": "website.trump_archive_timeline"}

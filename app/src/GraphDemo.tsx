@@ -8,6 +8,7 @@ export function GraphDemo() {
   const [nodes, setNodes] = useState<IdeaNode[]>([]);
   const [triples, setTriples] = useState<IdeaTriple[]>([]);
   const [q, setQ] = useState("type:Project linked:preston");
+  const [predFilter, setPredFilter] = useState<string>("All");
 
   useEffect(() => {
     // Load seeds from public
@@ -63,6 +64,11 @@ export function GraphDemo() {
     return g;
   }, [triples]);
 
+  const predicateOptions = useMemo(() => {
+    const opts = Array.from(grouped.keys()).sort();
+    return ["All", ...opts];
+  }, [grouped]);
+
   function friendlyPredicateBase(p: Predicate): string {
     const map: Record<Predicate, string> = {
       authored: "Wrote",
@@ -110,11 +116,25 @@ export function GraphDemo() {
         Loaded {nodesCount} nodes, {triples.length} triples
       </p>
 
+      {/* Predicate filter */}
+      <div style={{ display: "flex", gap: 8, marginTop: 8, alignItems: "center" }}>
+        <label style={{ fontSize: 12, color: "#555" }}>Predicate</label>
+        <select value={predFilter} onChange={(e) => setPredFilter(e.target.value)} style={{ padding: 6, borderRadius: 6, border: "1px solid #ccc" }}>
+          {predicateOptions.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* Profile view for subject */}
       <section style={{ marginTop: 12 }}>
         <h3 style={{ fontWeight: 700, fontSize: 16 }}>Profile: {SUBJECT_ID}</h3>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12, marginTop: 8 }}>
-          {Array.from(grouped.entries()).map(([p, objs]) => (
+          {Array.from(grouped.entries())
+            .filter(([p]) => predFilter === "All" || p === (predFilter as Predicate))
+            .map(([p, objs]) => (
             <div key={p} style={{ border: "1px solid #eee", borderRadius: 8, padding: 10 }}>
               <div style={{ fontWeight: 600, marginBottom: 6 }}>
                 {friendlyPredicate(p, objs.length)} {objs.length > 1 ? `(${objs.length})` : ""}
