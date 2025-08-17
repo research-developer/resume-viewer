@@ -8,12 +8,12 @@ This directory contains the shared library for the Resume Viewer project. It hou
 
 The library includes several key pieces of functionality:
 
--   **Schema System**: A comprehensive, Zod-based schema system for defining and extending the [JSON Resume schema](https://jsonresume.org/schema/). This allows for strong typing and validation of resume data.
-    -   Base schemas adhere to the JSON Resume v1.0.0 specification.
-    -   Extended schemas provide custom fields and structures tailored for the Resume Viewer application.
--   **Utility Functions**: A collection of helper functions and classes for common tasks, such as color manipulation, fluent iterable data structures, Gravatar integration, identity management, and JSON serialization/deserialization.
--   **React Components and Hooks**: Reusable UI components (like for Gravatar display) and custom React hooks for managing and accessing resume data within applications.
--   **Core Entry Point**: `index.ts` serves as the main export point for the library's public API.
+- **Schema System**: A comprehensive, Zod-based schema system for defining and extending the [JSON Resume schema](https://jsonresume.org/schema/). This allows for strong typing and validation of resume data.
+  - Base schemas adhere to the JSON Resume v1.0.0 specification.
+  - Extended schemas provide custom fields and structures tailored for the Resume Viewer application.
+- **Utility Functions**: A collection of helper functions and classes for common tasks, such as color manipulation, fluent iterable data structures, Gravatar integration, identity management, and JSON serialization/deserialization.
+- **React Components and Hooks**: Reusable UI components (like for Gravatar display) and custom React hooks for managing and accessing resume data within applications.
+- **Core Entry Point**: `index.ts` serves as the main export point for the library's public API.
 
 ## Schema Documentation
 
@@ -25,8 +25,8 @@ The library is built and managed alongside the main `app` and `resume-viewer` pr
 
 ### Prerequisites
 
--   Node.js (LTS version recommended)
--   npm (comes with Node.js)
+- Node.js (LTS version recommended)
+- npm (comes with Node.js)
 
 ### Installation and Building
 
@@ -38,6 +38,35 @@ npm install
 npm run build
 ```
 
+## Graph Query API Quickstart
+
+The library includes a lightweight graph layer with seed data, a natural-language (NL) query compiler, and scoring helpers.
+
+Example (TypeScript):
+
+```ts
+import { loadNodesFromJson, loadTriplesFromNdjson } from "./src/graph/Loader";
+import { query, top_nodes, exporter } from "./src/graph/API";
+import fs from "node:fs";
+import path from "node:path";
+
+const dataDir = path.join(__dirname, "./data");
+const nodes = loadNodesFromJson(fs.readFileSync(path.join(dataDir, "nodes.json"), "utf8"));
+const triples = loadTriplesFromNdjson(fs.readFileSync(path.join(dataDir, "triples.ndjson"), "utf8"));
+
+// NL queries: tokens s:, p:, o:, tag:, category:, type:, linked:, limit:, offset:
+const results = query("type:Project tag:agentic linked:preston", triples);
+
+// Top base nodes for a subject with scoring + recency tiebreak
+const top = top_nodes("person.preston", triples, 5);
+
+// Export helpers
+const nodesJson = exporter.nodesJson(nodes);
+const triplesNdjson = exporter.triplesNdjson(triples);
+```
+
+See `src/graph/API.ts` and `PLANS.md` for design notes and supported tokens.
+
 ### Local Development
 
 The library includes its own Vite development server, allowing for standalone testing and development of its components. This is particularly useful for building and verifying the library as an encapsulated web component.
@@ -48,6 +77,7 @@ To start the library's development server:
 # From the lib/ directory
 npm run dev
 ```
+
 This will typically make the library available for testing in a browser (e.g., at `http://localhost:5173`).
 
 ### Packaging as a Web Component

@@ -50,7 +50,36 @@ This repository has inspired the creation of a thin template repository designed
    cd resume-viewer
    ```
 
-2. Install dependencies for both the library and the app:
+## Graph Query API (lib)
+
+The `lib/` package includes a small graph layer with seed data, a natural-language query compiler, and scoring helpers.
+
+Examples (TypeScript):
+
+```ts
+import { loadNodesFromJson, loadTriplesFromNdjson } from "./lib/src/graph/Loader";
+import { query, top_nodes, exporter } from "./lib/src/graph/API";
+import fs from "node:fs";
+import path from "node:path";
+
+const dataDir = path.join(__dirname, "lib/data");
+const nodes = loadNodesFromJson(fs.readFileSync(path.join(dataDir, "nodes.json"), "utf8"));
+const triples = loadTriplesFromNdjson(fs.readFileSync(path.join(dataDir, "triples.ndjson"), "utf8"));
+
+// 1) Natural-language queries (tokens: s:, p:, o:, tag:, category:, type:, linked:, limit:, offset:)
+const results = query("type:Project tag:agentic linked:preston", triples);
+
+// 2) Top base nodes (scored by predicate weights with recency tiebreak)
+const top = top_nodes("person.preston", triples, 5);
+
+// 3) Export helpers
+const nodesJson = exporter.nodesJson(nodes);
+const triplesNdjson = exporter.triplesNdjson(triples);
+```
+
+See `lib/src/graph/API.ts` and `PLANS.md` for design notes and supported tokens.
+
+1. Install dependencies for both the library and the app:
 
    ```bash
    bash build.sh

@@ -1,0 +1,9 @@
+{"s": "person.preston", "p": "authored", "o": "musing.social_media_time_bomb", "meta": {"weight": 1.3, "created": "2025-08-15"}}
+{"s": "person.preston", "p": "inspired_by", "o": "story.cats_infected_mouse", "meta": {"created": "2025-08-10"}}
+{"s": "person.preston", "p": "worked_on", "o": "work.psychedelics_patent", "meta": {"weight": 1.5, "created": "2025-08-12"}}
+{"s": "person.preston", "p": "proposes", "o": "theory.psychedelic_modulation", "meta": {"weight": 1.2, "created": "2025-08-14"}}
+{"s": "person.preston", "p": "holds_degree_in", "o": "edu.design_degree", "meta": {"created": "2010-06-01"}}
+{"s": "person.preston", "p": "learned_at_age", "o": "skill.early_programming", "meta": {"notes": "ages 6–8", "created": "1995-01-01"}}
+{"s": "person.preston", "p": "role", "o": "role.semi_pro_photographer", "meta": {"created": "2015-01-01"}}
+{"s": "person.preston", "p": "role", "o": "role.amateur_racer_mechanic", "meta": {"created": "2013-01-01"}}
+{"s": "person.preston", "p": "worked_on", "o": "project.branching_agentic_chat", "meta": {"weight": 1.5, "created": "2025-08-16"}}

@@ -34,9 +34,9 @@ export const LoadingUI: FC<LoadingUIProps> = ({
   }, []);
 
   useEffect(() => {
-    let spinnerTimer: number;
-    let contentTimer: number;
-    let exitingTimer: number;
+    let spinnerTimer: ReturnType<typeof setTimeout> | undefined;
+    let contentTimer: ReturnType<typeof setTimeout> | undefined;
+    let exitingTimer: ReturnType<typeof setTimeout> | undefined;
 
     if (isLoading) {
       // Loading has started
@@ -73,9 +73,9 @@ export const LoadingUI: FC<LoadingUIProps> = ({
     }
 
     return () => {
-      clearTimeout(spinnerTimer);
-      clearTimeout(contentTimer);
-      clearTimeout(exitingTimer);
+      if (spinnerTimer) clearTimeout(spinnerTimer);
+      if (contentTimer) clearTimeout(contentTimer);
+      if (exitingTimer) clearTimeout(exitingTimer);
     };
   }, [
     isLoading,

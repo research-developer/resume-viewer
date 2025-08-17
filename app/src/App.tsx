@@ -1,7 +1,11 @@
-import { ResumeViewer } from "resume-viewer";
+import { GraphDemo } from "./GraphDemo";
 
 function App() {
-  return <ResumeViewer jsonResumeUrl="" />;
+  return (
+    <>
+      <GraphDemo />
+    </>
+  );
 }
 
 export default App;

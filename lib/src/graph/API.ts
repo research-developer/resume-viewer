@@ -7,6 +7,10 @@ import { exportNodesJson, exportTriplesNdjson } from "./Loader";
 /**
  * Facade: return top base nodes for a subject given triples.
  * Keeps API minimal and pure; caller supplies triples (e.g., from loaders or an API).
+ *
+ * Example:
+ *   top_nodes("person.preston", triples, 5)
+ *   // => [{ id: "project.foo", score: 3.0, recency: 1723766400000 }, ...]
  */
 export function top_nodes(
   subjectId: string,
@@ -19,6 +23,11 @@ export function top_nodes(
 /**
  * Facade: execute a natural-language or key:value query against triples.
  * Supports tokens like: s:, p:, o:, tag:, category:, type:, linked:, limit:, offset:
+ *
+ * Examples:
+ *   query("type:Project tag:agentic linked:preston", triples)
+ *   query("p:tag o:media", triples)
+ *   query("media oxytocin", triples) // free-text OR over object
  */
 export function query(input: string, triples: IdeaTriple[]): IdeaTriple[] {
   const tokens = input.trim().split(/\s+/).filter(Boolean);
@@ -42,7 +51,13 @@ export function query(input: string, triples: IdeaTriple[]): IdeaTriple[] {
   return out;
 }
 
-/** Export helpers for consumers */
+/**
+ * Export helpers for consumers.
+ *
+ * Example:
+ *   exporter.nodesJson(nodes)        // JSON string
+ *   exporter.triplesNdjson(triples)  // NDJSON string
+ */
 export const exporter = {
   nodesJson: exportNodesJson,
   triplesNdjson: exportTriplesNdjson,
