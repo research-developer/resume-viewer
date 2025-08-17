@@ -1,15 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { loadNodesFromJson, loadTriplesFromNdjson } from "../graph/Loader";
+import { loadTriplesFromNdjson } from "../graph/Loader";
 import { topBaseNodes } from "./IdeaGraphScore";
 
-const dataDir = join(process.cwd(), "lib", "data", "idea-graph");
+const dataDir = join(process.cwd(), "data", "idea-graph");
 
 describe("IdeaGraph scoring", () => {
-  const nodes = loadNodesFromJson(
-    readFileSync(join(dataDir, "nodes.json"), "utf8")
-  );
+  // Load seed triples
   const triples = loadTriplesFromNdjson(
     readFileSync(join(dataDir, "triples.ndjson"), "utf8")
   );

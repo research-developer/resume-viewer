@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { loadNodesFromJson, loadTriplesFromNdjson } from "./Loader";
 
-const dataDir = join(process.cwd(), "lib", "data", "idea-graph");
+const dataDir = join(process.cwd(), "data", "idea-graph");
 
 describe("Graph Loader", () => {
   it("loads nodes.json and validates", () => {
