@@ -18,7 +18,7 @@ cd lib
 
 # Clean up previous builds
 echo "Cleaning up previous packages..."
-rm *.tgz
+rm -f ./*.tgz 2>/dev/null || true
 
 # Installing dependencies for the library
 echo "Installing library dependencies..."
