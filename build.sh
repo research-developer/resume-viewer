@@ -51,7 +51,7 @@ cd ../app
 
 # Clean up previous builds
 echo "Cleaning up previous builds..."
-rm -rf ./node_modules/resume-viewer
+rm -rf ./node_modules/resume-viewer || true
 
 # Install the library tarball
 echo "Installing the library tarball..."
