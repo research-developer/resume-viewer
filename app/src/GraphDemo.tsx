@@ -8,15 +8,17 @@ export function GraphDemo() {
   const [nodes, setNodes] = useState<IdeaNode[]>([]);
   const [triples, setTriples] = useState<IdeaTriple[]>([]);
   const [q, setQ] = useState("type:Project linked:preston");
-  const [predFilter, setPredFilter] = useState<string>("All");
+  // Multi-select predicate filter (empty = All)
+  const [selectedPreds, setSelectedPreds] = useState<Set<Predicate>>(new Set());
   const [subjectId, setSubjectId] = useState<string>("person.preston");
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
   useEffect(() => {
     // Load seeds from public
     async function load() {
       const [nodesRes, triplesRes] = await Promise.all([
-        fetch("graph/nodes.json"),
-        fetch("graph/triples.ndjson"),
+        fetch("/graph/nodes.json"),
+        fetch("/graph/triples.ndjson"),
       ]);
       const nodesText = await nodesRes.text();
       const triplesText = await triplesRes.text();
@@ -93,7 +95,7 @@ export function GraphDemo() {
       if (bi === -1) return -1;
       return ai - bi;
     });
-    return ["All", ...opts];
+    return opts;
   }, [grouped, preferredOrder]);
 
   const subjectOptions = useMemo(() => {
@@ -130,6 +132,138 @@ export function GraphDemo() {
     };
     return map[p] ?? p.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
   }
+
+// Color helper for predicate badges/chips
+function predicateColor(p: Predicate): string {
+  const map: Record<Predicate, string> = {
+    worked_on: "#2563eb", // blue
+    built: "#16a34a", // green
+    authored: "#7c3aed", // purple
+    proposes: "#ea580c", // orange
+    role: "#0ea5e9", // sky
+    holds_degree_in: "#9333ea", // violet
+    learned_at_age: "#64748b", // slate
+    inspired_by: "#f59e0b", // amber
+    about: "#0d9488", // teal
+    relates_to: "#0891b2", // cyan
+    category: "#a16207", // yellow-darker
+    tag: "#525252", // neutral
+    status: "#b91c1c", // red
+    evidence: "#065f46", // emerald-darker
+  };
+  return map[p] ?? "#4b5563"; // fallback slate-600
+}
+
+type DetailsDrawerProps = {
+  nodeId: string;
+  onClose: () => void;
+  nodeById: Map<string, IdeaNode>;
+  triples: IdeaTriple[];
+};
+
+function DetailsDrawer({ nodeId, onClose, nodeById, triples }: DetailsDrawerProps) {
+  const node = nodeById.get(nodeId);
+  const outbound = useMemo(() => triples.filter((t) => t.s === nodeId), [triples, nodeId]);
+  const inbound = useMemo(
+    () => triples.filter((t) => typeof t.o === "string" && t.o === nodeId),
+    [triples, nodeId]
+  );
+
+  return (
+    <div>
+      {/* Overlay */}
+      <div
+        onClick={onClose}
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.25)",
+        }}
+      />
+      {/* Drawer */}
+      <aside
+        style={{
+          position: "fixed",
+          top: 0,
+          right: 0,
+          height: "100%",
+          width: 380,
+          background: "#fff",
+          borderLeft: "1px solid #ddd",
+          boxShadow: "-4px 0 12px rgba(0,0,0,0.08)",
+          padding: 16,
+          overflowY: "auto",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ fontWeight: 700 }}>Details</div>
+          <button onClick={onClose} style={{ border: "1px solid #ccc", borderRadius: 6, padding: "4px 8px", cursor: "pointer" }}>
+            Close
+          </button>
+        </div>
+        <div style={{ marginTop: 10 }}>
+          <div style={{ fontSize: 14, color: "#666" }}>ID</div>
+          <div style={{ fontFamily: "monospace" }}>{nodeId}</div>
+        </div>
+        {node ? (
+          <div style={{ marginTop: 10 }}>
+            <div style={{ fontSize: 14, color: "#666" }}>Label</div>
+            <div style={{ fontWeight: 600 }}>{node.label}</div>
+            <div style={{ marginTop: 8, display: "flex", gap: 6, alignItems: "center" }}>
+              <span style={{ fontSize: 12, color: "#666" }}>Type</span>
+              <span style={{ fontSize: 12, padding: "2px 8px", borderRadius: 999, background: "#eef2ff", color: "#3730a3", border: "1px solid #c7d2fe" }}>
+                {node.type}
+              </span>
+            </div>
+            {node.summary && (
+              <div style={{ marginTop: 8 }}>
+                <div style={{ fontSize: 14, color: "#666" }}>Summary</div>
+                <div>{node.summary}</div>
+              </div>
+            )}
+            {node.tags?.length ? (
+              <div style={{ marginTop: 8 }}>
+                <div style={{ fontSize: 14, color: "#666" }}>Tags</div>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
+                  {node.tags.map((t) => (
+                    <span key={t} style={{ fontSize: 12, padding: "2px 8px", borderRadius: 999, background: "#f3f4f6", border: "1px solid #e5e7eb" }}>
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <div style={{ color: "#666", marginTop: 8 }}>No node metadata found</div>
+        )}
+
+        <div style={{ marginTop: 16 }}>
+          <div style={{ fontWeight: 600 }}>Outbound triples</div>
+          <ul style={{ margin: 0, paddingLeft: 18 }}>
+            {outbound.map((t, i) => (
+              <li key={`out-${i}`}>
+                <strong>{t.p}</strong>: {typeof t.o === "string" ? nodeById.get(t.o)?.label ?? t.o : String(t.o)}
+              </li>
+            ))}
+            {!outbound.length && <li style={{ color: "#777" }}>None</li>}
+          </ul>
+        </div>
+        <div style={{ marginTop: 12 }}>
+          <div style={{ fontWeight: 600 }}>Inbound triples</div>
+          <ul style={{ margin: 0, paddingLeft: 18 }}>
+            {inbound.map((t, i) => (
+              <li key={`in-${i}`}>
+                <strong>{t.p}</strong>: {nodeById.get(t.s)?.label ?? t.s}
+              </li>
+            ))}
+            {!inbound.length && <li style={{ color: "#777" }}>None</li>}
+          </ul>
+        </div>
+      </aside>
+    </div>
+  );
+}
 
   function friendlyPredicate(p: Predicate, count: number): string {
     const base = friendlyPredicateBase(p);
@@ -170,24 +304,90 @@ export function GraphDemo() {
             ))}
           </select>
         </div>
-        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          <label style={{ fontSize: 12, color: "#555" }}>Predicate</label>
-          <select value={predFilter} onChange={(e) => setPredFilter(e.target.value)} style={{ padding: 6, borderRadius: 6, border: "1px solid #ccc" }}>
-            {predicateOptions.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-          </select>
+        {/* Predicate chips */}
+        <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+          <label style={{ fontSize: 12, color: "#555" }}>Predicates</label>
+          {/* All chip */}
+          <button
+            onClick={() => setSelectedPreds(new Set())}
+            style={{
+              padding: "4px 10px",
+              borderRadius: 999,
+              border: "1px solid #ccc",
+              background: selectedPreds.size === 0 ? "#222" : "#fff",
+              color: selectedPreds.size === 0 ? "#fff" : "#222",
+              cursor: "pointer",
+            }}
+          >
+            All
+          </button>
+          {predicateOptions.map((opt) => {
+            const isOn = selectedPreds.has(opt as Predicate);
+            const count = grouped.get(opt as Predicate)?.length ?? 0;
+            const color = predicateColor(opt as Predicate);
+            return (
+              <button
+                key={opt}
+                onClick={() => {
+                  setSelectedPreds((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(opt as Predicate)) next.delete(opt as Predicate);
+                    else next.add(opt as Predicate);
+                    return next;
+                  });
+                }}
+                style={{
+                  padding: "4px 10px",
+                  borderRadius: 999,
+                  border: `1px solid ${isOn ? color : "#ccc"}`,
+                  background: isOn ? color : "#fff",
+                  color: isOn ? "#fff" : "#222",
+                  cursor: "pointer",
+                  display: "flex",
+                  gap: 6,
+                  alignItems: "center",
+                }}
+              >
+                <span>{opt}</span>
+                <span style={{
+                  background: isOn ? "rgba(255,255,255,0.25)" : color,
+                  color: "#fff",
+                  borderRadius: 999,
+                  padding: "0 6px",
+                  fontSize: 12,
+                }}>{count}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Profile view for subject */}
       <section style={{ marginTop: 12 }}>
-        <h3 style={{ fontWeight: 700, fontSize: 16 }}>Profile: {SUBJECT_ID}</h3>
+        {/* Subject header UX */}
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+          <h3 style={{ fontWeight: 700, fontSize: 18, margin: 0 }}>
+            {nodeById.get(SUBJECT_ID)?.label ?? SUBJECT_ID}
+          </h3>
+          {nodeById.get(SUBJECT_ID)?.type && (
+            <span style={{
+              fontSize: 12,
+              padding: "2px 8px",
+              borderRadius: 999,
+              background: "#eef2ff",
+              color: "#3730a3",
+              border: "1px solid #c7d2fe",
+            }}>
+              {nodeById.get(SUBJECT_ID)!.type}
+            </span>
+          )}
+        </div>
+        {nodeById.get(SUBJECT_ID)?.summary && (
+          <div style={{ color: "#555", marginTop: 4 }}>{nodeById.get(SUBJECT_ID)!.summary}</div>
+        )}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12, marginTop: 8 }}>
           {Array.from(grouped.entries())
-            .filter(([p]) => predFilter === "All" || p === (predFilter as Predicate))
+            .filter(([p]) => selectedPreds.size === 0 || selectedPreds.has(p))
             .sort(([a], [b]) => {
               const ai = preferredOrder.indexOf(a as Predicate);
               const bi = preferredOrder.indexOf(b as Predicate);
@@ -198,16 +398,33 @@ export function GraphDemo() {
             })
             .map(([p, objs]) => (
             <div key={p} style={{ border: "1px solid #eee", borderRadius: 8, padding: 10 }}>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>
-                {friendlyPredicate(p, objs.length)} {objs.length > 1 ? `(${objs.length})` : ""}
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                <div style={{ fontWeight: 600 }}>
+                  {friendlyPredicate(p, objs.length)}
+                </div>
+                {/* Predicate badge with color */}
+                <span style={{
+                  background: predicateColor(p),
+                  color: "#fff",
+                  borderRadius: 999,
+                  padding: "0 8px",
+                  fontSize: 12,
+                }}>
+                  {objs.length}
+                </span>
               </div>
               <ul style={{ margin: 0, paddingLeft: 18 }}>
                 {objs.map((o, i) => {
                   const title = objectTitle(o);
                   const node = typeof o === "string" ? nodeById.get(o) : undefined;
                   return (
-                    <li key={`${String(o)}|${i}`}>
-                      {title}
+                    <li
+                      key={`${String(o)}|${i}`}
+                      onClick={() => typeof o === "string" && setSelectedNodeId(o)}
+                      style={{ cursor: typeof o === "string" ? "pointer" : "default" }}
+                      title={typeof o === "string" ? "Click for details" : undefined}
+                    >
+                      <span style={{ textDecoration: typeof o === "string" ? "underline" : "none" }}>{title}</span>
                       {node && (
                         <div style={{ color: "#666", fontSize: 12 }}>
                           <em>{node.type}</em>
@@ -224,6 +441,16 @@ export function GraphDemo() {
           {!grouped.size && <div style={{ color: "#777" }}>No subject triples</div>}
         </div>
       </section>
+
+      {/* Details Drawer */}
+      {selectedNodeId && (
+        <DetailsDrawer
+          nodeId={selectedNodeId}
+          onClose={() => setSelectedNodeId(null)}
+          nodeById={nodeById}
+          triples={triples}
+        />
+      )}
 
       <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
         <input
