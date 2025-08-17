@@ -49,6 +49,21 @@ export function GraphDemo() {
     }
   }, []);
 
+  function statusFromTags(tags?: string[]): string | null {
+    if (!tags) return null;
+    const lower = tags.map((t) => t.toLowerCase());
+    if (lower.includes("in-progress") || lower.includes("in_progress")) return "In progress";
+    if (lower.includes("concept") || lower.includes("prototype")) return "Concept";
+    if (lower.includes("complete") || lower.includes("shipped")) return "Complete";
+    return null;
+  }
+
+  function yearFromTags(tags?: string[]): string | null {
+    if (!tags) return null;
+    const m = tags.find((t) => /^\d{4}$/.test(t));
+    return m ?? null;
+  }
+
   // Persist state to URL
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
@@ -609,7 +624,7 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
             .sort(([a], [b]) => {
               const ai = preferredOrder.indexOf(a as Predicate);
               const bi = preferredOrder.indexOf(b as Predicate);
-              if (ai === -1 && bi === -1) return a.localeCompare(b);
+              if (ai === -1 && bi === -1) return (a as string).localeCompare(b as string);
               if (ai === -1) return 1;
               if (bi === -1) return -1;
               return ai - bi;
@@ -618,7 +633,7 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
             <div key={p} style={{ border: "1px solid #eee", borderRadius: 8, padding: 10 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
                 <div style={{ fontWeight: 600 }}>
-                  {friendlyPredicate(p, objs.length)}
+                  {p === "worked_on" ? "Work" : friendlyPredicate(p, objs.length)}
                 </div>
                 {/* Predicate badge with color */}
                 <span style={{
@@ -648,7 +663,8 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
                       buckets.set("Other", arr);
                     }
                   }
-                  const ordered = workedOnSubgroupOrder.filter((g) => buckets.has(g));
+                  const orderedPreset = workedOnSubgroupOrder.filter((g) => buckets.has(g));
+                  const ordered = orderedPreset.length ? orderedPreset : Array.from(buckets.keys());
                   return (
                     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       {ordered.map((g) => {
@@ -664,6 +680,8 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
                                 {items.map((o, i) => {
                                   const title = objectTitle(o);
                                   const node = typeof o === "string" ? nodeById.get(o) : undefined;
+                                  const status = node ? statusFromTags(node.tags) : null;
+                                  const year = node ? yearFromTags(node.tags) : null;
                                   return (
                                     <li
                                       key={`${String(o)}|${i}`}
@@ -674,8 +692,17 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
                                       <span style={{ textDecoration: typeof o === "string" ? "underline" : "none" }}>{title}</span>
                                       {node && (
                                         <div style={{ color: "#666", fontSize: 12 }}>
-                                          <em>{node.type}</em>
-                                          {node.summary ? ` — ${node.summary}` : ""}
+                                          {node.summary ?? ""}
+                                          {(status || year) && (
+                                            <span style={{ marginLeft: 6 }}>
+                                              {status && (
+                                                <span style={{ fontSize: 11, padding: "1px 6px", borderRadius: 999, background: "#eef2ff", border: "1px solid #c7d2fe", color: "#3730a3", marginRight: 4 }}>{status}</span>
+                                              )}
+                                              {year && (
+                                                <span style={{ fontSize: 11, padding: "1px 6px", borderRadius: 999, background: "#f3f4f6", border: "1px solid #e5e7eb", color: "#374151" }}>{year}</span>
+                                              )}
+                                            </span>
+                                          )}
                                         </div>
                                       )}
                                     </li>
@@ -689,6 +716,8 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
                                   {items.map((o, i) => {
                                     const title = objectTitle(o);
                                     const node = typeof o === "string" ? nodeById.get(o) : undefined;
+                                    const status = node ? statusFromTags(node.tags) : null;
+                                    const year = node ? yearFromTags(node.tags) : null;
                                     return (
                                       <div
                                         key={`${String(o)}|${i}`}
@@ -707,8 +736,17 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
                                         <div style={{ fontWeight: 600 }}>{title}</div>
                                         {node && (
                                           <div style={{ color: "#666", fontSize: 12, marginTop: 4 }}>
-                                            <em>{node.type}</em>
-                                            {node.summary ? ` — ${node.summary}` : ""}
+                                            {node.summary ?? ""}
+                                          </div>
+                                        )}
+                                        {(status || year) && (
+                                          <div style={{ marginTop: 6, display: "flex", gap: 6, alignItems: "center" }}>
+                                            {status && (
+                                              <span style={{ fontSize: 11, padding: "1px 6px", borderRadius: 999, background: "#eef2ff", border: "1px solid #c7d2fe", color: "#3730a3" }}>{status}</span>
+                                            )}
+                                            {year && (
+                                              <span style={{ fontSize: 11, padding: "1px 6px", borderRadius: 999, background: "#f3f4f6", border: "1px solid #e5e7eb", color: "#374151" }}>{year}</span>
+                                            )}
                                           </div>
                                         )}
                                       </div>
