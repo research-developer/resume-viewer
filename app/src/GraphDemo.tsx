@@ -437,6 +437,46 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
     return String(o);
   }
 
+  function groupLabelForNodeType(t: IdeaNode["type"]): string {
+    switch (t) {
+      case "Project":
+        return "Projects";
+      case "Theory":
+        return "Theories";
+      case "Idea":
+      case "Musing":
+      case "Experiment":
+        return "Ideas";
+      case "Tool":
+        return "Tools";
+      case "Website":
+        return "Websites";
+      case "Media":
+        return "Media";
+      case "Skill":
+        return "Skills";
+      case "Experience":
+        return "Experiences";
+      case "Education":
+        return "Education";
+      default:
+        return "Other";
+    }
+  }
+
+  const workedOnSubgroupOrder = [
+    "Projects",
+    "Theories",
+    "Ideas",
+    "Tools",
+    "Media",
+    "Websites",
+    "Skills",
+    "Experiences",
+    "Education",
+    "Other",
+  ];
+
   return (
     <div style={{ padding: 16, borderTop: "1px solid #eee" }}>
       <h2 style={{ fontSize: 18, fontWeight: 600 }}>Graph Demo</h2>
@@ -591,7 +631,102 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
                   {objs.length}
                 </span>
               </div>
-              {viewMode === "vertical" ? (
+              {/* Special handling: split worked_on into subgroups */}
+              {p === "worked_on" ? (
+                (() => {
+                  const buckets = new Map<string, Array<string | number | boolean>>();
+                  for (const o of objs) {
+                    if (typeof o === "string") {
+                      const n = nodeById.get(o);
+                      const label = n ? groupLabelForNodeType(n.type) : "Other";
+                      const arr = buckets.get(label) ?? [];
+                      arr.push(o);
+                      buckets.set(label, arr);
+                    } else {
+                      const arr = buckets.get("Other") ?? [];
+                      arr.push(o);
+                      buckets.set("Other", arr);
+                    }
+                  }
+                  const ordered = workedOnSubgroupOrder.filter((g) => buckets.has(g));
+                  return (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {ordered.map((g) => {
+                        const items = buckets.get(g)!;
+                        return (
+                          <div key={g}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                              <div style={{ fontWeight: 600 }}>{g}</div>
+                              <span style={{ background: "#e5e7eb", borderRadius: 999, padding: "0 8px", fontSize: 12 }}>{items.length}</span>
+                            </div>
+                            {viewMode === "vertical" ? (
+                              <ul style={{ margin: 0, paddingLeft: 18 }}>
+                                {items.map((o, i) => {
+                                  const title = objectTitle(o);
+                                  const node = typeof o === "string" ? nodeById.get(o) : undefined;
+                                  return (
+                                    <li
+                                      key={`${String(o)}|${i}`}
+                                      onClick={() => typeof o === "string" && setSelectedNodeId(o)}
+                                      style={{ cursor: typeof o === "string" ? "pointer" : "default" }}
+                                      title={typeof o === "string" ? "Click for details" : undefined}
+                                    >
+                                      <span style={{ textDecoration: typeof o === "string" ? "underline" : "none" }}>{title}</span>
+                                      {node && (
+                                        <div style={{ color: "#666", fontSize: 12 }}>
+                                          <em>{node.type}</em>
+                                          {node.summary ? ` — ${node.summary}` : ""}
+                                        </div>
+                                      )}
+                                    </li>
+                                  );
+                                })}
+                                {!items.length && <li style={{ color: "#777" }}>No entries</li>}
+                              </ul>
+                            ) : (
+                              <div>
+                                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                  {items.map((o, i) => {
+                                    const title = objectTitle(o);
+                                    const node = typeof o === "string" ? nodeById.get(o) : undefined;
+                                    return (
+                                      <div
+                                        key={`${String(o)}|${i}`}
+                                        onClick={() => typeof o === "string" && setSelectedNodeId(o)}
+                                        style={{
+                                          flex: "0 0 auto",
+                                          width: 260,
+                                          border: "1px solid #eee",
+                                          borderRadius: 8,
+                                          padding: 10,
+                                          cursor: typeof o === "string" ? "pointer" : "default",
+                                          background: "#fafafa",
+                                        }}
+                                        title={typeof o === "string" ? "Click for details" : undefined}
+                                      >
+                                        <div style={{ fontWeight: 600 }}>{title}</div>
+                                        {node && (
+                                          <div style={{ color: "#666", fontSize: 12, marginTop: 4 }}>
+                                            <em>{node.type}</em>
+                                            {node.summary ? ` — ${node.summary}` : ""}
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                  {!items.length && (
+                                    <div style={{ color: "#777" }}>No entries</div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()
+              ) : viewMode === "vertical" ? (
                 <ul style={{ margin: 0, paddingLeft: 18 }}>
                   {objs.map((o, i) => {
                     const title = objectTitle(o);
@@ -616,8 +751,8 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
                   {!objs.length && <li style={{ color: "#777" }}>No entries</li>}
                 </ul>
               ) : (
-                <div style={{ overflowX: "auto" }}>
-                  <div style={{ display: "flex", gap: 8 }}>
+                <div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     {objs.map((o, i) => {
                       const title = objectTitle(o);
                       const node = typeof o === "string" ? nodeById.get(o) : undefined;
@@ -626,8 +761,8 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
                           key={`${String(o)}|${i}`}
                           onClick={() => typeof o === "string" && setSelectedNodeId(o)}
                           style={{
-                            minWidth: 240,
-                            maxWidth: 280,
+                            flex: "0 0 auto",
+                            width: 260,
                             border: "1px solid #eee",
                             borderRadius: 8,
                             padding: 10,
