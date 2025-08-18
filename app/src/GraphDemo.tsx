@@ -14,6 +14,46 @@ export function GraphDemo() {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"vertical" | "horizontal">("horizontal");
 
+  // Runtime-editable schemas and node overrides (persisted locally)
+  type ExtraField = { key: string; label?: string; type: "string" | "number" | "boolean" };
+  type TypeSchema = { extraFields: ExtraField[] };
+  type SchemaRegistry = Record<string, TypeSchema>;
+  const DEFAULT_SCHEMA: SchemaRegistry = {};
+  const NODE_TYPES: string[] = [
+    "Person",
+    "Idea",
+    "Project",
+    "Experiment",
+    "Theory",
+    "Musing",
+    "Skill",
+    "Experience",
+    "Education",
+    "Animal",
+    "Media",
+    "Website",
+    "Tool",
+  ];
+  const [schemas, setSchemas] = useState<SchemaRegistry>(() => {
+    try {
+      const raw = localStorage.getItem("node_schemas");
+      return raw ? (JSON.parse(raw) as SchemaRegistry) : DEFAULT_SCHEMA;
+    } catch {
+      return DEFAULT_SCHEMA;
+    }
+  });
+  const [schemaEditorOpen, setSchemaEditorOpen] = useState(false);
+
+  type NodeOverrides = Record<string, Partial<IdeaNode>>;
+  const [overrides, setOverrides] = useState<NodeOverrides>(() => {
+    try {
+      const raw = localStorage.getItem("node_overrides");
+      return raw ? (JSON.parse(raw) as NodeOverrides) : {};
+    } catch {
+      return {};
+    }
+  });
+
   // Read initial state from URL (subject, preds, selected node)
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
@@ -87,13 +127,31 @@ export function GraphDemo() {
       const nodesText = await nodesRes.text();
       const triplesText = await triplesRes.text();
       const nodes = loadNodesFromJson(nodesText);
+      // apply overrides
+      const merged = nodes.map((n) => ({ ...n, ...(overrides[n.id] ?? {}) }));
       const t = loadTriplesFromNdjson(triplesText);
-      setNodesCount(nodes.length);
-      setNodes(nodes);
+      setNodesCount(merged.length);
+      setNodes(merged);
       setTriples(t);
     }
     load().catch(console.error);
-  }, []);
+  }, [overrides]);
+
+  // Persist overrides and schemas when they change
+  useEffect(() => {
+    try {
+      localStorage.setItem("node_overrides", JSON.stringify(overrides));
+    } catch (e) {
+      void e; // noop
+    }
+  }, [overrides]);
+  useEffect(() => {
+    try {
+      localStorage.setItem("node_schemas", JSON.stringify(schemas));
+    } catch (e) {
+      void e; // noop
+    }
+  }, [schemas]);
 
   const results = useMemo<IdeaTriple[]>(() => (q.trim() ? query(q, triples) : []), [q, triples]);
   const top = useMemo(() => (triples.length ? top_nodes("person.preston", triples, 5) : []), [triples]);
@@ -227,9 +285,11 @@ type DetailsDrawerProps = {
   triples: IdeaTriple[];
   onNavigate?: (nextNodeId: string) => void;
   onSetSubject?: (id: string) => void;
+  onSaveNode?: (n: IdeaNode) => void;
+  nodeTypes?: string[];
 };
 
-function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSubject }: DetailsDrawerProps) {
+function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSubject, onSaveNode, nodeTypes }: DetailsDrawerProps) {
   const node = nodeById.get(nodeId);
   const outbound = useMemo(() => triples.filter((t) => t.s === nodeId), [triples, nodeId]);
   const inbound = useMemo(
@@ -280,6 +340,17 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // Edit mode state
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState<IdeaNode | null>(node ?? null);
+  useEffect(() => setDraft(node ?? null), [nodeId, node]);
+
+  function saveDraft() {
+    if (!draft) return;
+    if (onSaveNode) onSaveNode(draft);
+    setIsEditing(false);
+  }
+
   return (
     <div>
       {/* Overlay */}
@@ -317,6 +388,16 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
               Set as subject
             </button>
           )}
+          {node && (
+            isEditing ? (
+              <div style={{ display: "flex", gap: 6 }}>
+                <button onClick={saveDraft} style={{ border: "1px solid #10b981", color: "#065f46", background: "#ecfdf5", borderRadius: 6, padding: "4px 8px", cursor: "pointer" }}>Save</button>
+                <button onClick={() => { setIsEditing(false); setDraft(node); }} style={{ border: "1px solid #ccc", borderRadius: 6, padding: "4px 8px", cursor: "pointer" }}>Cancel</button>
+              </div>
+            ) : (
+              <button onClick={() => setIsEditing(true)} style={{ border: "1px solid #ccc", borderRadius: 6, padding: "4px 8px", cursor: "pointer", background: "#fff" }}>Edit</button>
+            )
+          )}
           <button ref={closeBtnRef} onClick={onClose} style={{ border: "1px solid #ccc", borderRadius: 6, padding: "4px 8px", cursor: "pointer" }}>
             Close
           </button>
@@ -325,7 +406,7 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
           <div style={{ fontSize: 14, color: "#666" }}>ID</div>
           <div style={{ fontFamily: "monospace" }}>{nodeId}</div>
         </div>
-        {node ? (
+        {node && !isEditing ? (
           <div style={{ marginTop: 10 }}>
             <div style={{ fontSize: 14, color: "#666" }}>Label</div>
             <div style={{ fontWeight: 600 }}>{node.label}</div>
@@ -369,6 +450,30 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
                 </ul>
               </div>
             ) : null}
+          </div>
+        ) : node && isEditing ? (
+          <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
+            <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <span style={{ fontSize: 12, color: "#666" }}>Label</span>
+              <input value={draft?.label ?? ""} onChange={(e) => draft && setDraft({ ...draft, label: e.target.value })} style={{ padding: 6, border: "1px solid #ccc", borderRadius: 6 }} />
+            </label>
+            <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <span style={{ fontSize: 12, color: "#666" }}>Type</span>
+              <select value={draft?.type ?? "Idea"} onChange={(e) => draft && setDraft({ ...draft, type: e.target.value as IdeaNode["type"] })} style={{ padding: 6, borderRadius: 6, border: "1px solid #ccc" }}>
+                {nodeTypes?.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </label>
+            <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <span style={{ fontSize: 12, color: "#666" }}>Summary</span>
+              <textarea value={draft?.summary ?? ""} onChange={(e) => draft && setDraft({ ...draft, summary: e.target.value })} rows={3} style={{ padding: 6, border: "1px solid #ccc", borderRadius: 6 }} />
+            </label>
+            <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <span style={{ fontSize: 12, color: "#666" }}>Tags (comma-separated)</span>
+              <input value={(draft?.tags ?? []).join(", ")} onChange={(e) => draft && setDraft({ ...draft, tags: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} style={{ padding: 6, border: "1px solid #ccc", borderRadius: 6 }} />
+            </label>
+            {/* Future: render extra fields from schema for the draft.type */}
           </div>
         ) : (
           <div style={{ color: "#666", marginTop: 8 }}>No node metadata found</div>
@@ -591,6 +696,13 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
             title="Toggle orientation"
           >
             {viewMode === "horizontal" ? "Horizontal" : "Vertical"}
+          </button>
+          <button
+            onClick={() => setSchemaEditorOpen(true)}
+            style={{ padding: "4px 8px", borderRadius: 6, border: "1px solid #ccc", background: "#fff", cursor: "pointer" }}
+            title="Edit type schemas"
+          >
+            Schemas…
           </button>
         </div>
       </div>
@@ -843,6 +955,12 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
             setSubjectId(id);
             setSelectedNodeId(null);
           }}
+          onSaveNode={(updated) => {
+            // Update overrides and nodes list
+            setOverrides((prev) => ({ ...prev, [updated.id]: { label: updated.label, type: updated.type, summary: updated.summary, tags: updated.tags } }));
+            setNodes((prev) => prev.map((n) => (n.id === updated.id ? { ...n, ...updated } : n)));
+          }}
+          nodeTypes={NODE_TYPES}
         />
       )}
 
@@ -880,6 +998,55 @@ function DetailsDrawer({ nodeId, onClose, nodeById, triples, onNavigate, onSetSu
           </ol>
         </section>
       </div>
+
+      {/* Schema Editor Modal */}
+      {schemaEditorOpen && (
+        <div>
+          <div onClick={() => setSchemaEditorOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.25)" }} />
+          <aside style={{ position: "fixed", top: "10%", left: "50%", transform: "translateX(-50%)", width: 600, maxWidth: "90vw", background: "#fff", border: "1px solid #ddd", boxShadow: "0 8px 24px rgba(0,0,0,0.15)", borderRadius: 8, padding: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+              <div style={{ fontWeight: 700 }}>Schema Editor</div>
+              <button onClick={() => setSchemaEditorOpen(false)} style={{ border: "1px solid #ccc", borderRadius: 6, padding: "4px 8px", cursor: "pointer" }}>Close</button>
+            </div>
+            <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12, color: "#666" }}>Schemas (JSON)</div>
+                <textarea
+                  rows={14}
+                  style={{ width: "100%", padding: 8, border: "1px solid #ccc", borderRadius: 6, fontFamily: "monospace", fontSize: 12 }}
+                  defaultValue={JSON.stringify(schemas, null, 2)}
+                  onChange={(e) => {
+                    try {
+                      const next = JSON.parse(e.target.value) as SchemaRegistry;
+                      setSchemas(next);
+                    } catch {
+                      // ignore until valid JSON
+                    }
+                  }}
+                />
+              </div>
+              <div style={{ width: 200 }}>
+                <div style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>Add type</div>
+                <select id="schema-type-select" style={{ width: "100%", padding: 6, borderRadius: 6, border: "1px solid #ccc" }}>
+                  {NODE_TYPES.map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => {
+                    const sel = (document.getElementById("schema-type-select") as HTMLSelectElement | null)?.value;
+                    if (!sel) return;
+                    setSchemas((prev) => ({ ...prev, [sel]: prev[sel] ?? { extraFields: [] } }));
+                  }}
+                  style={{ marginTop: 8, width: "100%", padding: 6, borderRadius: 6, border: "1px solid #ccc", background: "#fff", cursor: "pointer" }}
+                >
+                  Ensure Type Entry
+                </button>
+              </div>
+            </div>
+          </aside>
+        </div>
+      )}
     </div>
   );
 }
